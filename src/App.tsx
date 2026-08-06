@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
-  ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronRight, Compass, Footprints,
+  ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronLeft, ChevronRight, Compass, Footprints,
   Landmark, List, LocateFixed, LogOut, Map as MapIcon, MessageCircle, Mountain,
   LockKeyhole, Navigation, Pencil, Plus, Search, SlidersHorizontal, TentTree, Trash2,
   UserRound, Waves, X,
@@ -20,6 +20,7 @@ type Place = {
 
 type Comment = { id: number; user_id: string; location_id: number; body: string; status: 'pending' | 'approved' | 'rejected'; created_at: string; author?: string }
 type UserPhoto = { id: number; user_id: string; location_id: number; object_path: string; caption: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string; url?: string }
+type LocationPhoto = { id: number; location_id: number; object_path: string; position: number; created_at: string; url?: string }
 
 const categories = {
   trail: { label: 'Trails', color: '#1f7a4d', icon: Footprints },
@@ -146,6 +147,39 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
     {mapStatus === 'loading' && <div className="map-loading" role="status"><span/>Loading the map…</div>}
     {mapStatus === 'error' && <div className="map-loading map-loading--error" role="status">The map background is resting. The place pins still work.</div>}
   </>
+}
+
+function PhotoCarousel({ photos, place }: { photos: LocationPhoto[]; place: Place }) {
+  const rail = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    setActive(0)
+    rail.current?.scrollTo({ left: 0 })
+  }, [place.id])
+
+  const goTo = (index: number) => {
+    const next = Math.max(0, Math.min(index, photos.length - 1))
+    rail.current?.scrollTo({ left: next * (rail.current.clientWidth || 1), behavior: 'smooth' })
+    setActive(next)
+  }
+
+  return <aside className="location-gallery" aria-label={`${place.name} photo gallery`}>
+    {photos.length ? <>
+      <div ref={rail} className="location-gallery__rail" onScroll={(event) => {
+        const width = event.currentTarget.clientWidth || 1
+        setActive(Math.round(event.currentTarget.scrollLeft / width))
+      }}>
+        {photos.map((photo, index) => <figure key={photo.id}><img src={photo.url} alt={`${place.name}, view ${index + 1} of ${photos.length}`}/></figure>)}
+      </div>
+      <div className="location-gallery__shade"/>
+      <div className="location-gallery__meta"><span>Wander Éire field notes</span><strong>{place.county}</strong></div>
+      {photos.length > 1 && <>
+        <div className="location-gallery__arrows"><button onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous photo"><ChevronLeft/></button><button onClick={() => goTo(active + 1)} disabled={active === photos.length - 1} aria-label="Next photo"><ChevronRight/></button></div>
+        <div className="location-gallery__dots" aria-label={`Photo ${active + 1} of ${photos.length}`}>{photos.map((photo, index) => <button key={photo.id} className={active === index ? 'active' : ''} onClick={() => goTo(index)} aria-label={`Show photo ${index + 1}`}/>)}</div>
+      </>}
+    </> : <div className="location-gallery__empty" style={{ '--accent': categories[place.category].color } as React.CSSProperties}><span className="sun"/><Mountain strokeWidth={1}/><p>Photography coming soon</p><small>{place.name} · {place.county}</small></div>}
+  </aside>
 }
 
 function PlaceRow({ place, onClick }: { place: Place; onClick: () => void }) {
@@ -290,10 +324,12 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
   const [items, setItems] = useState<Place[]>(publicPlaces)
   const [comments, setComments] = useState<Comment[]>([])
   const [photoQueue, setPhotoQueue] = useState<UserPhoto[]>([])
+  const [officialPhotos, setOfficialPhotos] = useState<LocationPhoto[]>([])
   const [tab, setTab] = useState<'locations' | 'moderation'>('locations')
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Place | null>(null)
   const [busy, setBusy] = useState(false)
+  const [photoBusy, setPhotoBusy] = useState(false)
   const [notice, setNotice] = useState('')
   const [form, setForm] = useState({ name: '', county: '', category: 'trail' as Category, latitude: '53.35', longitude: '-7.8', cost: 'Free', distance: '', kicker: '', description: '', address: '', parking: '', facts: '' })
 
@@ -304,7 +340,8 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
       client.from('locations').select('*').order('name'),
       client.from('comments').select('*').eq('status', 'pending').order('created_at'),
       client.from('user_photos').select('*').eq('status', 'pending').order('created_at'),
-    ]).then(async ([locationsResult, commentsResult, photosResult]) => {
+      client.from('location_photos').select('*').order('position'),
+    ]).then(async ([locationsResult, commentsResult, photosResult, officialResult]) => {
       if (locationsResult.data) setItems(locationsResult.data.map((row) => fromDatabase(row)))
       if (commentsResult.data) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
@@ -314,7 +351,14 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
         }))
         setPhotoQueue(withUrls)
       }
-      if (locationsResult.error || commentsResult.error) setNotice('Admin permissions still need the next Supabase update.')
+      if (officialResult.data) {
+        const withUrls = await Promise.all((officialResult.data as LocationPhoto[]).map(async (photo) => {
+          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
+          return { ...photo, url: data?.signedUrl }
+        }))
+        setOfficialPhotos(withUrls)
+      }
+      if (locationsResult.error || commentsResult.error || officialResult.error) setNotice('The official gallery needs its Supabase photo update before uploads will work.')
     })
   }, [viewer])
 
@@ -383,6 +427,41 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
     setNotice(status === 'approved' ? 'Photo approved and now public.' : 'Photo rejected and removed.')
   }
 
+  const uploadOfficialPhoto = async (place: Place, file: File) => {
+    const existing = officialPhotos.filter((photo) => photo.location_id === place.id)
+    const position = [1, 2, 3].find((slot) => !existing.some((photo) => photo.position === slot))
+    if (!position) return setNotice('This location already has its maximum of three photos.')
+    if (!file.type.startsWith('image/') || file.size > 8 * 1024 * 1024) return setNotice('Choose a JPG, PNG, WebP or HEIC image smaller than 8 MB.')
+    setPhotoBusy(true); setNotice('')
+    if (supabase && !viewer.demo) {
+      const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+      const objectPath = `official/${place.id}/${crypto.randomUUID()}.${extension}`
+      const uploadResult = await supabase.storage.from('location-photos').upload(objectPath, file, { contentType: file.type, upsert: false })
+      if (uploadResult.error) { setPhotoBusy(false); setNotice('That image could not be uploaded. Run the official gallery database update first.'); return }
+      const { data, error } = await supabase.from('location_photos').insert({ location_id: place.id, object_path: objectPath, position }).select().single()
+      if (error) {
+        await supabase.storage.from('location-photos').remove([objectPath])
+        setPhotoBusy(false); setNotice('That gallery slot could not be saved.'); return
+      }
+      const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, 3600)
+      setOfficialPhotos((all) => [...all, { ...(data as LocationPhoto), url: signed.data?.signedUrl }].sort((a, b) => a.position - b.position))
+    } else {
+      setOfficialPhotos((all) => [...all, { id: Date.now(), location_id: place.id, object_path: URL.createObjectURL(file), position, created_at: new Date().toISOString(), url: URL.createObjectURL(file) }])
+    }
+    setPhotoBusy(false); setNotice(`Photo ${position} added to ${place.name}.`)
+  }
+
+  const removeOfficialPhoto = async (photo: LocationPhoto) => {
+    setPhotoBusy(true); setNotice('')
+    if (supabase && !viewer.demo) {
+      const { error: storageError } = await supabase.storage.from('location-photos').remove([photo.object_path])
+      const { error: recordError } = await supabase.from('location_photos').delete().eq('id', photo.id)
+      if (storageError || recordError) { setPhotoBusy(false); setNotice('That photo could not be removed.'); return }
+    }
+    setOfficialPhotos((all) => all.filter((item) => item.id !== photo.id))
+    setPhotoBusy(false); setNotice('Photo removed from the gallery.')
+  }
+
   return <main className="admin-view">
     <aside><a className="brand" href="#"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a><nav><button className={tab === 'locations' ? 'active' : ''} onClick={() => setTab('locations')}><MapIcon/>Locations</button><button className={tab === 'moderation' ? 'active' : ''} onClick={() => setTab('moderation')}><MessageCircle/>Moderation {comments.length + photoQueue.length > 0 && <span>{comments.length + photoQueue.length}</span>}</button></nav><div><p>{viewer.name}</p><small>Administrator</small><button onClick={onBack}><ArrowLeft/>Back to public map</button></div></aside>
     <section className="admin-main">
@@ -402,6 +481,13 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
           <label className="wide">Description<textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}/></label>
           <label className="wide">Address<input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}/></label>
           <label className="wide">Parking information<input value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })}/></label>
+          <section className="admin-photo-editor">
+            <div><p className="eyebrow">Official gallery</p><h3>Feature photography</h3><span>{editing ? `${officialPhotos.filter((photo) => photo.location_id === editing.id).length} of 3 photos` : 'Publish the location first, then edit it to add photos.'}</span></div>
+            {editing && <div className="admin-photo-slots">{[1, 2, 3].map((position) => {
+              const photo = officialPhotos.find((item) => item.location_id === editing.id && item.position === position)
+              return photo ? <figure key={position}>{photo.url && <img src={photo.url} alt={`${editing.name} gallery slot ${position}`}/>}<figcaption><span>Photo {position}</span><button type="button" disabled={photoBusy} onClick={() => removeOfficialPhoto(photo)} aria-label={`Remove photo ${position}`}><Trash2/></button></figcaption></figure> : <label className="admin-photo-slot" key={position}><Camera/><strong>Photo {position}</strong><small>JPG, PNG, WebP or HEIC</small><input type="file" disabled={photoBusy} accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadOfficialPhoto(editing, file); event.target.value = '' }}/></label>
+            })}</div>}
+          </section>
           <button className="primary-button" disabled={busy}>{busy ? 'Saving…' : editing ? 'Save changes' : 'Publish location'}</button>
         </form>}
         <div className="admin-table"><div className="admin-table__head"><span>Location</span><span>Category</span><span>Status</span><span/></div>{items.map((place) => <div className={place.archived ? 'archived' : ''} key={place.id}><span><i style={{ background: categories[place.category].color }}><CategoryIcon category={place.category}/></i><b>{place.name}<small>{place.county}</small></b></span><span>{categories[place.category].label}</span><span>{place.archived ? 'Archived' : 'Live'}</span><span className="row-actions"><button onClick={() => openEdit(place)} aria-label={`Edit ${place.name}`}><Pencil/></button><button onClick={() => toggleArchive(place)} aria-label={`${place.archived ? 'Restore' : 'Archive'} ${place.name}`}><Trash2/></button></span></div>)}</div>
@@ -461,6 +547,7 @@ function App() {
   const [commentMessage, setCommentMessage] = useState('')
   const [comments, setComments] = useState<Comment[]>([])
   const [photos, setPhotos] = useState<UserPhoto[]>([])
+  const [officialPhotos, setOfficialPhotos] = useState<LocationPhoto[]>([])
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoCaption, setPhotoCaption] = useState('')
   const [photoBusy, setPhotoBusy] = useState(false)
@@ -492,13 +579,15 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!selected || !supabase) { setComments([]); setPhotos([]); return }
+    if (!selected || !supabase) { setComments([]); setPhotos([]); setOfficialPhotos([]); return }
     const client = supabase
+    setOfficialPhotos([])
     setPhotoFile(null); setPhotoCaption(''); setPhotoMessage(''); setCommentMessage('')
     void Promise.all([
       client.from('comments').select('*').eq('location_id', selected.id).order('created_at'),
       client.from('user_photos').select('*').eq('location_id', selected.id).order('created_at'),
-    ]).then(async ([commentsResult, photosResult]) => {
+      client.from('location_photos').select('*').eq('location_id', selected.id).order('position'),
+    ]).then(async ([commentsResult, photosResult, officialResult]) => {
       if (commentsResult.data) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
         const withUrls = await Promise.all((photosResult.data as UserPhoto[]).map(async (photo) => {
@@ -506,6 +595,13 @@ function App() {
           return { ...photo, url: data?.signedUrl }
         }))
         setPhotos(withUrls)
+      }
+      if (officialResult.data) {
+        const withUrls = await Promise.all((officialResult.data as LocationPhoto[]).map(async (photo) => {
+          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
+          return { ...photo, url: data?.signedUrl }
+        }))
+        setOfficialPhotos(withUrls.filter((photo) => photo.url))
       }
     })
   }, [selected, viewer])
@@ -590,28 +686,29 @@ function App() {
 
   if (selected) {
     const cat = categories[selected.category]
-    return <main className="app detail">
-      <div className="detail__hero" style={{ '--accent': cat.color } as React.CSSProperties}>
-        <button className="round-button back" onClick={() => setSelected(null)} aria-label="Back to map"><ArrowLeft /></button>
-        <div className="detail__landscape"><Mountain size={70} strokeWidth={1.2} /><span className="sun" /></div>
-        <div className="detail__category"><CategoryIcon category={selected.category} size={22} /><span>{cat.label}</span></div>
-      </div>
+    return <main className="app detail" style={{ '--accent': cat.color } as React.CSSProperties}>
+      <button className="round-button detail-back" onClick={() => setSelected(null)} aria-label="Back to map"><ArrowLeft /></button>
       <section className="detail__content">
-        <p className="eyebrow">{selected.county} · Ireland</p>
-        <h1>{selected.name}</h1>
-        <p className="detail__kicker">{selected.kicker}</p>
+        <div className="detail__category"><CategoryIcon category={selected.category} size={18}/><span>{cat.label}</span><i/>{selected.county}, Ireland</div>
+        <header className="detail__heading">
+          <p className="eyebrow">Curated place · Wander Éire</p>
+          <h1>{selected.name}</h1>
+          <p className="detail__kicker">{selected.kicker}</p>
+        </header>
         <div className="detail__actions">
-          <button className={visited.includes(selected.id) ? 'active green' : ''} onClick={() => toggleRecord('visit', selected.id)}><Check size={19} />{visited.includes(selected.id) ? 'Visited' : 'Mark visited'}</button>
-          <button className={saved.includes(selected.id) ? 'active amber' : ''} onClick={() => toggleRecord('save', selected.id)}><Bookmark size={18} fill={saved.includes(selected.id) ? 'currentColor' : 'none'} />{saved.includes(selected.id) ? 'Saved' : 'Save'}</button>
+          <button className={visited.includes(selected.id) ? 'active green' : ''} onClick={() => toggleRecord('visit', selected.id)}><Check size={19}/>{visited.includes(selected.id) ? 'Visited' : 'Mark visited'}</button>
+          <button className={saved.includes(selected.id) ? 'active amber' : ''} onClick={() => toggleRecord('save', selected.id)}><Bookmark size={18} fill={saved.includes(selected.id) ? 'currentColor' : 'none'}/>{saved.includes(selected.id) ? 'Saved' : 'Save for later'}</button>
         </div>
+        <div className="detail__essentials"><div><small>Cost</small><strong>{selected.cost}</strong></div><div><small>Time & distance</small><strong>{selected.distance || 'Take your time'}</strong></div></div>
         <div className="fact-strip">{selected.facts.map((fact) => <span key={fact}>{fact}</span>)}</div>
         <div className="detail__body">
-          <h2>Worth the wander</h2><p>{selected.description}</p>
-          <h2>Find your way</h2>
-          <button className="address" onClick={() => { navigator.clipboard?.writeText(selected.address); setCopied(true); setTimeout(() => setCopied(false), 1600) }}><Navigation size={20} /><span><strong>{selected.address}</strong><small>{copied ? 'Copied to clipboard' : 'Tap to copy address'}</small></span></button>
-          <h2>Good to know</h2><p>{selected.parking}</p>
+          <section className="detail-section"><p className="eyebrow">The experience</p><h2>Worth the wander</h2><p>{selected.description}</p></section>
+          <section className="detail-section"><p className="eyebrow">Arrival</p><h2>Find your way</h2>
+            <button className="address" onClick={() => { navigator.clipboard?.writeText(selected.address); setCopied(true); setTimeout(() => setCopied(false), 1600) }}><Navigation size={20}/><span><strong>{selected.address}</strong><small>{copied ? 'Copied to clipboard' : 'Tap to copy address'}</small></span></button>
+            <div className="parking-note"><span>Parking</span><p>{selected.parking}</p></div>
+          </section>
           <section className="photo-section">
-            <div><h2>Photos from the road</h2><p>Shared by people who stopped here.</p></div>
+            <div><p className="eyebrow">From the community</p><h2>Photos from the road</h2><p>Shared by people who stopped here.</p></div>
             {photos.length > 0 && <div className="photo-grid">{photos.map((photo) => <figure key={photo.id}>{photo.url && <img src={photo.url} alt={photo.caption || `Visitor view of ${selected.name}`}/>}<figcaption>{photo.status === 'pending' && <small>Pending review</small>}{photo.caption && <span>{photo.caption}</span>}</figcaption></figure>)}</div>}
             {viewer ? <form className="photo-form" onSubmit={uploadPhoto}>
               <label className="photo-picker"><Camera/><span><strong>{photoFile ? photoFile.name : 'Add your photo'}</strong><small>JPG, PNG, WebP or HEIC · up to 8 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}/></label>
@@ -620,7 +717,7 @@ function App() {
             </form> : <button className="contribute-gate" onClick={() => setShowAuth(true)}><Camera/><span><strong>Got a photo from here?</strong><small>Sign in to add it to the guide.</small></span><ChevronRight/></button>}
           </section>
           <section className="community">
-            <h2>Notes from the trail</h2><p className="community__intro">Useful details shared by people who’ve been there.</p>
+            <p className="eyebrow">Local knowledge</p><h2>Notes from the trail</h2><p className="community__intro">Useful details shared by people who’ve been there.</p>
             {comments.map((item) => { const own = viewer?.id === item.user_id; return <article key={item.id}><span>{own ? viewer.name.slice(0, 1).toUpperCase() : 'W'}</span><div><strong>{own ? 'You' : 'A fellow wanderer'}</strong>{item.status === 'pending' && <small>Pending review</small>}<p>{item.body}</p></div></article> })}
             {viewer ? <form className="comment-form" onSubmit={async (event) => {
               event.preventDefault(); if (!comment.trim()) return
@@ -635,6 +732,7 @@ function App() {
           </section>
         </div>
       </section>
+      <PhotoCarousel photos={officialPhotos} place={selected}/>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthenticated={authenticated} />}
     </main>
   }
