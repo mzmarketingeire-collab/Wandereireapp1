@@ -43,12 +43,105 @@ const greatBritainMask = {
 
 const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
   const usingMapTiler = Boolean(mapTilerKey)
+  const encodedKey = usingMapTiler ? encodeURIComponent(mapTilerKey!) : ''
   const tiles = usingMapTiler
-    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}.png?key=${encodeURIComponent(mapTilerKey!)}`]
+    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}.png?key=${encodedKey}`]
     : ['https://tile.openstreetmap.org/{z}/{x}/{y}.png']
+  const outdoorsLayers: StyleSpecification['layers'] = usingMapTiler ? [
+    {
+      id: 'contours-soft',
+      type: 'line',
+      source: 'contours',
+      'source-layer': 'contour',
+      minzoom: 9,
+      filter: ['all', ['!', ['in', ['get', 'nth_line'], ['literal', [5, 10]]]], ['!', ['has', 'glacier']]],
+      paint: {
+        'line-color': '#9b8f69',
+        'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.2, 13, 0.34, 16, 0.42],
+        'line-width': 0.7,
+      },
+    },
+    {
+      id: 'contours-index',
+      type: 'line',
+      source: 'contours',
+      'source-layer': 'contour',
+      minzoom: 9,
+      filter: ['all', ['in', ['get', 'nth_line'], ['literal', [5, 10]]], ['!', ['has', 'glacier']]],
+      paint: {
+        'line-color': '#756b4d',
+        'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.32, 14, 0.5],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 14, 1.2],
+      },
+    },
+    {
+      id: 'hiking-route-casing',
+      type: 'line',
+      source: 'outdoor-routes',
+      'source-layer': 'trail',
+      minzoom: 9,
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking'], true, false]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': 'rgba(255, 253, 246, 0.96)',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 2.4, 13, 4.4, 17, 6.5],
+      },
+    },
+    {
+      id: 'hiking-routes',
+      type: 'line',
+      source: 'outdoor-routes',
+      'source-layer': 'trail',
+      minzoom: 9,
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking'], true, false]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': ['match', ['get', 'color'], 'blue', '#367eb5', 'green', '#4d8a62', 'yellow', '#c79a2f', 'black', '#5a544b', '#c6533f'],
+        'line-opacity': 0.92,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.15, 13, 2.1, 17, 3.2],
+      },
+    },
+    {
+      id: 'cycling-routes',
+      type: 'line',
+      source: 'outdoor-routes',
+      'source-layer': 'trail',
+      minzoom: 9,
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'class'], 'bicycle']],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': '#276ea2',
+        'line-opacity': 0.92,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.25, 14, 2.25, 17, 3],
+        'line-dasharray': [2, 1.4],
+      },
+    },
+    {
+      id: 'trail-labels',
+      type: 'symbol',
+      source: 'outdoor-routes',
+      'source-layer': 'trail',
+      minzoom: 12,
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking', 'bicycle'], true, false]],
+      layout: {
+        'symbol-placement': 'line',
+        'symbol-spacing': 360,
+        'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name'], ['get', 'ref']],
+        'text-font': ['Open Sans Semi Bold', 'Noto Sans Semi Bold'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 12],
+        'text-letter-spacing': 0.02,
+      },
+      paint: {
+        'text-color': ['match', ['get', 'class'], 'bicycle', '#1f5f8c', '#8d3b2d'],
+        'text-halo-color': 'rgba(255, 253, 246, 0.96)',
+        'text-halo-width': 1.8,
+      },
+    },
+  ] : []
 
   return {
     version: 8,
+    ...(usingMapTiler ? { glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${encodedKey}` } : {}),
     sources: {
       'base-map': {
         type: 'raster',
@@ -60,6 +153,10 @@ const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
           ? '<a href="https://www.maptiler.com/copyright/">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
           : '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
       },
+      ...(usingMapTiler ? {
+        contours: { type: 'vector' as const, url: `https://api.maptiler.com/tiles/contours-v2/tiles.json?key=${encodedKey}` },
+        'outdoor-routes': { type: 'vector' as const, url: `https://api.maptiler.com/tiles/outdoor/tiles.json?key=${encodedKey}` },
+      } : {}),
       'great-britain-mask': { type: 'geojson', data: greatBritainMask },
     },
     layers: [
@@ -70,13 +167,14 @@ const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
         source: 'base-map',
         paint: {
           'raster-opacity': 1,
-          'raster-saturation': 0.08,
-          'raster-contrast': 0.12,
+          'raster-saturation': -0.02,
+          'raster-contrast': 0.1,
           'raster-brightness-min': 0.04,
           'raster-brightness-max': 1,
           'raster-fade-duration': 0,
         },
       },
+      ...outdoorsLayers,
       {
         id: 'great-britain-muted',
         type: 'fill',
