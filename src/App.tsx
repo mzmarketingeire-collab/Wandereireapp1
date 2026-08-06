@@ -161,7 +161,7 @@ type Viewer = { id: string; email: string; name: string; role: 'user' | 'admin';
 const friendlyAuthError = (message: string) => {
   const detail = message.toLowerCase()
   if (detail.includes('invalid login credentials')) return 'That email and password do not match. Try again or reset your password.'
-  if (detail.includes('email not confirmed')) return 'Your email still needs confirming. Use the button below to request a new link.'
+  if (detail.includes('email not confirmed')) return 'This older account needs a one-time account update before it can sign in.'
   if (detail.includes('user already registered')) return 'That account already exists. Choose sign in instead.'
   if (detail.includes('password')) return 'That password was not accepted. Use at least 8 characters for a new password.'
   if (detail.includes('rate') || detail.includes('too many')) return 'Too many tries for now. Wait a minute, then try again.'
@@ -176,7 +176,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [needsConfirmation, setNeedsConfirmation] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -196,7 +196,11 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!supabase) return
-    setBusy(true); setError(''); setMessage(''); setNeedsConfirmation(false)
+    if (mode === 'signup' && !acceptedTerms) {
+      setError('Please accept the Wander Éire account terms and privacy notice.')
+      return
+    }
+    setBusy(true); setError(''); setMessage('')
     if (mode === 'forgot') {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
       setBusy(false)
@@ -208,32 +212,17 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: email.split('@')[0] } } })
     setBusy(false)
-    if (result.error) {
-      setError(friendlyAuthError(result.error.message))
-      setNeedsConfirmation(result.error.message.toLowerCase().includes('email not confirmed'))
-    }
+    if (result.error) setError(friendlyAuthError(result.error.message))
     else if (result.data.user && result.data.session) onAuthenticated({ id: result.data.user.id, email: result.data.user.email ?? email, name: result.data.user.user_metadata.display_name ?? email.split('@')[0], role: 'user' })
-    else if (result.data.user) {
-      setMessage('Nearly there — check your email and tap the confirmation link, then sign in.')
-      setNeedsConfirmation(true)
-    }
-  }
-
-  const resendConfirmation = async () => {
-    if (!supabase || !email) return
-    setBusy(true); setError(''); setMessage('')
-    const { error: resendError } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    })
-    setBusy(false)
-    if (resendError) setError(friendlyAuthError(resendError.message))
-    else setMessage('A fresh confirmation email is on its way. Check your inbox and spam folder.')
+    else if (result.data.user) setError('We could not finish creating your account. Please try again.')
   }
 
   const google = async () => {
     if (!supabase) return
+    if (mode === 'signup' && !acceptedTerms) {
+      setError('Please accept the Wander Éire account terms and privacy notice.')
+      return
+    }
     setError('')
     const { error: googleError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
     if (googleError) setError(friendlyAuthError(googleError.message))
@@ -247,20 +236,23 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       <h2 id="auth-title">{mode === 'forgot' ? 'Find your way back.' : admin ? 'Sign in to manage the guide' : mode === 'signin' ? 'Welcome back, wanderer.' : 'Make the map yours.'}</h2>
       <p>{mode === 'forgot' ? 'Tell us your email and we’ll send you a safe password-reset link.' : admin ? 'Only approved administrators can publish and moderate places.' : 'Save wild places, tick off visits and share your own notes.'}</p>
       {isSupabaseConfigured ? <>
+        {mode === 'signup' && <div className="signup-acceptance">
+          <label><input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)}/><span>I accept the Wander Éire account terms and privacy notice.</span></label>
+          <details><summary>Read the small print</summary><p>We keep your email, display name, saved and visited places, and anything you choose to submit. Supabase securely processes and stores this data for Wander Éire; you are not creating a separate Supabase account. You can delete your account and its data from Profile settings.</p></details>
+        </div>}
         {mode !== 'forgot' && <><button className="google-button" onClick={google}>Continue with Google</button><span className="or"><i/>or use email<i/></span></>}
         <form onSubmit={submit}>
-          <label>Email<input autoFocus type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setNeedsConfirmation(false) }} placeholder="you@example.com" /></label>
+          <label>Email<input autoFocus type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
           {mode !== 'forgot' && <label>Password<input type="password" required minLength={mode === 'signup' ? 8 : 1} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'} /></label>}
           {error && <p className="form-error">{error}</p>}
           {message && <p className="form-message" role="status">{message}</p>}
-          {needsConfirmation && <button type="button" className="confirmation-button" disabled={busy || !email} onClick={resendConfirmation}>Resend confirmation email</button>}
           <button className="primary-button" disabled={busy}>{busy ? 'One moment…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create free account' : 'Send reset link'}</button>
         </form>
-        {mode === 'signin' && <button className="text-button" onClick={() => { setMode('forgot'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>Forgot your password?</button>}
-        {!admin && mode !== 'forgot' && <button className="text-button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>{mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button>}
-        {mode === 'forgot' && <button className="text-button" onClick={() => { setMode('signin'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>Back to sign in</button>}
+        {mode === 'signin' && <button className="text-button" onClick={() => { setMode('forgot'); setError(''); setMessage('') }}>Forgot your password?</button>}
+        {!admin && mode !== 'forgot' && <button className="text-button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); setAcceptedTerms(false) }}>{mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button>}
+        {mode === 'forgot' && <button className="text-button" onClick={() => { setMode('signin'); setError(''); setMessage('') }}>Back to sign in</button>}
       </> : <div className="demo-gate"><p>Supabase isn’t connected yet. Continue in preview mode to try the complete experience.</p><button className="primary-button" onClick={() => onAuthenticated({ id: 'demo-user', email: 'explorer@wander-eire.ie', name: admin ? 'Wander Éire Admin' : 'Maeve', role: admin ? 'admin' : 'user', demo: true })}>{admin ? 'Open admin preview' : 'Continue as Maeve'}</button></div>}
-      <small>By continuing, you agree to our <a href="/privacy">privacy policy</a>. Your trail stays yours.</small>
+      {mode !== 'signup' && <small>You’re signing in to Wander Éire. Your trail stays yours.</small>}
     </section>
   </div>
 }
@@ -423,10 +415,6 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
   </main>
 }
 
-function PrivacyView({ onBack }: { onBack: () => void }) {
-  return <main className="privacy-view"><button className="round-button" onClick={onBack} aria-label="Back"><ArrowLeft/></button><p className="eyebrow">Plain-English privacy</p><h1>Your trail stays yours.</h1><p>Wander Éire stores only what the app needs to remember your account and contributions.</p><section><h2>What we keep</h2><p>Your email and display name, places you save or mark visited, and any notes or photos you choose to submit.</p><h2>Who can see it</h2><p>Your saved and visited places are private. Approved notes and photos can appear publicly without publishing your email address. Pending contributions are visible only to you and the administrator.</p><h2>Photos</h2><p>Photos stay private while awaiting review. Rejected photos are removed. Approved photos appear in the public guide.</p><h2>Your choices</h2><p>You can change your display name, sign out, or permanently delete your account and associated records from Profile settings.</p><h2>Service provider</h2><p>Wander Éire uses Supabase to authenticate accounts and securely store app data. This does not create a separate Supabase account for you.</p><h2>Contact</h2><p>For privacy questions, contact the Wander Éire owner through the project’s published contact channel.</p></section></main>
-}
-
 function ResetPasswordView({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -463,7 +451,7 @@ function App() {
   const [visited, setVisited] = useState<number[]>([])
   const [copied, setCopied] = useState(false)
   const [viewer, setViewer] = useState<Viewer | null>(null)
-  const [screen, setScreen] = useState<'map' | 'profile' | 'admin' | 'privacy' | 'reset-password'>(() => window.location.pathname === '/admin' ? 'admin' : window.location.pathname === '/privacy' ? 'privacy' : window.location.pathname === '/reset-password' ? 'reset-password' : 'map')
+  const [screen, setScreen] = useState<'map' | 'profile' | 'admin' | 'reset-password'>(() => window.location.pathname === '/admin' ? 'admin' : window.location.pathname === '/reset-password' ? 'reset-password' : 'map')
   const [showAuth, setShowAuth] = useState(window.location.pathname === '/admin')
   const [pendingAction, setPendingAction] = useState<'save' | 'visit' | null>(null)
   const [pendingPlace, setPendingPlace] = useState<Place | null>(null)
@@ -527,7 +515,6 @@ function App() {
       const path = window.location.pathname
       setSelected(null)
       if (path === '/admin') { setScreen('admin'); setShowAuth(!viewer) }
-      else if (path === '/privacy') setScreen('privacy')
       else if (path === '/reset-password') setScreen('reset-password')
       else { setScreen('map'); setShowAuth(false) }
     }
@@ -599,7 +586,6 @@ function App() {
   if (screen === 'admin' && viewer?.role === 'admin') return <AdminView viewer={viewer} places={locationItems} onPlacesChange={setLocationItems} onBack={() => { window.history.pushState({}, '', '/'); setScreen('map') }} />
   if (screen === 'admin' && viewer && viewer.role !== 'admin') return <main className="access-denied"><LockKeyhole/><p className="eyebrow">Owner access only</p><h1>This gate needs an admin key.</h1><p>You’re signed in, but this account is not an administrator.</p><div><button className="primary-button" onClick={() => { window.history.pushState({}, '', '/'); setScreen('map') }}>Back to the map</button><button className="text-button" onClick={signOut}>Sign out</button></div></main>
   if (screen === 'profile' && viewer) return <ProfileView viewer={viewer} places={locationItems} saved={saved} visited={visited} onOpen={(place) => { setSelected(place); setScreen('map') }} onBack={() => setScreen('map')} onAdmin={() => { window.history.pushState({}, '', '/admin'); setScreen('admin') }} onSignOut={signOut} onViewerChange={setViewer} />
-  if (screen === 'privacy') return <PrivacyView onBack={() => { window.history.pushState({}, '', '/'); setScreen('map') }} />
   if (screen === 'reset-password') return <ResetPasswordView onDone={() => { window.history.replaceState({}, '', '/'); setScreen(viewer ? 'profile' : 'map') }} />
 
   if (selected) {
