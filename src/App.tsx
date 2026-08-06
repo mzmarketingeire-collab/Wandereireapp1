@@ -172,7 +172,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
     }
     const result = mode === 'signin'
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password, options: { data: { display_name: email.split('@')[0] } } })
+      : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: email.split('@')[0] } } })
     setBusy(false)
     if (result.error) setError('That didn’t work — check your details and try again.')
     else if (result.data.user && result.data.session) onAuthenticated({ id: result.data.user.id, email: result.data.user.email ?? email, name: result.data.user.user_metadata.display_name ?? email.split('@')[0], role: 'user' })
@@ -181,7 +181,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
 
   const google = async () => {
     if (!supabase) return
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
   }
 
   return <div className="modal-backdrop" role="presentation">
