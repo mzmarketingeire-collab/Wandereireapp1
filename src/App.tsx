@@ -74,14 +74,18 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
   const mapLibrary = useRef<typeof import('maplibre-gl') | null>(null)
   const markers = useRef<MapLibreMarker[]>([])
   const [mapReady, setMapReady] = useState(false)
+  const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'fallback' | 'error'>('loading')
 
   useEffect(() => {
     if (!node.current || map.current) return
     let cancelled = false
+    let loadTimer: number | undefined
     void import('maplibre-gl').then((library) => {
       if (cancelled || !node.current) return
       const mapTilerKey = import.meta.env.VITE_MAPTILER_API_KEY as string | undefined
       const fallbackStyle = { version: 8 as const, sources: { osm: { type: 'raster' as const, tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OpenStreetMap contributors' } }, layers: [{ id: 'osm', type: 'raster' as const, source: 'osm', paint: { 'raster-saturation': -0.7, 'raster-opacity': 0.72, 'raster-brightness-min': 0.18, 'raster-brightness-max': 0.96 } }] }
+      let fallbackApplied = !mapTilerKey
+      let primarySettled = false
       const instance = new library.Map({
         container: node.current,
         center: [-7.9, 53.45], zoom: 5.45, minZoom: 5,
@@ -92,9 +96,24 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
       mapLibrary.current = library
       map.current = instance
       setMapReady(true)
+      const useFallbackMap = () => {
+        if (cancelled || fallbackApplied || primarySettled) return
+        fallbackApplied = true
+        instance.setStyle(fallbackStyle)
+      }
+      instance.on('error', useFallbackMap)
+      instance.once('idle', () => {
+        primarySettled = true
+        if (loadTimer) window.clearTimeout(loadTimer)
+        if (!cancelled) setMapStatus(fallbackApplied ? 'fallback' : 'ready')
+      })
+      loadTimer = window.setTimeout(useFallbackMap, 10000)
+    }).catch(() => {
+      if (!cancelled) setMapStatus('error')
     })
     return () => {
       cancelled = true
+      if (loadTimer) window.clearTimeout(loadTimer)
       markers.current.forEach((marker) => marker.remove())
       markers.current = []
       map.current?.remove()
@@ -122,7 +141,11 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
     if (focus && map.current && mapReady) map.current.flyTo({ center: focus, zoom: 10, duration: 1200 })
   }, [focus, mapReady])
 
-  return <div ref={node} className="map-canvas" aria-label="Map of places across Ireland" />
+  return <>
+    <div ref={node} className="map-canvas" aria-label="Map of places across Ireland" />
+    {mapStatus === 'loading' && <div className="map-loading" role="status"><span/>Loading the map…</div>}
+    {mapStatus === 'error' && <div className="map-loading map-loading--error" role="status">The map background is resting. The place pins still work.</div>}
+  </>
 }
 
 function PlaceRow({ place, onClick }: { place: Place; onClick: () => void }) {
