@@ -161,7 +161,7 @@ type Viewer = { id: string; email: string; name: string; role: 'user' | 'admin';
 const friendlyAuthError = (message: string) => {
   const detail = message.toLowerCase()
   if (detail.includes('invalid login credentials')) return 'That email and password do not match. Try again or reset your password.'
-  if (detail.includes('email not confirmed')) return 'Please open the confirmation email from Supabase first, then come back and sign in.'
+  if (detail.includes('email not confirmed')) return 'Your email still needs confirming. Use the button below to request a new link.'
   if (detail.includes('user already registered')) return 'That account already exists. Choose sign in instead.'
   if (detail.includes('password')) return 'That password was not accepted. Use at least 8 characters for a new password.'
   if (detail.includes('rate') || detail.includes('too many')) return 'Too many tries for now. Wait a minute, then try again.'
@@ -424,7 +424,7 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
 }
 
 function PrivacyView({ onBack }: { onBack: () => void }) {
-  return <main className="privacy-view"><button className="round-button" onClick={onBack} aria-label="Back"><ArrowLeft/></button><p className="eyebrow">Plain-English privacy</p><h1>Your trail stays yours.</h1><p>Wander Éire stores only what the app needs to remember your account and contributions.</p><section><h2>What we keep</h2><p>Your email and display name, places you save or mark visited, and any notes or photos you choose to submit.</p><h2>Who can see it</h2><p>Your saved and visited places are private. Approved notes and photos can appear publicly without publishing your email address. Pending contributions are visible only to you and the administrator.</p><h2>Photos</h2><p>Photos stay private while awaiting review. Rejected photos are removed. Approved photos appear in the public guide.</p><h2>Your choices</h2><p>You can change your display name, sign out, or permanently delete your account and associated records from Profile settings.</p><h2>Contact</h2><p>For privacy questions, contact the Wander Éire owner through the project’s published contact channel.</p></section></main>
+  return <main className="privacy-view"><button className="round-button" onClick={onBack} aria-label="Back"><ArrowLeft/></button><p className="eyebrow">Plain-English privacy</p><h1>Your trail stays yours.</h1><p>Wander Éire stores only what the app needs to remember your account and contributions.</p><section><h2>What we keep</h2><p>Your email and display name, places you save or mark visited, and any notes or photos you choose to submit.</p><h2>Who can see it</h2><p>Your saved and visited places are private. Approved notes and photos can appear publicly without publishing your email address. Pending contributions are visible only to you and the administrator.</p><h2>Photos</h2><p>Photos stay private while awaiting review. Rejected photos are removed. Approved photos appear in the public guide.</p><h2>Your choices</h2><p>You can change your display name, sign out, or permanently delete your account and associated records from Profile settings.</p><h2>Service provider</h2><p>Wander Éire uses Supabase to authenticate accounts and securely store app data. This does not create a separate Supabase account for you.</p><h2>Contact</h2><p>For privacy questions, contact the Wander Éire owner through the project’s published contact channel.</p></section></main>
 }
 
 function ResetPasswordView({ onDone }: { onDone: () => void }) {
