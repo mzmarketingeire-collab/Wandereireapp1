@@ -344,6 +344,20 @@ function PlaceRow({ place, onClick }: { place: Place; onClick: () => void }) {
   </button>
 }
 
+function PinPreview({ place, photoUrl, loading, onClose, onMore }: { place: Place; photoUrl: string; loading: boolean; onClose: () => void; onMore: () => void }) {
+  const activity = { trail: 'Trail', historic: 'Historic place', viewpoint: 'Viewpoint', beach: 'Beach', camp: 'Camping' }[place.category]
+  return <aside className="pin-preview" role="dialog" aria-label={`${place.name} preview`} style={{ '--accent': categories[place.category].color } as React.CSSProperties}>
+    <button className="pin-preview__close" onClick={onClose} aria-label="Close place preview"><X size={16}/></button>
+    <div className={`pin-preview__image ${loading ? 'loading' : ''}`}>
+      {photoUrl ? <img src={photoUrl} alt={`Preview of ${place.name}`} decoding="async"/> : !loading && <CategoryIcon category={place.category} size={38}/>}
+    </div>
+    <div className="pin-preview__glass">
+      <span><CategoryIcon category={place.category} size={15}/>{activity}</span>
+      <button onClick={onMore}>Click for more<ChevronRight size={16}/></button>
+    </div>
+  </aside>
+}
+
 type Viewer = { id: string; email: string; name: string; role: 'user' | 'admin'; demo?: boolean }
 
 const friendlyAuthError = (message: string) => {
@@ -686,6 +700,10 @@ function App() {
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'map' | 'list'>('map')
   const [mapFocus, setMapFocus] = useState<[number, number] | null>(null)
+  const [previewPlace, setPreviewPlace] = useState<Place | null>(null)
+  const [previewPhotoUrl, setPreviewPhotoUrl] = useState('')
+  const [previewPhotoLoading, setPreviewPhotoLoading] = useState(false)
+  const previewPhotoCache = useRef<Record<number, string>>({})
   const [selected, setSelected] = useState<Place | null>(null)
   const [saved, setSaved] = useState<number[]>([])
   const [visited, setVisited] = useState<number[]>([])
@@ -733,6 +751,30 @@ function App() {
   }, [])
 
   useEffect(() => {
+    let active = true
+    setPreviewPhotoUrl('')
+    if (!previewPlace || !supabase) { setPreviewPhotoLoading(false); return }
+    const cached = previewPhotoCache.current[previewPlace.id]
+    if (cached) { setPreviewPhotoUrl(cached); setPreviewPhotoLoading(false); return }
+    const client = supabase
+    setPreviewPhotoLoading(true)
+    void (async () => {
+      try {
+        const { data } = await client.from('location_photos').select('object_path').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
+        if (!data?.object_path) return
+        const signed = await client.storage.from('location-photos').createSignedUrl(data.object_path, 3600)
+        if (signed.data?.signedUrl) {
+          previewPhotoCache.current[previewPlace.id] = signed.data.signedUrl
+          if (active) setPreviewPhotoUrl(signed.data.signedUrl)
+        }
+      } finally {
+        if (active) setPreviewPhotoLoading(false)
+      }
+    })()
+    return () => { active = false }
+  }, [previewPlace])
+
+  useEffect(() => {
     if (!selected || !supabase) { setComments([]); setPhotos([]); setOfficialPhotos([]); return }
     const client = supabase
     setOfficialPhotos([])
@@ -764,6 +806,7 @@ function App() {
     const followAddressBar = () => {
       const path = window.location.pathname
       setSelected(null)
+      setPreviewPlace(null)
       if (path === '/admin') { setScreen('admin'); setShowAuth(!viewer) }
       else if (path === '/reset-password') setScreen('reset-password')
       else { setScreen('map'); setShowAuth(false) }
@@ -821,6 +864,7 @@ function App() {
   }
 
   const openPlace = (place: Place) => {
+    setPreviewPlace(null)
     if (!viewer && !viewedIds.includes(place.id) && viewedIds.length >= 3) {
       setPendingPlace(place); setShowAuth(true); return
     }
@@ -900,7 +944,7 @@ function App() {
     <section className="map-shell" id="top">
       <div className="map-ui">
         <div className="intro"><p className="eyebrow">Your next story starts here</p><h1>Go somewhere<br/><em>worth remembering.</em></h1></div>
-        <label className="search"><Search size={20} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search places or counties" aria-label="Search places or counties" />{query ? <button onClick={() => setQuery('')} aria-label="Clear search"><X size={17}/></button> : <SlidersHorizontal size={18} />}</label>
+        <label className="search"><Search size={20} /><input value={query} onChange={(e) => { setQuery(e.target.value); setPreviewPlace(null) }} placeholder="Search places or counties" aria-label="Search places or counties" />{query ? <button onClick={() => setQuery('')} aria-label="Clear search"><X size={17}/></button> : <SlidersHorizontal size={18} />}</label>
         <nav className="filters" aria-label="Filter by category">
           <button className={category === 'all' ? 'active all' : ''} onClick={() => setCategory('all')}>All places</button>
           {(Object.keys(categories) as Category[]).map((key) => <button key={key} className={category === key ? 'active' : ''} style={{ '--chip': categories[key].color } as React.CSSProperties} onClick={() => setCategory(key)}><CategoryIcon category={key} size={15}/>{categories[key].label}</button>)}
@@ -908,11 +952,12 @@ function App() {
       </div>
 
       <div className="map-area">
-        <MapCanvas places={locationItems} filtered={filtered} selected={null} focus={mapFocus} onSelect={openPlace} />
+        <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} onSelect={setPreviewPlace} />
+        {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)}/>}
         {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
         {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />)}</div>}
-        <button className="view-toggle" onClick={() => setView(view === 'map' ? 'list' : 'map')}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
-        {!query && view === 'map' && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
+        <button className="view-toggle" onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
+        {!query && view === 'map' && !previewPlace && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
       </div>
     </section>
     <footer><span>Made for the long way round.</span><small>Wander Éire · Independent & free</small></footer>
