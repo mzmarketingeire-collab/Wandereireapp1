@@ -1,0 +1,115 @@
+# generated: 2026-08-06
+# last_updated: 2026-08-06
+# project: wander-eire
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; sprint-status surfaces open ones
+#
+# SEQUENCING NOTES (from bmad-sprint-planning cross-epic dependency check, 2026-08-06):
+# ========================================================================================
+# - Execution order below follows epics.md's epic order (1→2→3→4→5), which already matches
+#   PROJECT-BRIEF.md's Build Order: Phase 1 = Epic 1 + Epic 2 ("map + seeded locations + admin
+#   CRUD, no auth" — usable v1 on its own), Phase 2 = Epic 3 + Epic 4 (auth-dependent), Phase 3
+#   = Epic 5 (PWA/offline). Auth-dependent epics (3, 4) do not begin until Epics 1 and 2 are done.
+# - Within-epic story order (validated independently, matches implementation-readiness-report-
+#   2026-08-06.md Section C): no forward references found in any epic's own sequence.
+# - CROSS-EPIC GAP FOUND (not caught by the readiness report): Epic 1 Story 1.6's photo gallery
+#   queries `location_photos`, but that table is not created until Epic 2 Story 2.3. Resolved
+#   with the user: Story 1.1's migration scope is widened to create the empty `location_photos`
+#   table (AD-21 shape) up front — no story reordering. Story 1.6 ships against an empty/partial
+#   gallery; real rows arrive once Epic 2 Story 2.3's admin upload flow lands. Story 1.1 and 1.6
+#   file-level scope notes should reflect this when their story files are created.
+# - Two pre-existing open [ASSUMPTION] items from epics.md / the readiness report do not block
+#   sequencing and are carried forward for resolution at story-creation/dev time, not here:
+#     - Story 1.2: geolocation prompt trigger — automatic on map load vs. manual "locate me".
+#     - Story 2.3: whether zero admin photos is an acceptable publish state (inferred optional).
+# - Epic count note: epics.md's own header/overview text says "24 stories"; the document actually
+#   contains 25 (`### Story` headers counted directly). Sprint status below reflects the actual 25.
+
+generated: 2026-08-06
+last_updated: 2026-08-06
+project: wander-eire
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # --- Epic 1: Map & Location Discovery (Build Order Phase 1) ---
+  epic-1: backlog
+  1-1-view-published-locations-on-the-map: backlog
+  1-2-see-my-own-location-on-the-map: backlog
+  1-3-filter-pins-by-category: backlog
+  1-4-toggle-between-map-and-list-view: backlog
+  1-5-search-locations-by-name: backlog
+  1-6-view-location-detail-and-copy-directions: backlog
+  epic-1-retrospective: optional
+
+  # --- Epic 2: Admin Location Management (Build Order Phase 1) ---
+  epic-2: backlog
+  2-1-protected-admin-route-access: backlog
+  2-2-add-a-location: backlog
+  2-3-add-photos-to-a-location: backlog
+  2-4-edit-archive-and-restore-a-location: backlog
+  epic-2-retrospective: optional
+
+  # --- Epic 3: Accounts & Personal Tracking (Build Order Phase 2 — auth-dependent) ---
+  epic-3: backlog
+  3-1-anonymous-detail-view-gate: backlog
+  3-2-privacy-policy-page: backlog
+  3-3-account-creation-via-email-or-google: backlog
+  3-4-profile-with-display-name: backlog
+  3-5-tick-off-and-save-a-location: backlog
+  3-6-view-my-ticked-and-saved-locations: backlog
+  3-7-delete-my-account: backlog
+  epic-3-retrospective: optional
+
+  # --- Epic 4: User Contributions & Moderation (Build Order Phase 2 — auth-dependent) ---
+  epic-4: backlog
+  4-1-upload-a-photo-to-a-location: backlog
+  4-2-leave-a-comment-on-a-location: backlog
+  4-3-contributions-stay-private-until-approved: backlog
+  4-4-moderate-contributions: backlog
+  4-5-extend-account-deletion-to-cover-contributions: backlog
+  epic-4-retrospective: optional
+
+  # --- Epic 5: PWA Installability & Offline-Read Hardening (Build Order Phase 3) ---
+  epic-5: backlog
+  5-1-install-wander-eire-to-home-screen: backlog
+  5-2-browse-cached-map-data-with-no-signal: backlog
+  5-3-writes-fail-cleanly-offline: backlog
+  epic-5-retrospective: optional
