@@ -1,0 +1,15 @@
+{
+  "name": "Wander Éire",
+  "short_name": "Wander Éire",
+  "description": "Find unforgettable trails, ruins, beaches and wild places across all 32 counties of Ireland.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FBF3E7",
+  "theme_color": "#1F7A4D",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

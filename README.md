@@ -1,32 +1,70 @@
-# React + TypeScript + Vite
+# Wander Éire
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An installable Ireland discovery guide built with React, TypeScript, MapLibre, MapTiler and Supabase.
 
-Currently, two official plugins are available:
+## What is working
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Seven database-backed places across all five categories
+- Interactive map, search, filters, list view and location details
+- Email/password and optional Google sign-in
+- Private saved places and visited-place tracking
+- Community notes and private photo uploads with admin moderation
+- Admin location publishing, editing, archiving and restoring
+- Profile editing and permanent account deletion
+- Password recovery, privacy page and installable PWA shell
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Copy `.env.example` to `.env.local`.
+2. Fill in the three public browser values:
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_OR_PUBLISHABLE_KEY
+VITE_MAPTILER_API_KEY=YOUR_MAPTILER_KEY
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Never put a Supabase `service_role` key in this app.
+
+3. Install and start:
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## Supabase setup
+
+Run these files in the Supabase SQL Editor, in order:
+
+1. `supabase/schema.sql`
+2. `supabase/next-step.sql`
+3. `supabase/photos-step.sql`
+4. `supabase/account-step.sql`
+5. `supabase/security-step.sql`
+
+The final security step limits profile edits to `display_name`, so a normal user cannot turn themselves into an administrator.
+
+In Supabase **Authentication → URL Configuration**, use `http://localhost:5173` as the local Site URL and add `http://localhost:5173/**` as a local redirect URL. Add the production site and `/reset-password` redirect when the app is deployed.
+
+To make an existing account an administrator, run this in the SQL Editor with the correct email:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = (
+  select id from auth.users where email = 'you@example.com'
+);
+```
+
+## Checks
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+The production files are written to `dist/`.
