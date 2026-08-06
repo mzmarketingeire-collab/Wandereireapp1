@@ -135,6 +135,16 @@ function PlaceRow({ place, onClick }: { place: Place; onClick: () => void }) {
 
 type Viewer = { id: string; email: string; name: string; role: 'user' | 'admin'; demo?: boolean }
 
+const friendlyAuthError = (message: string) => {
+  const detail = message.toLowerCase()
+  if (detail.includes('invalid login credentials')) return 'That email and password do not match. Try again or reset your password.'
+  if (detail.includes('email not confirmed')) return 'Please open the confirmation email from Supabase first, then come back and sign in.'
+  if (detail.includes('user already registered')) return 'That account already exists. Choose sign in instead.'
+  if (detail.includes('password')) return 'That password was not accepted. Use at least 8 characters for a new password.'
+  if (detail.includes('rate') || detail.includes('too many')) return 'Too many tries for now. Wait a minute, then try again.'
+  return 'That did not work. Check your details and try again.'
+}
+
 function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolean; onClose: () => void; onAuthenticated: (viewer: Viewer) => void }) {
   const dialog = useRef<HTMLElement>(null)
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
@@ -174,14 +184,16 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: email.split('@')[0] } } })
     setBusy(false)
-    if (result.error) setError('That didn’t work — check your details and try again.')
+    if (result.error) setError(friendlyAuthError(result.error.message))
     else if (result.data.user && result.data.session) onAuthenticated({ id: result.data.user.id, email: result.data.user.email ?? email, name: result.data.user.user_metadata.display_name ?? email.split('@')[0], role: 'user' })
     else if (result.data.user) setMessage('Nearly there — check your email and tap the confirmation link, then sign in.')
   }
 
   const google = async () => {
     if (!supabase) return
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
+    setError('')
+    const { error: googleError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
+    if (googleError) setError(friendlyAuthError(googleError.message))
   }
 
   return <div className="modal-backdrop" role="presentation">
@@ -195,7 +207,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
         {mode !== 'forgot' && <><button className="google-button" onClick={google}>Continue with Google</button><span className="or"><i/>or use email<i/></span></>}
         <form onSubmit={submit}>
           <label>Email<input autoFocus type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
-          {mode !== 'forgot' && <label>Password<input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" /></label>}
+          {mode !== 'forgot' && <label>Password<input type="password" required minLength={mode === 'signup' ? 8 : 1} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'} /></label>}
           {error && <p className="form-error">{error}</p>}
           {message && <p className="form-message" role="status">{message}</p>}
           <button className="primary-button" disabled={busy}>{busy ? 'One moment…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create free account' : 'Send reset link'}</button>
