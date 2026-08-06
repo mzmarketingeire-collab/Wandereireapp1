@@ -41,45 +41,56 @@ const greatBritainMask = {
   },
 }
 
-type MutableMapLayer = { id: string; type: string; paint?: Record<string, unknown> }
-type MutableMapStyle = { layers?: MutableMapLayer[]; transition?: { duration: number; delay: number }; [key: string]: unknown }
+const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
+  const usingMapTiler = Boolean(mapTilerKey)
+  const tiles = usingMapTiler
+    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}.png?key=${encodeURIComponent(mapTilerKey!)}`]
+    : ['https://tile.openstreetmap.org/{z}/{x}/{y}.png']
 
-const makeGraphicOutdoorStyle = (source: unknown) => {
-  const style = source as MutableMapStyle
-  const usefulLayer = /background|scrub|residential|wood|forest|grass|sand|glacier|hillshade|contour|river|stream|water|reef|ferry|road|track|path|trail|pedestrian|steps|bridge|border|lake|ocean|town|city|village|place labels|protected area|peak|volcano|island|bay|sea labels|country labels|state labels/i
-  style.layers = (style.layers ?? []).filter((layer) => usefulLayer.test(layer.id)).map((layer) => {
-    const id = layer.id.toLowerCase()
-    const paint = { ...(layer.paint ?? {}) }
-    if (layer.type === 'background') paint['background-color'] = '#dce8d2'
-    if (layer.type === 'fill') {
-      if (id.includes('water') || id.includes('reef')) { paint['fill-color'] = '#78bde2'; paint['fill-opacity'] = 1 }
-      else if (id.includes('wood') || id.includes('forest')) { paint['fill-color'] = '#afd09e'; paint['fill-opacity'] = 0.9 }
-      else if (id.includes('grass') || id.includes('scrub')) { paint['fill-color'] = '#c9dfb3'; paint['fill-opacity'] = 0.86 }
-      else if (id.includes('sand')) paint['fill-color'] = '#efdca8'
-      else if (id.includes('residential')) { paint['fill-color'] = '#e8eadc'; paint['fill-opacity'] = 0.7 }
-    }
-    if (layer.type === 'hillshade') {
-      paint['hillshade-shadow-color'] = '#526c59'
-      paint['hillshade-highlight-color'] = '#fff7dc'
-      paint['hillshade-accent-color'] = '#7f947c'
-      paint['hillshade-exaggeration'] = 0.22
-    }
-    if (layer.type === 'line') {
-      if (id.includes('river') || id.includes('stream')) paint['line-color'] = '#3298cc'
-      else if (id.includes('contour')) { paint['line-color'] = '#718665'; paint['line-opacity'] = id.includes('index') ? 0.55 : 0.32 }
-      else if (id.includes('border')) { paint['line-color'] = '#63766a'; paint['line-opacity'] = 0.72 }
-      else if (id.includes('outline')) paint['line-color'] = '#536a5d'
-      else if (/road|track|path|trail|pedestrian|steps|bridge/.test(id)) { paint['line-color'] = '#fffdf8'; paint['line-opacity'] = 1 }
-    }
-    if (layer.type === 'symbol') {
-      paint['text-color'] = /river|lake|ocean|sea|bay/.test(id) ? '#175f86' : '#263a30'
-      paint['text-halo-color'] = '#fffdf0'
-      paint['text-halo-width'] = 1.5
-    }
-    return { ...layer, paint }
-  })
-  style.transition = { duration: 0, delay: 0 }
-  return style as unknown as StyleSpecification
+  return {
+    version: 8,
+    sources: {
+      'base-map': {
+        type: 'raster',
+        tiles,
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: 18,
+        attribution: usingMapTiler
+          ? '<a href="https://www.maptiler.com/copyright/">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
+          : '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
+      },
+      'great-britain-mask': { type: 'geojson', data: greatBritainMask },
+    },
+    layers: [
+      { id: 'sea', type: 'background', paint: { 'background-color': '#6fb9df' } },
+      {
+        id: 'outdoor-map',
+        type: 'raster',
+        source: 'base-map',
+        paint: {
+          'raster-opacity': 1,
+          'raster-saturation': 0.08,
+          'raster-contrast': 0.12,
+          'raster-brightness-min': 0.04,
+          'raster-brightness-max': 1,
+          'raster-fade-duration': 0,
+        },
+      },
+      {
+        id: 'great-britain-muted',
+        type: 'fill',
+        source: 'great-britain-mask',
+        paint: { 'fill-color': '#aeb1ad', 'fill-opacity': 1 },
+      },
+      {
+        id: 'great-britain-edge',
+        type: 'line',
+        source: 'great-britain-mask',
+        paint: { 'line-color': '#898e88', 'line-width': 1.2 },
+      },
+    ],
+  }
 }
 
 const places: Place[] = [
@@ -127,31 +138,22 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
   const mapLibrary = useRef<typeof import('maplibre-gl') | null>(null)
   const markers = useRef<MapLibreMarker[]>([])
   const [mapReady, setMapReady] = useState(false)
-  const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'fallback' | 'error'>('loading')
+  const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 
   useEffect(() => {
     if (!node.current || map.current) return
     let cancelled = false
-    let loadTimer: number | undefined
     const mapTilerKey = import.meta.env.VITE_MAPTILER_API_KEY as string | undefined
-    const fallbackStyle = { version: 8 as const, sources: { osm: { type: 'raster' as const, tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OpenStreetMap contributors' } }, layers: [{ id: 'osm', type: 'raster' as const, source: 'osm', paint: { 'raster-saturation': 0.05, 'raster-contrast': 0.16, 'raster-opacity': 1, 'raster-brightness-min': 0.08, 'raster-brightness-max': 1 } }] }
-    const styleRequest = mapTilerKey
-      ? fetch(`https://api.maptiler.com/maps/outdoor-v4/style.json?key=${encodeURIComponent(mapTilerKey)}`).then((response) => {
-          if (!response.ok) throw new Error('Outdoor map style unavailable')
-          return response.json()
-        }).then((style) => ({ style: makeGraphicOutdoorStyle(style), fallback: false })).catch(() => ({ style: fallbackStyle as StyleSpecification, fallback: true }))
-      : Promise.resolve({ style: fallbackStyle as StyleSpecification, fallback: true })
-    void Promise.all([mapLibraryPromise, styleRequest]).then(([library, requested]) => {
+    const mapStyle = makeFastMapStyle(mapTilerKey)
+    void mapLibraryPromise.then((library) => {
       if (cancelled || !node.current) return
-      let fallbackApplied = requested.fallback
-      let primarySettled = false
       const instance = new library.Map({
         container: node.current,
-        bounds: [[-11.25, 51.15], [-5.15, 55.65]],
-        fitBoundsOptions: { padding: 28, maxZoom: 6.25 },
-        maxBounds: [[-12.5, 50.55], [-4.75, 56.35]],
-        minZoom: 5, maxZoom: 16,
-        style: requested.style,
+        bounds: [[-13.5, 49.3], [2.4, 59]],
+        fitBoundsOptions: { padding: 20, maxZoom: 5.25 },
+        maxBounds: [[-14.5, 48.7], [3.4, 59.7]],
+        minZoom: 4.25, maxZoom: 16,
+        style: mapStyle,
         attributionControl: { compact: true },
         fadeDuration: 0,
         renderWorldCopies: false,
@@ -160,27 +162,14 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
       mapLibrary.current = library
       map.current = instance
       setMapReady(true)
-      const useFallbackMap = () => {
-        if (cancelled || fallbackApplied || primarySettled) return
-        fallbackApplied = true
-        instance.setStyle(fallbackStyle)
-      }
-      instance.on('error', useFallbackMap)
-      instance.once('load', () => {
-        instance.addSource('great-britain-mask', { type: 'geojson', data: greatBritainMask })
-        instance.addLayer({ id: 'great-britain-muted', type: 'fill', source: 'great-britain-mask', paint: { 'fill-color': '#b8b9b4', 'fill-opacity': 0.96 } })
-        instance.addLayer({ id: 'great-britain-edge', type: 'line', source: 'great-britain-mask', paint: { 'line-color': '#959993', 'line-width': 1 } })
-        primarySettled = true
-        if (loadTimer) window.clearTimeout(loadTimer)
-        if (!cancelled) setMapStatus(fallbackApplied ? 'fallback' : 'ready')
+      instance.once('style.load', () => {
+        if (!cancelled) setMapStatus('ready')
       })
-      loadTimer = window.setTimeout(useFallbackMap, 7000)
     }).catch(() => {
       if (!cancelled) setMapStatus('error')
     })
     return () => {
       cancelled = true
-      if (loadTimer) window.clearTimeout(loadTimer)
       markers.current.forEach((marker) => marker.remove())
       markers.current = []
       map.current?.remove()
