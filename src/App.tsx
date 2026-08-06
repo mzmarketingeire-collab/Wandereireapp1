@@ -45,7 +45,7 @@ const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
   const usingMapTiler = Boolean(mapTilerKey)
   const encodedKey = usingMapTiler ? encodeURIComponent(mapTilerKey!) : ''
   const tiles = usingMapTiler
-    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}.png?key=${encodedKey}`]
+    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}@2x.webp?key=${encodedKey}`]
     : ['https://tile.openstreetmap.org/{z}/{x}/{y}.png']
   const outdoorsLayers: StyleSpecification['layers'] = usingMapTiler ? [
     {
@@ -171,7 +171,8 @@ const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
           'raster-contrast': 0.1,
           'raster-brightness-min': 0.04,
           'raster-brightness-max': 1,
-          'raster-fade-duration': 0,
+          'raster-resampling': 'linear',
+          'raster-fade-duration': 180,
         },
       },
       ...outdoorsLayers,
@@ -247,10 +248,10 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
       if (cancelled || !node.current) return
       const instance = new library.Map({
         container: node.current,
-        bounds: [[-13.5, 49.3], [2.4, 59]],
-        fitBoundsOptions: { padding: 20, maxZoom: 5.25 },
-        maxBounds: [[-14.5, 48.7], [3.4, 59.7]],
-        minZoom: 4.25, maxZoom: 16,
+        bounds: [[-12.1, 50.2], [-3.9, 56.4]],
+        fitBoundsOptions: { padding: 24, maxZoom: 5.9 },
+        maxBounds: [[-13.2, 49.5], [-2.2, 57.25]],
+        minZoom: 4.75, maxZoom: 16,
         style: mapStyle,
         attributionControl: { compact: true },
         fadeDuration: 0,
