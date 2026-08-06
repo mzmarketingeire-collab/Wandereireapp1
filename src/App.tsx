@@ -176,6 +176,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -195,7 +196,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!supabase) return
-    setBusy(true); setError(''); setMessage('')
+    setBusy(true); setError(''); setMessage(''); setNeedsConfirmation(false)
     if (mode === 'forgot') {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
       setBusy(false)
@@ -207,9 +208,28 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: email.split('@')[0] } } })
     setBusy(false)
-    if (result.error) setError(friendlyAuthError(result.error.message))
+    if (result.error) {
+      setError(friendlyAuthError(result.error.message))
+      setNeedsConfirmation(result.error.message.toLowerCase().includes('email not confirmed'))
+    }
     else if (result.data.user && result.data.session) onAuthenticated({ id: result.data.user.id, email: result.data.user.email ?? email, name: result.data.user.user_metadata.display_name ?? email.split('@')[0], role: 'user' })
-    else if (result.data.user) setMessage('Nearly there — check your email and tap the confirmation link, then sign in.')
+    else if (result.data.user) {
+      setMessage('Nearly there — check your email and tap the confirmation link, then sign in.')
+      setNeedsConfirmation(true)
+    }
+  }
+
+  const resendConfirmation = async () => {
+    if (!supabase || !email) return
+    setBusy(true); setError(''); setMessage('')
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    })
+    setBusy(false)
+    if (resendError) setError(friendlyAuthError(resendError.message))
+    else setMessage('A fresh confirmation email is on its way. Check your inbox and spam folder.')
   }
 
   const google = async () => {
@@ -229,15 +249,16 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       {isSupabaseConfigured ? <>
         {mode !== 'forgot' && <><button className="google-button" onClick={google}>Continue with Google</button><span className="or"><i/>or use email<i/></span></>}
         <form onSubmit={submit}>
-          <label>Email<input autoFocus type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
+          <label>Email<input autoFocus type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setNeedsConfirmation(false) }} placeholder="you@example.com" /></label>
           {mode !== 'forgot' && <label>Password<input type="password" required minLength={mode === 'signup' ? 8 : 1} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'} /></label>}
           {error && <p className="form-error">{error}</p>}
           {message && <p className="form-message" role="status">{message}</p>}
+          {needsConfirmation && <button type="button" className="confirmation-button" disabled={busy || !email} onClick={resendConfirmation}>Resend confirmation email</button>}
           <button className="primary-button" disabled={busy}>{busy ? 'One moment…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create free account' : 'Send reset link'}</button>
         </form>
-        {mode === 'signin' && <button className="text-button" onClick={() => { setMode('forgot'); setError(''); setMessage('') }}>Forgot your password?</button>}
-        {!admin && mode !== 'forgot' && <button className="text-button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage('') }}>{mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button>}
-        {mode === 'forgot' && <button className="text-button" onClick={() => { setMode('signin'); setError(''); setMessage('') }}>Back to sign in</button>}
+        {mode === 'signin' && <button className="text-button" onClick={() => { setMode('forgot'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>Forgot your password?</button>}
+        {!admin && mode !== 'forgot' && <button className="text-button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>{mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button>}
+        {mode === 'forgot' && <button className="text-button" onClick={() => { setMode('signin'); setError(''); setMessage(''); setNeedsConfirmation(false) }}>Back to sign in</button>}
       </> : <div className="demo-gate"><p>Supabase isn’t connected yet. Continue in preview mode to try the complete experience.</p><button className="primary-button" onClick={() => onAuthenticated({ id: 'demo-user', email: 'explorer@wander-eire.ie', name: admin ? 'Wander Éire Admin' : 'Maeve', role: admin ? 'admin' : 'user', demo: true })}>{admin ? 'Open admin preview' : 'Continue as Maeve'}</button></div>}
       <small>By continuing, you agree to our <a href="/privacy">privacy policy</a>. Your trail stays yours.</small>
     </section>
