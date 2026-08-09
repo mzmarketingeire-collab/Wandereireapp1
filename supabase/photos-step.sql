@@ -28,7 +28,7 @@ for select using (
 
 drop policy if exists "Photos are attributable" on public.user_photos;
 create policy "Photos are attributable" on public.user_photos
-for insert with check (auth.uid() = user_id);
+for insert with check (auth.uid() = user_id and status = 'pending');
 
 drop policy if exists "Owners can remove pending photos" on public.user_photos;
 create policy "Owners can remove pending photos" on public.user_photos

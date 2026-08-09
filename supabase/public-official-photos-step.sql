@@ -11,5 +11,11 @@ for select
 to anon, authenticated
 using (
   bucket_id = 'location-photos'
-  and (storage.foldername(name))[1] = 'official'
+  and exists (
+    select 1
+    from public.location_photos
+    join public.locations on locations.id = location_photos.location_id
+    where location_photos.object_path = name
+      and locations.archived_at is null
+  )
 );
