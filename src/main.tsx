@@ -10,9 +10,10 @@ createRoot(document.getElementById('root')!).render(
 )
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  const hadController = Boolean(navigator.serviceWorker.controller)
   let refreshing = false
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return
+    if (!hadController || refreshing) return
     refreshing = true
     window.location.reload()
   })

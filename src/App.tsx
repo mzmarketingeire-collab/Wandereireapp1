@@ -19,8 +19,11 @@ export type Place = {
 }
 
 export type Comment = { id: number; user_id: string; location_id: number; body: string; status: 'pending' | 'approved' | 'rejected'; created_at: string; author?: string }
-export type UserPhoto = { id: number; user_id: string; location_id: number; object_path: string; caption: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string; url?: string }
-export type LocationPhoto = { id: number; location_id: number; object_path: string; position: number; created_at: string; url?: string }
+export type UserPhoto = { id: number; user_id: string; location_id: number; object_path: string; caption: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string; url?: string; expiresAt?: number }
+export type LocationPhoto = { id: number; location_id: number; object_path: string; position: number; created_at: string; url?: string; expiresAt?: number }
+
+const SIGNED_URL_TTL_SECONDS = 3600
+const signedUrlExpiresAt = () => Date.now() + SIGNED_URL_TTL_SECONDS * 1000
 
 export const categories = {
   trail: { label: 'Trails', color: '#1f7a4d', icon: Footprints },
@@ -332,7 +335,7 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
   </>
 }
 
-function PhotoCarousel({ photos, place }: { photos: LocationPhoto[]; place: Place }) {
+function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[]; place: Place; onImageError: (photo: LocationPhoto) => void }) {
   const rail = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
 
@@ -353,7 +356,7 @@ function PhotoCarousel({ photos, place }: { photos: LocationPhoto[]; place: Plac
         const width = event.currentTarget.clientWidth || 1
         setActive(Math.round(event.currentTarget.scrollLeft / width))
       }}>
-        {photos.map((photo, index) => <figure key={photo.id}><img src={photo.url} alt={`${place.name}, view ${index + 1} of ${photos.length}`}/></figure>)}
+        {photos.map((photo, index) => <figure key={photo.id}><img src={photo.url} alt={`${place.name}, view ${index + 1} of ${photos.length}`} loading={index === active ? 'eager' : 'lazy'} decoding={index === active ? 'auto' : 'async'} onError={() => onImageError(photo)}/></figure>)}
       </div>
       <div className="location-gallery__shade"/>
       <div className="location-gallery__meta"><span>Wander Éire field notes</span><strong>{place.county}</strong></div>
@@ -373,12 +376,12 @@ export function PlaceRow({ place, onClick }: { place: Place; onClick: () => void
   </button>
 }
 
-function PinPreview({ place, photoUrl, loading, onClose, onMore }: { place: Place; photoUrl: string; loading: boolean; onClose: () => void; onMore: () => void }) {
+function PinPreview({ place, photoUrl, loading, onClose, onMore, onImageError }: { place: Place; photoUrl: string; loading: boolean; onClose: () => void; onMore: () => void; onImageError: () => void }) {
   const activity = { trail: 'Trail', historic: 'Historic place', viewpoint: 'Viewpoint', beach: 'Beach', camp: 'Camping' }[place.category]
   return <aside className="pin-preview" role="dialog" aria-label={`${place.name} preview`} style={{ '--accent': categories[place.category].color } as React.CSSProperties}>
     <button className="pin-preview__close" onClick={onClose} aria-label="Close place preview"><X size={16}/></button>
     <div className={`pin-preview__image ${loading ? 'loading' : ''}`}>
-      {photoUrl ? <img src={photoUrl} alt={`Preview of ${place.name}`} decoding="async"/> : !loading && <CategoryIcon category={place.category} size={38}/>}
+      {photoUrl ? <img src={photoUrl} alt={`Preview of ${place.name}`} loading="lazy" decoding="async" onError={onImageError}/> : !loading && <CategoryIcon category={place.category} size={38}/>}
     </div>
     <div className="pin-preview__glass">
       <span><CategoryIcon category={place.category} size={15}/>{activity}</span>
@@ -505,7 +508,7 @@ function App() {
   const [previewPlace, setPreviewPlace] = useState<Place | null>(null)
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState('')
   const [previewPhotoLoading, setPreviewPhotoLoading] = useState(false)
-  const previewPhotoCache = useRef<Record<number, string>>({})
+  const previewPhotoCache = useRef<Record<number, { url: string; expiresAt: number }>>({})
   const [selected, setSelected] = useState<Place | null>(null)
   const [saved, setSaved] = useState<number[]>([])
   const [visited, setVisited] = useState<number[]>([])
@@ -568,16 +571,16 @@ function App() {
     setPreviewPhotoUrl('')
     if (!previewPlace || !supabase) { setPreviewPhotoLoading(false); return }
     const cached = previewPhotoCache.current[previewPlace.id]
-    if (cached) { setPreviewPhotoUrl(cached); setPreviewPhotoLoading(false); return }
+    if (cached && cached.expiresAt > Date.now() + 5 * 60 * 1000) { setPreviewPhotoUrl(cached.url); setPreviewPhotoLoading(false); return }
     const client = supabase
     setPreviewPhotoLoading(true)
     void (async () => {
       try {
         const { data } = await client.from('location_photos').select('object_path').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
         if (!data?.object_path) return
-        const signed = await client.storage.from('location-photos').createSignedUrl(data.object_path, 3600)
+        const signed = await client.storage.from('location-photos').createSignedUrl(data.object_path, SIGNED_URL_TTL_SECONDS)
         if (signed.data?.signedUrl) {
-          previewPhotoCache.current[previewPlace.id] = signed.data.signedUrl
+          previewPhotoCache.current[previewPlace.id] = { url: signed.data.signedUrl, expiresAt: signedUrlExpiresAt() }
           if (active) setPreviewPhotoUrl(signed.data.signedUrl)
         }
       } finally {
@@ -602,22 +605,44 @@ function App() {
     ]).then(async ([commentsResult, photosResult, officialResult]) => {
       if (commentsResult.data && isCurrent()) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
-        const withUrls = await Promise.all((photosResult.data as UserPhoto[]).map(async (photo) => {
-          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
-          return { ...photo, url: data?.signedUrl }
-        }))
+        const photoRows = photosResult.data as UserPhoto[]
+        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
+        const expiresAt = signedUrlExpiresAt()
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
+        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         if (isCurrent()) setPhotos(withUrls)
       }
       if (officialResult.data) {
-        const withUrls = await Promise.all((officialResult.data as LocationPhoto[]).map(async (photo) => {
-          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
-          return { ...photo, url: data?.signedUrl }
-        }))
+        const photoRows = officialResult.data as LocationPhoto[]
+        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
+        const expiresAt = signedUrlExpiresAt()
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
+        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         if (isCurrent()) setOfficialPhotos(withUrls.filter((photo) => photo.url))
       }
     })
     return () => { active = false }
   }, [selected, viewer])
+
+  const refreshPreviewPhoto = async () => {
+    if (!previewPlace || !supabase) return
+    const { data: photo } = await supabase.from('location_photos').select('object_path').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
+    if (!photo?.object_path) return
+    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
+    if (data?.signedUrl) {
+      previewPhotoCache.current[previewPlace.id] = { url: data.signedUrl, expiresAt: signedUrlExpiresAt() }
+      setPreviewPhotoUrl(data.signedUrl)
+    }
+  }
+
+  const refreshPhoto = async (photo: UserPhoto | LocationPhoto, official: boolean) => {
+    if (!supabase) return
+    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
+    if (!data?.signedUrl) return
+    const update = (item: UserPhoto | LocationPhoto) => item.id === photo.id ? { ...item, url: data.signedUrl, expiresAt: signedUrlExpiresAt() } : item
+    if (official) setOfficialPhotos((all) => all.map(update) as LocationPhoto[])
+    else setPhotos((all) => all.map(update) as UserPhoto[])
+  }
 
   useEffect(() => {
     const followAddressBar = () => {
@@ -648,8 +673,8 @@ function App() {
       await supabase.storage.from('location-photos').remove([objectPath])
       setPhotoMessage('Couldn’t save that photo — try again.'); setPhotoBusy(false); return
     }
-    const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, 3600)
-    setPhotos((all) => [...all, { ...(data as UserPhoto), url: signed.data?.signedUrl }])
+    const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, SIGNED_URL_TTL_SECONDS)
+    setPhotos((all) => [...all, { ...(data as UserPhoto), url: signed.data?.signedUrl, expiresAt: signedUrlExpiresAt() }])
     setPhotoFile(null); setPhotoCaption(''); setPhotoBusy(false); setPhotoMessage('Submitted — this goes live once we’ve had a look.')
   }
 
@@ -733,7 +758,7 @@ function App() {
           </section>
           <section className="photo-section">
             <div><p className="eyebrow">From the community</p><h2>Photos from the road</h2><p>Shared by people who stopped here.</p></div>
-            {photos.length > 0 && <div className="photo-grid">{photos.map((photo) => <figure key={photo.id}>{photo.url && <img src={photo.url} alt={photo.caption || `Visitor view of ${selected.name}`}/>}<figcaption>{photo.status === 'pending' && <small>Pending review</small>}{photo.caption && <span>{photo.caption}</span>}</figcaption></figure>)}</div>}
+            {photos.length > 0 && <div className="photo-grid">{photos.map((photo) => <figure key={photo.id}>{photo.url && <img src={photo.url} alt={photo.caption || `Visitor view of ${selected.name}`} loading="lazy" decoding="async" onError={() => void refreshPhoto(photo, false)}/>}<figcaption>{photo.status === 'pending' && <small>Pending review</small>}{photo.caption && <span>{photo.caption}</span>}</figcaption></figure>)}</div>}
             {viewer ? <form className="photo-form" onSubmit={uploadPhoto}>
               <label className="photo-picker"><Camera/><span><strong>{photoFile ? photoFile.name : 'Add your photo'}</strong><small>JPG, PNG, WebP or HEIC · up to 8 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}/></label>
               {photoFile && <><label>Optional caption<input value={photoCaption} maxLength={240} onChange={(event) => setPhotoCaption(event.target.value)} placeholder="A helpful detail about this view"/></label><button className="primary-button" disabled={photoBusy}>{photoBusy ? 'Uploading…' : 'Submit for review'}</button></>}
@@ -756,7 +781,7 @@ function App() {
           </section>
         </div>
       </section>
-      <PhotoCarousel photos={officialPhotos} place={selected}/>
+      <PhotoCarousel photos={officialPhotos} place={selected} onImageError={(photo) => void refreshPhoto(photo, true)}/>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthenticated={authenticated} />}
     </main>
   }
@@ -780,7 +805,7 @@ function App() {
 
       <div className="map-area">
         <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} onSelect={setPreviewPlace} />
-        {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)}/>}
+        {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)} onImageError={() => void refreshPreviewPhoto()}/>}
         {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
         {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />)}</div>}
         <button className="view-toggle" onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
