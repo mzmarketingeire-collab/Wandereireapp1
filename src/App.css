@@ -30,6 +30,7 @@ footer{display:none}
 
 .form-message{font-size:12px!important;color:var(--green)!important;background:#e5f1e9;padding:10px;border-radius:8px;margin:0!important}
 .admin-notice{background:#e5f1e9;color:#245d3f;border-radius:10px;padding:11px 15px;font-size:12px;margin:-14px 0 20px}
+.app-notice{position:fixed;z-index:90;top:14px;left:50%;transform:translateX(-50%);max-width:calc(100% - 28px);margin:0;background:#fff4d6;color:#654d18;border-radius:10px;padding:11px 15px;font-size:12px;box-shadow:0 6px 24px #1e2a2224}
 .admin-form{grid-template-columns:repeat(4,minmax(130px,1fr))}
 .admin-form textarea{width:100%;min-height:100px;resize:vertical;border:1px solid #d9d4ca;border-radius:10px;background:white;padding:13px 14px;color:var(--ink);outline:0;font:inherit}
 .admin-form textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px #1f7a4d1f}

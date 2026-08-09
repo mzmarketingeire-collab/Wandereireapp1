@@ -207,7 +207,7 @@ const fromDatabase = (row: Record<string, unknown>): Place => ({
   name: String(row.name ?? ''),
   county: String(row.county ?? ''),
   category: row.category as Category,
-  coordinates: [Number(row.longitude), Number(row.latitude)],
+  coordinates: [row.longitude == null ? NaN : Number(row.longitude), row.latitude == null ? NaN : Number(row.latitude)],
   cost: String(row.cost ?? 'Free'),
   distance: String(row.distance ?? ''),
   kicker: String(row.kicker ?? ''),
@@ -217,6 +217,12 @@ const fromDatabase = (row: Record<string, unknown>): Place => ({
   facts: Array.isArray(row.facts) ? row.facts.map(String) : [],
   archived: Boolean(row.archived_at),
 })
+
+const hasValidCoordinates = (place: Place) => {
+  const [longitude, latitude] = place.coordinates
+  return Number.isFinite(longitude) && Number.isFinite(latitude)
+    && longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90
+}
 
 const toDatabase = (place: Omit<Place, 'id' | 'archived'>) => ({
   name: place.name, county: place.county, category: place.category,
@@ -422,7 +428,7 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
     setBusy(false)
     if (result.error) setError(friendlyAuthError(result.error.message))
     else if (result.data.user && result.data.session) onAuthenticated({ id: result.data.user.id, email: result.data.user.email ?? email, name: result.data.user.user_metadata.display_name ?? email.split('@')[0], role: 'user' })
-    else if (result.data.user) setError('We could not finish creating your account. Please try again.')
+    else if (result.data.user) setMessage('Check your email to confirm your account.')
   }
 
   const google = async () => {
@@ -516,7 +522,7 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
       client.from('user_photos').select('*').eq('status', 'pending').order('created_at'),
       client.from('location_photos').select('*').order('position'),
     ]).then(async ([locationsResult, commentsResult, photosResult, officialResult]) => {
-      if (locationsResult.data) setItems(locationsResult.data.map((row) => fromDatabase(row)))
+      if (locationsResult.data) setItems(locationsResult.data.map((row) => fromDatabase(row)).filter(hasValidCoordinates))
       if (commentsResult.data) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
         const withUrls = await Promise.all((photosResult.data as UserPhoto[]).map(async (photo) => {
@@ -592,9 +598,10 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
         const { error } = await supabase.from('user_photos').update({ status }).eq('id', item.id)
         if (error) return setNotice('That photo could not be approved.')
       } else {
-        await supabase.storage.from('location-photos').remove([item.object_path])
         const { error } = await supabase.from('user_photos').delete().eq('id', item.id)
         if (error) return setNotice('That photo could not be rejected.')
+        const { error: storageError } = await supabase.storage.from('location-photos').remove([item.object_path])
+        if (storageError) console.warn('Rejected photo record deleted, but storage cleanup failed.', storageError)
       }
     }
     setPhotoQueue((all) => all.filter((photo) => photo.id !== item.id))
@@ -628,9 +635,10 @@ function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { v
   const removeOfficialPhoto = async (photo: LocationPhoto) => {
     setPhotoBusy(true); setNotice('')
     if (supabase && !viewer.demo) {
-      const { error: storageError } = await supabase.storage.from('location-photos').remove([photo.object_path])
       const { error: recordError } = await supabase.from('location_photos').delete().eq('id', photo.id)
-      if (storageError || recordError) { setPhotoBusy(false); setNotice('That photo could not be removed.'); return }
+      if (recordError) { setPhotoBusy(false); setNotice('That photo could not be removed.'); return }
+      const { error: storageError } = await supabase.storage.from('location-photos').remove([photo.object_path])
+      if (storageError) console.warn('Official photo record deleted, but storage cleanup failed.', storageError)
     }
     setOfficialPhotos((all) => all.filter((item) => item.id !== photo.id))
     setPhotoBusy(false); setNotice('Photo removed from the gallery.')
@@ -730,9 +738,15 @@ function App() {
   const [photoCaption, setPhotoCaption] = useState('')
   const [photoBusy, setPhotoBusy] = useState(false)
   const [photoMessage, setPhotoMessage] = useState('')
+  const [notice, setNotice] = useState('')
+  const selectedId = useRef<number | null>(null)
+  selectedId.current = selected?.id ?? null
   const filtered = useMemo(() => locationItems.filter((p) => (category === 'all' || p.category === category) && (`${p.name} ${p.county}`.toLowerCase().includes(query.toLowerCase()))), [category, query, locationItems])
   const loadViewer = async (session: Session | null) => {
-    if (!session?.user || !supabase) return setViewer(null)
+    if (!session?.user || !supabase) {
+      setViewer(null); setSaved([]); setVisited([])
+      return
+    }
     const { data: profile } = await supabase.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle()
     const next: Viewer = { id: session.user.id, email: session.user.email ?? '', name: profile?.display_name ?? session.user.user_metadata.display_name ?? session.user.email?.split('@')[0] ?? 'Wanderer', role: profile?.role === 'admin' ? 'admin' : 'user' }
     setViewer(next); setShowAuth(false)
@@ -742,8 +756,13 @@ function App() {
 
   useEffect(() => {
     if (!supabase) return
-    void supabase.from('locations').select('*').is('archived_at', null).order('name').then(({ data }) => {
-      if (data?.length) setLocationItems(data.map((row) => fromDatabase(row)))
+    void supabase.from('locations').select('*').is('archived_at', null).order('name').then(({ data, error }) => {
+      if (error) {
+        setLocationItems(places)
+        setNotice('Live location data could not be loaded. Showing the offline guide for now.')
+        return
+      }
+      setLocationItems((data ?? []).map((row) => fromDatabase(row)).filter(hasValidCoordinates))
     })
     supabase.auth.getSession().then(({ data }) => loadViewer(data.session))
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -783,29 +802,33 @@ function App() {
   useEffect(() => {
     if (!selected || !supabase) { setComments([]); setPhotos([]); setOfficialPhotos([]); return }
     const client = supabase
-    setOfficialPhotos([])
+    const selectedPlaceId = selected.id
+    let active = true
+    const isCurrent = () => active && selectedId.current === selectedPlaceId
+    setComments([]); setPhotos([]); setOfficialPhotos([])
     setPhotoFile(null); setPhotoCaption(''); setPhotoMessage(''); setCommentMessage('')
     void Promise.all([
-      client.from('comments').select('*').eq('location_id', selected.id).order('created_at'),
-      client.from('user_photos').select('*').eq('location_id', selected.id).order('created_at'),
-      client.from('location_photos').select('*').eq('location_id', selected.id).order('position'),
+      client.from('comments').select('*').eq('location_id', selectedPlaceId).order('created_at'),
+      client.from('user_photos').select('*').eq('location_id', selectedPlaceId).order('created_at'),
+      client.from('location_photos').select('*').eq('location_id', selectedPlaceId).order('position'),
     ]).then(async ([commentsResult, photosResult, officialResult]) => {
-      if (commentsResult.data) setComments(commentsResult.data as Comment[])
+      if (commentsResult.data && isCurrent()) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
         const withUrls = await Promise.all((photosResult.data as UserPhoto[]).map(async (photo) => {
           const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
           return { ...photo, url: data?.signedUrl }
         }))
-        setPhotos(withUrls)
+        if (isCurrent()) setPhotos(withUrls)
       }
       if (officialResult.data) {
         const withUrls = await Promise.all((officialResult.data as LocationPhoto[]).map(async (photo) => {
           const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
           return { ...photo, url: data?.signedUrl }
         }))
-        setOfficialPhotos(withUrls.filter((photo) => photo.url))
+        if (isCurrent()) setOfficialPhotos(withUrls.filter((photo) => photo.url))
       }
     })
+    return () => { active = false }
   }, [selected, viewer])
 
   useEffect(() => {
@@ -850,8 +873,13 @@ function App() {
     setter((items) => active ? items.filter((x) => x !== id) : [...items, id])
     if (supabase && !viewer.demo) {
       const table = kind === 'save' ? 'user_saves' : 'user_ticks'
-      if (active) await supabase.from(table).delete().eq('user_id', viewer.id).eq('location_id', id)
-      else await supabase.from(table).insert({ user_id: viewer.id, location_id: id })
+      const { error } = active
+        ? await supabase.from(table).delete().eq('user_id', viewer.id).eq('location_id', id)
+        : await supabase.from(table).insert({ user_id: viewer.id, location_id: id })
+      if (error) {
+        setter((items) => active ? (items.includes(id) ? items : [...items, id]) : items.filter((x) => x !== id))
+        setNotice(`That ${kind === 'save' ? 'save' : 'visit'} could not be updated. Please try again.`)
+      }
     }
   }
 
@@ -881,7 +909,10 @@ function App() {
     setSelected(place)
   }
 
-  const signOut = async () => { if (supabase && !viewer?.demo) await supabase.auth.signOut(); setViewer(null); setScreen('map') }
+  const signOut = async () => {
+    setViewer(null); setSaved([]); setVisited([]); setScreen('map')
+    if (supabase && !viewer?.demo) await supabase.auth.signOut()
+  }
 
   if (screen === 'admin' && viewer?.role === 'admin') return <AdminView viewer={viewer} places={locationItems} onPlacesChange={setLocationItems} onBack={() => { window.history.pushState({}, '', '/'); setScreen('map') }} />
   if (screen === 'admin' && viewer && viewer.role !== 'admin') return <main className="access-denied"><LockKeyhole/><p className="eyebrow">Owner access only</p><h1>This gate needs an admin key.</h1><p>You’re signed in, but this account is not an administrator.</p><div><button className="primary-button" onClick={() => { window.history.pushState({}, '', '/'); setScreen('map') }}>Back to the map</button><button className="text-button" onClick={signOut}>Sign out</button></div></main>
@@ -891,6 +922,7 @@ function App() {
   if (selected) {
     const cat = categories[selected.category]
     return <main className="app detail" style={{ '--accent': cat.color } as React.CSSProperties}>
+      {notice && <p className="app-notice" role="status">{notice}</p>}
       <button className="round-button detail-back" onClick={() => setSelected(null)} aria-label="Back to map"><ArrowLeft /></button>
       <section className="detail__content">
         <div className="detail__category"><CategoryIcon category={selected.category} size={18}/><span>{cat.label}</span><i/>{selected.county}, Ireland</div>
@@ -942,6 +974,7 @@ function App() {
   }
 
   return <main className="app">
+    {notice && <p className="app-notice" role="status">{notice}</p>}
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Wander Éire home"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a>
       <div className="topbar__actions"><button className="round-button" onClick={() => navigator.geolocation?.getCurrentPosition((position) => setMapFocus([position.coords.longitude, position.coords.latitude]), () => undefined)} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? setScreen('profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
