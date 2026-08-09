@@ -5,6 +5,9 @@ import { supabase } from './lib/supabase'
 import { CategoryIcon, PlaceRow, categories, fromDatabase, hasValidCoordinates, toDatabase } from './App'
 import type { Category, Comment, LocationPhoto, Place, UserPhoto, Viewer } from './App'
 
+const SIGNED_URL_TTL_SECONDS = 3600
+const signedUrlExpiresAt = () => Date.now() + SIGNED_URL_TTL_SECONDS * 1000
+
 export default function ProfileView({ viewer, places: allPlaces, saved, visited, onOpen, onBack, onAdmin, onSignOut, onViewerChange }: { viewer: Viewer; places: Place[]; saved: number[]; visited: number[]; onOpen: (p: Place) => void; onBack: () => void; onAdmin: () => void; onSignOut: () => void; onViewerChange: (viewer: Viewer) => void }) {
   const [tab, setTab] = useState<'visited' | 'saved'>('visited')
   const [settings, setSettings] = useState(false)
@@ -59,17 +62,19 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
       if (locationsResult.data) setItems(locationsResult.data.map((row) => fromDatabase(row)).filter(hasValidCoordinates))
       if (commentsResult.data) setComments(commentsResult.data as Comment[])
       if (photosResult.data) {
-        const withUrls = await Promise.all((photosResult.data as UserPhoto[]).map(async (photo) => {
-          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
-          return { ...photo, url: data?.signedUrl }
-        }))
+        const photoRows = photosResult.data as UserPhoto[]
+        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
+        const expiresAt = signedUrlExpiresAt()
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl]))
+        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         setPhotoQueue(withUrls)
       }
       if (officialResult.data) {
-        const withUrls = await Promise.all((officialResult.data as LocationPhoto[]).map(async (photo) => {
-          const { data } = await client.storage.from('location-photos').createSignedUrl(photo.object_path, 3600)
-          return { ...photo, url: data?.signedUrl }
-        }))
+        const photoRows = officialResult.data as LocationPhoto[]
+        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
+        const expiresAt = signedUrlExpiresAt()
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl]))
+        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         setOfficialPhotos(withUrls)
       }
       if (locationsResult.error || commentsResult.error || officialResult.error) setNotice('The official gallery needs its Supabase photo update before uploads will work.')
@@ -142,6 +147,15 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
     setNotice(status === 'approved' ? 'Photo approved and now public.' : 'Photo rejected and removed.')
   }
 
+  const refreshPhoto = async (photo: UserPhoto | LocationPhoto, official: boolean) => {
+    if (!supabase || viewer.demo) return
+    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
+    if (!data?.signedUrl) return
+    const update = (item: UserPhoto | LocationPhoto) => item.id === photo.id ? { ...item, url: data.signedUrl, expiresAt: signedUrlExpiresAt() } : item
+    if (official) setOfficialPhotos((all) => all.map(update) as LocationPhoto[])
+    else setPhotoQueue((all) => all.map(update) as UserPhoto[])
+  }
+
   const uploadOfficialPhoto = async (place: Place, file: File) => {
     const existing = officialPhotos.filter((photo) => photo.location_id === place.id)
     const position = [1, 2, 3].find((slot) => !existing.some((photo) => photo.position === slot))
@@ -158,8 +172,8 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
         await supabase.storage.from('location-photos').remove([objectPath])
         setPhotoBusy(false); setNotice('That gallery slot could not be saved.'); return
       }
-      const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, 3600)
-      setOfficialPhotos((all) => [...all, { ...(data as LocationPhoto), url: signed.data?.signedUrl }].sort((a, b) => a.position - b.position))
+      const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, SIGNED_URL_TTL_SECONDS)
+      setOfficialPhotos((all) => [...all, { ...(data as LocationPhoto), url: signed.data?.signedUrl, expiresAt: signedUrlExpiresAt() }].sort((a, b) => a.position - b.position))
     } else {
       setOfficialPhotos((all) => [...all, { id: Date.now(), location_id: place.id, object_path: URL.createObjectURL(file), position, created_at: new Date().toISOString(), url: URL.createObjectURL(file) }])
     }
@@ -201,7 +215,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
             <div><p className="eyebrow">Official gallery</p><h3>Feature photography</h3><span>{editing ? `${officialPhotos.filter((photo) => photo.location_id === editing.id).length} of 3 photos` : 'Publish the location first, then edit it to add photos.'}</span></div>
             {editing && <div className="admin-photo-slots">{[1, 2, 3].map((position) => {
               const photo = officialPhotos.find((item) => item.location_id === editing.id && item.position === position)
-              return photo ? <figure key={position}>{photo.url && <img src={photo.url} alt={`${editing.name} gallery slot ${position}`}/>}<figcaption><span>Photo {position}</span><button type="button" disabled={photoBusy} onClick={() => removeOfficialPhoto(photo)} aria-label={`Remove photo ${position}`}><Trash2/></button></figcaption></figure> : <label className="admin-photo-slot" key={position}><Camera/><strong>Photo {position}</strong><small>JPG, PNG, WebP or HEIC</small><input type="file" disabled={photoBusy} accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadOfficialPhoto(editing, file); event.target.value = '' }}/></label>
+              return photo ? <figure key={position}>{photo.url && <img src={photo.url} alt={`${editing.name} gallery slot ${position}`} width="400" height="300" loading="lazy" decoding="async" onError={() => void refreshPhoto(photo, true)}/>}<figcaption><span>Photo {position}</span><button type="button" disabled={photoBusy} onClick={() => removeOfficialPhoto(photo)} aria-label={`Remove photo ${position}`}><Trash2/></button></figcaption></figure> : <label className="admin-photo-slot" key={position}><Camera/><strong>Photo {position}</strong><small>JPG, PNG, WebP or HEIC</small><input type="file" disabled={photoBusy} accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadOfficialPhoto(editing, file); event.target.value = '' }}/></label>
             })}</div>}
           </section>
           <button className="primary-button" disabled={busy}>{busy ? 'Saving…' : editing ? 'Save changes' : 'Publish location'}</button>
@@ -209,7 +223,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
         <div className="admin-table"><div className="admin-table__head"><span>Location</span><span>Category</span><span>Status</span><span/></div>{items.map((place) => <div className={place.archived ? 'archived' : ''} key={place.id}><span><i style={{ background: categories[place.category].color }}><CategoryIcon category={place.category}/></i><b>{place.name}<small>{place.county}</small></b></span><span>{categories[place.category].label}</span><span>{place.archived ? 'Archived' : 'Live'}</span><span className="row-actions"><button onClick={() => openEdit(place)} aria-label={`Edit ${place.name}`}><Pencil/></button><button onClick={() => toggleArchive(place)} aria-label={`${place.archived ? 'Restore' : 'Archive'} ${place.name}`}><Trash2/></button></span></div>)}</div>
       </>}
       {tab === 'moderation' && <div className="moderation-list">
-        {photoQueue.map((item) => <article className="photo-review" key={`photo-${item.id}`}>{item.url && <img src={item.url} alt="Submitted location"/>}<div><p className="eyebrow">Photo · Location #{item.location_id} · {new Date(item.created_at).toLocaleDateString('en-IE')}</p>{item.caption && <blockquote>{item.caption}</blockquote>}<small>Submitted by {item.user_id.slice(0, 8)}…</small></div><div><button onClick={() => moderatePhoto(item, 'approved')}><Check/>Approve</button><button onClick={() => moderatePhoto(item, 'rejected')}><X/>Reject</button></div></article>)}
+        {photoQueue.map((item) => <article className="photo-review" key={`photo-${item.id}`}>{item.url && <img src={item.url} alt="Submitted location" width="130" height="100" loading="lazy" decoding="async" onError={() => void refreshPhoto(item, false)}/>}<div><p className="eyebrow">Photo · Location #{item.location_id} · {new Date(item.created_at).toLocaleDateString('en-IE')}</p>{item.caption && <blockquote>{item.caption}</blockquote>}<small>Submitted by {item.user_id.slice(0, 8)}…</small></div><div><button onClick={() => moderatePhoto(item, 'approved')}><Check/>Approve</button><button onClick={() => moderatePhoto(item, 'rejected')}><X/>Reject</button></div></article>)}
         {comments.map((item) => <article key={`comment-${item.id}`}><div><p className="eyebrow">Note · Location #{item.location_id} · {new Date(item.created_at).toLocaleDateString('en-IE')}</p><blockquote>{item.body}</blockquote><small>Submitted by {item.user_id.slice(0, 8)}…</small></div><div><button onClick={() => moderate(item, 'approved')}><Check/>Approve</button><button onClick={() => moderate(item, 'rejected')}><X/>Reject</button></div></article>)}
         {!comments.length && !photoQueue.length && <div className="empty"><Check/><h2>Nothing waiting on you.</h2><p>The community queue is clear.</p></div>}
       </div>}
@@ -241,4 +255,3 @@ export function ResetPasswordView({ onDone }: { onDone: () => void }) {
     {complete ? <><p>Your password is changed. You’re safely signed in again.</p><button className="primary-button" onClick={onDone}>Return to Wander Éire</button></> : <><p>Make it at least 8 characters and something only you know.</p><form onSubmit={updatePassword}><label>New password<input autoFocus type="password" minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)}/></label><label>Type it again<input type="password" minLength={8} required value={confirm} onChange={(event) => setConfirm(event.target.value)}/></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="primary-button" disabled={busy}>{busy ? 'Saving…' : 'Save new password'}</button></form></>}
   </section></main>
 }
-
