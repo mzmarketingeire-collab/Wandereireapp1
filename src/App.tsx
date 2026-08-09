@@ -319,13 +319,24 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
 
   useEffect(() => {
     markers.current.forEach(({ el }, id) => {
-      el.classList.toggle('map-pin--dim', !filteredIds.has(id))
+      const dimmed = !filteredIds.has(id)
+      el.classList.toggle('map-pin--dim', dimmed)
       el.classList.toggle('map-pin--active', selected?.id === id)
+      if (dimmed) {
+        el.setAttribute('aria-hidden', 'true')
+        el.setAttribute('tabindex', '-1')
+      } else {
+        el.removeAttribute('aria-hidden')
+        el.removeAttribute('tabindex')
+      }
     })
   }, [filteredIds, selected])
 
   useEffect(() => {
-    if (focus && map.current && mapReady) map.current.flyTo({ center: focus, zoom: 10, duration: 1200 })
+    if (focus && map.current && mapReady) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      map.current.flyTo({ center: focus, zoom: 10, duration: reduceMotion ? 0 : 1200 })
+    }
   }, [focus, mapReady])
 
   return <>
@@ -346,7 +357,8 @@ function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[
 
   const goTo = (index: number) => {
     const next = Math.max(0, Math.min(index, photos.length - 1))
-    rail.current?.scrollTo({ left: next * (rail.current.clientWidth || 1), behavior: 'smooth' })
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    rail.current?.scrollTo({ left: next * (rail.current.clientWidth || 1), behavior: reduceMotion ? 'auto' : 'smooth' })
     setActive(next)
   }
 
@@ -378,7 +390,7 @@ export function PlaceRow({ place, onClick }: { place: Place; onClick: () => void
 
 function PinPreview({ place, photoUrl, loading, onClose, onMore, onImageError }: { place: Place; photoUrl: string; loading: boolean; onClose: () => void; onMore: () => void; onImageError: () => void }) {
   const activity = { trail: 'Trail', historic: 'Historic place', viewpoint: 'Viewpoint', beach: 'Beach', camp: 'Camping' }[place.category]
-  return <aside className="pin-preview" role="dialog" aria-label={`${place.name} preview`} style={{ '--accent': categories[place.category].color } as React.CSSProperties}>
+  return <aside className="pin-preview" role="region" aria-label={`${place.name} preview`} style={{ '--accent': categories[place.category].color } as React.CSSProperties}>
     <button className="pin-preview__close" onClick={onClose} aria-label="Close place preview"><X size={16}/></button>
     <div className={`pin-preview__image ${loading ? 'loading' : ''}`}>
       {photoUrl ? <img src={photoUrl} alt={`Preview of ${place.name}`} loading="lazy" decoding="async" onError={onImageError}/> : !loading && <CategoryIcon category={place.category} size={38}/>}
@@ -404,6 +416,7 @@ const friendlyAuthError = (message: string) => {
 
 function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolean; onClose: () => void; onAuthenticated: (viewer: Viewer) => void }) {
   const dialog = useRef<HTMLElement>(null)
+  const previouslyFocused = useRef<HTMLElement | null>(document.activeElement instanceof HTMLElement ? document.activeElement : null)
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -424,7 +437,10 @@ function AuthModal({ admin = false, onClose, onAuthenticated }: { admin?: boolea
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
     }
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocused.current?.focus()
+    }
   }, [onClose])
 
   const submit = async (event: React.FormEvent) => {
@@ -512,7 +528,9 @@ function App() {
   const [selected, setSelected] = useState<Place | null>(null)
   const [saved, setSaved] = useState<number[]>([])
   const [visited, setVisited] = useState<number[]>([])
-  const [copied, setCopied] = useState(false)
+  const [copyMessage, setCopyMessage] = useState('Tap to copy address')
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [viewer, setViewer] = useState<Viewer | null>(null)
   const [screen, setScreen] = useState<'map' | 'profile' | 'admin' | 'reset-password'>(() => window.location.pathname === '/admin' ? 'admin' : window.location.pathname === '/reset-password' ? 'reset-password' : 'map')
   const [showAuth, setShowAuth] = useState(window.location.pathname === '/admin')
@@ -533,6 +551,41 @@ function App() {
   const selectedId = useRef<number | null>(null)
   selectedId.current = selected?.id ?? null
   const filtered = useMemo(() => locationItems.filter((p) => (category === 'all' || p.category === category) && (`${p.name} ${p.county}`.toLowerCase().includes(query.toLowerCase()))), [category, query, locationItems])
+
+  useEffect(() => () => {
+    if (copyTimer.current) clearTimeout(copyTimer.current)
+    if (noticeTimer.current) clearTimeout(noticeTimer.current)
+  }, [])
+
+  const copyAddress = async (address: string) => {
+    if (copyTimer.current) clearTimeout(copyTimer.current)
+    try {
+      if (!navigator.clipboard) throw new Error('Clipboard API unavailable')
+      await navigator.clipboard.writeText(address)
+      setCopyMessage('Copied to clipboard')
+    } catch {
+      setCopyMessage('Could not copy — long-press to select')
+    }
+    copyTimer.current = setTimeout(() => setCopyMessage('Tap to copy address'), 1600)
+  }
+
+  const locateUser = () => {
+    const showLocationError = (message: string) => {
+      setNotice(message)
+      if (noticeTimer.current) clearTimeout(noticeTimer.current)
+      noticeTimer.current = setTimeout(() => setNotice(''), 4000)
+    }
+    if (!navigator.geolocation) return showLocationError('Location services are unavailable in this browser.')
+    navigator.geolocation.getCurrentPosition(
+      (position) => setMapFocus([position.coords.longitude, position.coords.latitude]),
+      (error) => showLocationError(error.code === error.PERMISSION_DENIED
+        ? 'Location permission was denied. Enable it in your browser settings to find yourself on the map.'
+        : error.code === error.TIMEOUT
+          ? 'Finding your location timed out. Please try again.'
+          : 'Your location is currently unavailable. Please try again.'),
+      { timeout: 8000, maximumAge: 60000 },
+    )
+  }
   const loadViewer = async (session: Session | null) => {
     if (!session?.user || !supabase) {
       setViewer(null); setSaved([]); setVisited([])
@@ -660,8 +713,8 @@ function App() {
   const uploadPhoto = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!selected || !viewer || !photoFile || !supabase) return
-    if (!photoFile.type.startsWith('image/') || photoFile.size > 8 * 1024 * 1024) {
-      setPhotoMessage('Choose a JPG, PNG, WebP or HEIC image smaller than 8 MB.'); return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(photoFile.type) || photoFile.size > 8 * 1024 * 1024) {
+      setPhotoMessage('Choose a JPG, PNG or WebP image smaller than 8 MB.'); return
     }
     setPhotoBusy(true); setPhotoMessage('')
     const extension = photoFile.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
@@ -734,7 +787,7 @@ function App() {
 
   if (selected) {
     const cat = categories[selected.category]
-    return <main className="app detail" style={{ '--accent': cat.color } as React.CSSProperties}>
+    return <><main className="app detail" aria-hidden={showAuth ? 'true' : undefined} style={{ '--accent': cat.color } as React.CSSProperties}>
       {notice && <p className="app-notice" role="status">{notice}</p>}
       <button className="round-button detail-back" onClick={() => setSelected(null)} aria-label="Back to map"><ArrowLeft /></button>
       <section className="detail__content">
@@ -753,14 +806,14 @@ function App() {
         <div className="detail__body">
           <section className="detail-section"><p className="eyebrow">The experience</p><h2>Worth the wander</h2><p>{selected.description}</p></section>
           <section className="detail-section"><p className="eyebrow">Arrival</p><h2>Find your way</h2>
-            <button className="address" onClick={() => { navigator.clipboard?.writeText(selected.address); setCopied(true); setTimeout(() => setCopied(false), 1600) }}><Navigation size={20}/><span><strong>{selected.address}</strong><small>{copied ? 'Copied to clipboard' : 'Tap to copy address'}</small></span></button>
+            <button className="address" onClick={() => void copyAddress(selected.address)}><Navigation size={20}/><span><strong>{selected.address}</strong><small>{copyMessage}</small></span></button>
             <div className="parking-note"><span>Parking</span><p>{selected.parking}</p></div>
           </section>
           <section className="photo-section">
             <div><p className="eyebrow">From the community</p><h2>Photos from the road</h2><p>Shared by people who stopped here.</p></div>
             {photos.length > 0 && <div className="photo-grid">{photos.map((photo) => <figure key={photo.id}>{photo.url && <img src={photo.url} alt={photo.caption || `Visitor view of ${selected.name}`} loading="lazy" decoding="async" onError={() => void refreshPhoto(photo, false)}/>}<figcaption>{photo.status === 'pending' && <small>Pending review</small>}{photo.caption && <span>{photo.caption}</span>}</figcaption></figure>)}</div>}
             {viewer ? <form className="photo-form" onSubmit={uploadPhoto}>
-              <label className="photo-picker"><Camera/><span><strong>{photoFile ? photoFile.name : 'Add your photo'}</strong><small>JPG, PNG, WebP or HEIC · up to 8 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}/></label>
+              <label className="photo-picker"><Camera/><span><strong>{photoFile ? photoFile.name : 'Add your photo'}</strong><small>JPG, PNG or WebP · up to 8 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}/></label>
               {photoFile && <><label>Optional caption<input value={photoCaption} maxLength={240} onChange={(event) => setPhotoCaption(event.target.value)} placeholder="A helpful detail about this view"/></label><button className="primary-button" disabled={photoBusy}>{photoBusy ? 'Uploading…' : 'Submit for review'}</button></>}
               {photoMessage && <p className="photo-message" role="status">{photoMessage}</p>}
             </form> : <button className="contribute-gate" onClick={() => setShowAuth(true)}><Camera/><span><strong>Got a photo from here?</strong><small>Sign in to add it to the guide.</small></span><ChevronRight/></button>}
@@ -782,15 +835,14 @@ function App() {
         </div>
       </section>
       <PhotoCarousel photos={officialPhotos} place={selected} onImageError={(photo) => void refreshPhoto(photo, true)}/>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthenticated={authenticated} />}
-    </main>
+    </main>{showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthenticated={authenticated} />}</>
   }
 
-  return <main className="app">
+  return <><main className="app" aria-hidden={showAuth ? 'true' : undefined}>
     {notice && <p className="app-notice" role="status">{notice}</p>}
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Wander Éire home"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a>
-      <div className="topbar__actions"><button className="round-button" onClick={() => navigator.geolocation?.getCurrentPosition((position) => setMapFocus([position.coords.longitude, position.coords.latitude]), () => undefined)} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? setScreen('profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
+      <div className="topbar__actions"><button className="round-button" onClick={locateUser} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? setScreen('profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
     </header>
 
     <section className="map-shell" id="top">
@@ -798,8 +850,8 @@ function App() {
         <div className="intro"><p className="eyebrow">Your next story starts here</p><h1>Go somewhere<br/><em>worth remembering.</em></h1></div>
         <label className="search"><Search size={20} /><input value={query} onChange={(e) => { setQuery(e.target.value); setPreviewPlace(null) }} placeholder="Search places or counties" aria-label="Search places or counties" />{query ? <button onClick={() => setQuery('')} aria-label="Clear search"><X size={17}/></button> : <SlidersHorizontal size={18} />}</label>
         <nav className="filters" aria-label="Filter by category">
-          <button className={category === 'all' ? 'active all' : ''} onClick={() => setCategory('all')}>All places</button>
-          {(Object.keys(categories) as Category[]).map((key) => <button key={key} className={category === key ? 'active' : ''} style={{ '--chip': categories[key].color } as React.CSSProperties} onClick={() => setCategory(key)}><CategoryIcon category={key} size={15}/>{categories[key].label}</button>)}
+          <button className={category === 'all' ? 'active all' : ''} aria-pressed={category === 'all'} onClick={() => setCategory('all')}>All places</button>
+          {(Object.keys(categories) as Category[]).map((key) => <button key={key} className={category === key ? 'active' : ''} aria-pressed={category === key} style={{ '--chip': categories[key].color } as React.CSSProperties} onClick={() => setCategory(key)}><CategoryIcon category={key} size={15}/>{categories[key].label}</button>)}
         </nav>
       </div>
 
@@ -808,13 +860,12 @@ function App() {
         {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)} onImageError={() => void refreshPreviewPhoto()}/>}
         {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
         {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />)}</div>}
-        <button className="view-toggle" onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
+        <button className="view-toggle" aria-pressed={view === 'list'} onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
         {!query && view === 'map' && !previewPlace && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
       </div>
     </section>
     <footer><span>Made for the long way round.</span><small>Wander Éire · Independent & free</small></footer>
-    {showAuth && <AuthModal admin={screen === 'admin'} onClose={() => { setShowAuth(false); setPendingPlace(null); if (screen === 'admin') { window.history.pushState({}, '', '/'); setScreen('map') } }} onAuthenticated={authenticated} />}
-  </main>
+  </main>{showAuth && <AuthModal admin={screen === 'admin'} onClose={() => { setShowAuth(false); setPendingPlace(null); if (screen === 'admin') { window.history.pushState({}, '', '/'); setScreen('map') } }} onAuthenticated={authenticated} />}</>
 }
 
 export default App
