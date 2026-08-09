@@ -63,7 +63,7 @@ create policy "Profiles are self-editable" on public.profiles for update using (
 create policy "Ticks are owned" on public.user_ticks for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Saves are owned" on public.user_saves for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Approved and owned comments are readable" on public.comments for select using (status = 'approved' or auth.uid() = user_id);
-create policy "Comments are attributable" on public.comments for insert with check (auth.uid() = user_id);
+create policy "Comments are attributable" on public.comments for insert with check (auth.uid() = user_id and status = 'pending');
 
 -- People may edit their display name, but never promote their own role.
 revoke update on public.profiles from anon, authenticated;
