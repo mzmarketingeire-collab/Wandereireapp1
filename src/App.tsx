@@ -8,6 +8,7 @@ import {
   UserRound, Waves, X,
 } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
+import { Navigate, Route, Routes, matchPath, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import './App.css'
 
@@ -515,8 +516,20 @@ function ViewLoading() {
   return <main className="app"><div className="map-loading" role="status"><span/>Loading…</div></main>
 }
 
+function PlaceRoute({ places: allPlaces, loading, children }: { places: Place[]; loading: boolean; children: (place: Place) => React.ReactNode }) {
+  const { id } = useParams()
+  const numericId = Number(id)
+  const place = Number.isInteger(numericId) ? allPlaces.find((item) => item.id === numericId) : undefined
+  if (place) return children(place)
+  if (loading) return <ViewLoading/>
+  return <Navigate to="/" replace/>
+}
+
 function App() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [locationItems, setLocationItems] = useState<Place[]>(places)
+  const [locationsLoading, setLocationsLoading] = useState(Boolean(supabase))
   const [category, setCategory] = useState<'all' | Category>('all')
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'map' | 'list'>('map')
@@ -525,14 +538,12 @@ function App() {
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState('')
   const [previewPhotoLoading, setPreviewPhotoLoading] = useState(false)
   const previewPhotoCache = useRef<Record<number, { url: string; expiresAt: number }>>({})
-  const [selected, setSelected] = useState<Place | null>(null)
   const [saved, setSaved] = useState<number[]>([])
   const [visited, setVisited] = useState<number[]>([])
   const [copyMessage, setCopyMessage] = useState('Tap to copy address')
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [viewer, setViewer] = useState<Viewer | null>(null)
-  const [screen, setScreen] = useState<'map' | 'profile' | 'admin' | 'reset-password'>(() => window.location.pathname === '/admin' ? 'admin' : window.location.pathname === '/reset-password' ? 'reset-password' : 'map')
   const [showAuth, setShowAuth] = useState(window.location.pathname === '/admin')
   const [pendingAction, setPendingAction] = useState<'save' | 'visit' | null>(null)
   const [pendingPlace, setPendingPlace] = useState<Place | null>(null)
@@ -548,6 +559,10 @@ function App() {
   const [photoBusy, setPhotoBusy] = useState(false)
   const [photoMessage, setPhotoMessage] = useState('')
   const [notice, setNotice] = useState('')
+  const placeMatch = matchPath('/place/:id', location.pathname)
+  const selectedRouteId = placeMatch ? Number(placeMatch.params.id) : null
+  const selected = Number.isInteger(selectedRouteId) ? locationItems.find((place) => place.id === selectedRouteId) ?? null : null
+  const closePlace = () => (location.state as { fromMap?: boolean } | null)?.fromMap ? navigate(-1) : navigate('/', { replace: true })
   const selectedId = useRef<number | null>(null)
   selectedId.current = selected?.id ?? null
   const filtered = useMemo(() => locationItems.filter((p) => (category === 'all' || p.category === category) && (`${p.name} ${p.county}`.toLowerCase().includes(query.toLowerCase()))), [category, query, locationItems])
@@ -604,20 +619,21 @@ function App() {
       if (error) {
         setLocationItems(places)
         setNotice('Live location data could not be loaded. Showing the offline guide for now.')
+        setLocationsLoading(false)
         return
       }
       setLocationItems((data ?? []).map((row) => fromDatabase(row)).filter(hasValidCoordinates))
+      setLocationsLoading(false)
     })
     supabase.auth.getSession().then(({ data }) => loadViewer(data.session))
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
-        window.history.replaceState({}, '', '/reset-password')
-        setScreen('reset-password')
+        navigate('/reset-password', { replace: true })
       }
       void loadViewer(session)
     })
     return () => data.subscription.unsubscribe()
-  }, [])
+  }, [navigate])
 
   useEffect(() => {
     let active = true
@@ -697,19 +713,6 @@ function App() {
     else setPhotos((all) => all.map(update) as UserPhoto[])
   }
 
-  useEffect(() => {
-    const followAddressBar = () => {
-      const path = window.location.pathname
-      setSelected(null)
-      setPreviewPlace(null)
-      if (path === '/admin') { setScreen('admin'); setShowAuth(!viewer) }
-      else if (path === '/reset-password') setScreen('reset-password')
-      else { setScreen('map'); setShowAuth(false) }
-    }
-    window.addEventListener('popstate', followAddressBar)
-    return () => window.removeEventListener('popstate', followAddressBar)
-  }, [viewer])
-
   const uploadPhoto = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!selected || !viewer || !photoFile || !supabase) return
@@ -751,7 +754,7 @@ function App() {
 
   const authenticated = (next: Viewer) => {
     setViewer(next); setShowAuth(false)
-    if (pendingPlace) { setSelected(pendingPlace); setPendingPlace(null) }
+    if (pendingPlace) { navigate(`/place/${pendingPlace.id}`, { state: { fromMap: true } }); setPendingPlace(null) }
     if (pendingAction && selected) {
       if (pendingAction === 'save') setSaved((items) => items.includes(selected.id) ? items : [...items, selected.id])
       else setVisited((items) => items.includes(selected.id) ? items : [...items, selected.id])
@@ -772,24 +775,19 @@ function App() {
       const next = [...viewedIds, place.id]
       setViewedIds(next); sessionStorage.setItem('wander-eire-viewed', JSON.stringify(next))
     }
-    setSelected(place)
+    navigate(`/place/${place.id}`, { state: { fromMap: true } })
   }
 
   const signOut = async () => {
-    setViewer(null); setSaved([]); setVisited([]); setScreen('map')
+    setViewer(null); setSaved([]); setVisited([]); navigate('/')
     if (supabase && !viewer?.demo) await supabase.auth.signOut()
   }
 
-  if (screen === 'admin' && viewer?.role === 'admin') return <Suspense fallback={<ViewLoading/>}><AdminView viewer={viewer} places={locationItems} onPlacesChange={setLocationItems} onBack={() => { window.history.pushState({}, '', '/'); setScreen('map') }} /></Suspense>
-  if (screen === 'admin' && viewer && viewer.role !== 'admin') return <main className="access-denied"><LockKeyhole/><p className="eyebrow">Owner access only</p><h1>This gate needs an admin key.</h1><p>You’re signed in, but this account is not an administrator.</p><div><button className="primary-button" onClick={() => { window.history.pushState({}, '', '/'); setScreen('map') }}>Back to the map</button><button className="text-button" onClick={signOut}>Sign out</button></div></main>
-  if (screen === 'profile' && viewer) return <Suspense fallback={<ViewLoading/>}><ProfileView viewer={viewer} places={locationItems} saved={saved} visited={visited} onOpen={(place) => { setSelected(place); setScreen('map') }} onBack={() => setScreen('map')} onAdmin={() => { window.history.pushState({}, '', '/admin'); setScreen('admin') }} onSignOut={signOut} onViewerChange={setViewer} /></Suspense>
-  if (screen === 'reset-password') return <Suspense fallback={<ViewLoading/>}><ResetPasswordView onDone={() => { window.history.replaceState({}, '', '/'); setScreen(viewer ? 'profile' : 'map') }} /></Suspense>
-
-  if (selected) {
+  const detailView = selected ? (() => {
     const cat = categories[selected.category]
-    return <><main className="app detail" aria-hidden={showAuth ? 'true' : undefined} style={{ '--accent': cat.color } as React.CSSProperties}>
+    return <main className="app detail" aria-hidden={showAuth ? 'true' : undefined} style={{ '--accent': cat.color } as React.CSSProperties}>
       {notice && <p className="app-notice" role="status">{notice}</p>}
-      <button className="round-button detail-back" onClick={() => setSelected(null)} aria-label="Back to map"><ArrowLeft /></button>
+      <button className="round-button detail-back" onClick={closePlace} aria-label="Back to map"><ArrowLeft /></button>
       <section className="detail__content">
         <div className="detail__category"><CategoryIcon category={selected.category} size={18}/><span>{cat.label}</span><i/>{selected.county}, Ireland</div>
         <header className="detail__heading">
@@ -835,14 +833,14 @@ function App() {
         </div>
       </section>
       <PhotoCarousel photos={officialPhotos} place={selected} onImageError={(photo) => void refreshPhoto(photo, true)}/>
-    </main>{showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthenticated={authenticated} />}</>
-  }
+    </main>
+  })() : <ViewLoading/>
 
-  return <><main className="app" aria-hidden={showAuth ? 'true' : undefined}>
+  const mapView = <main className="app" aria-hidden={showAuth ? 'true' : undefined}>
     {notice && <p className="app-notice" role="status">{notice}</p>}
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Wander Éire home"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a>
-      <div className="topbar__actions"><button className="round-button" onClick={locateUser} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? setScreen('profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
+      <div className="topbar__actions"><button className="round-button" onClick={locateUser} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? navigate('/profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
     </header>
 
     <section className="map-shell" id="top">
@@ -865,7 +863,27 @@ function App() {
       </div>
     </section>
     <footer><span>Made for the long way round.</span><small>Wander Éire · Independent & free</small></footer>
-  </main>{showAuth && <AuthModal admin={screen === 'admin'} onClose={() => { setShowAuth(false); setPendingPlace(null); if (screen === 'admin') { window.history.pushState({}, '', '/'); setScreen('map') } }} onAuthenticated={authenticated} />}</>
+  </main>
+
+  const adminDenied = <main className="access-denied"><LockKeyhole/><p className="eyebrow">Owner access only</p><h1>This gate needs an admin key.</h1><p>You’re signed in, but this account is not an administrator.</p><div><button className="primary-button" onClick={() => navigate('/')}>Back to the map</button><button className="text-button" onClick={signOut}>Sign out</button></div></main>
+  const adminView = viewer?.role === 'admin'
+    ? <Suspense fallback={<ViewLoading/>}><AdminView viewer={viewer} places={locationItems} onPlacesChange={setLocationItems} onBack={() => navigate('/')} /></Suspense>
+    : viewer ? adminDenied : mapView
+  const profileView = viewer
+    ? <Suspense fallback={<ViewLoading/>}><ProfileView viewer={viewer} places={locationItems} saved={saved} visited={visited} onOpen={(place) => navigate(`/place/${place.id}`)} onBack={() => navigate('/')} onAdmin={() => navigate('/admin')} onSignOut={signOut} onViewerChange={setViewer} /></Suspense>
+    : mapView
+
+  return <>
+    <Routes>
+      <Route path="/" element={mapView}/>
+      <Route path="/place/:id" element={<PlaceRoute places={locationItems} loading={locationsLoading}>{() => detailView}</PlaceRoute>}/>
+      <Route path="/profile" element={profileView}/>
+      <Route path="/admin" element={adminView}/>
+      <Route path="/reset-password" element={<Suspense fallback={<ViewLoading/>}><ResetPasswordView onDone={() => navigate(viewer ? '/profile' : '/', { replace: true })} /></Suspense>}/>
+      <Route path="*" element={<Navigate to="/" replace/>}/>
+    </Routes>
+    {showAuth && <AuthModal admin={location.pathname === '/admin'} onClose={() => { setShowAuth(false); setPendingPlace(null); if (location.pathname === '/admin') navigate('/') }} onAuthenticated={authenticated} />}
+  </>
 }
 
 export default App
