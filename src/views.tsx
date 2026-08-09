@@ -65,7 +65,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
         const photoRows = photosResult.data as UserPhoto[]
         const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
         const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl]))
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
         const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         setPhotoQueue(withUrls)
       }
@@ -73,7 +73,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
         const photoRows = officialResult.data as LocationPhoto[]
         const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
         const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl]))
+        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
         const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
         setOfficialPhotos(withUrls)
       }
