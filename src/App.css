@@ -106,3 +106,12 @@ footer{display:none}
 .reset-view input{width:100%;border:1px solid #d9d4ca;border-radius:10px;background:white;padding:13px 14px;color:var(--ink);outline:0}
 .reset-view input:focus{border-color:var(--green);box-shadow:0 0 0 3px #1f7a4d1f}
 .reset-view form .primary-button{width:100%}
+
+@media(max-width:800px){
+  .topbar__actions .round-button:first-child{display:grid}
+  .filters{padding-right:52px;mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 42px),transparent 100%)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
