@@ -3,8 +3,8 @@ import type { Map as MapLibreMap, Marker as MapLibreMarker, StyleSpecification }
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronLeft, ChevronRight, Compass, Footprints,
-  Landmark, List, LocateFixed, LogOut, Map as MapIcon, MessageCircle, Mountain,
-  LockKeyhole, Navigation, Pencil, Plus, Search, SlidersHorizontal, TentTree, Trash2,
+  Landmark, List, LocateFixed, Map as MapIcon, MessageCircle, Mountain,
+  LockKeyhole, Navigation, Search, SlidersHorizontal, TentTree,
   UserRound, Waves, X,
 } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
