@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Map as MapLibreMap, MapLayerMouseEvent, Marker as MapLibreMarker, StyleSpecification } from 'maplibre-gl'
+import type { Map as MapLibreMap, Marker as MapLibreMarker, StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
-  ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronLeft, ChevronRight, Compass, Euro, Footprints,
+  ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronLeft, ChevronRight, Compass, Footprints,
   Landmark, List, LocateFixed, LogOut, Map as MapIcon, MessageCircle, Mountain,
   LockKeyhole, Navigation, Pencil, Plus, Search, SlidersHorizontal, TentTree, Trash2,
   UserRound, Waves, X,
 } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
-import {
-  MARKET_COLORS, RENTAL_BOUNDARY_URL, propertyMarketByBoundary, rentalMarketFillExpression,
-  type MarketArea, type MarketBand,
-} from './data/propertyMarket'
 import './App.css'
 
 type Category = 'trail' | 'historic' | 'viewpoint' | 'beach' | 'camp'
@@ -33,15 +29,6 @@ const categories = {
   beach: { label: 'Beaches', color: '#1c7293', icon: Waves },
   camp: { label: 'Camping', color: '#6b4a85', icon: TentTree },
 } satisfies Record<Category, { label: string; color: string; icon: typeof Footprints }>
-
-const marketBandLabels: Record<MarketBand, string> = {
-  'high-yield': 'Strong indicative yield',
-  'high-price': 'Higher purchase price',
-  'medium-price': 'Mid-range purchase price',
-  'lower-price': 'Lower purchase price',
-}
-
-const euro = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
 const mapLibraryPromise = import('maplibre-gl')
 
@@ -244,25 +231,19 @@ function CategoryIcon({ category, size = 18 }: { category: Category; size?: numb
   return <Icon size={size} strokeWidth={2.4} aria-hidden="true" />
 }
 
-function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect, marketMode, selectedMarket, onMarketSelect }: {
+function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
   places: Place[]
   filtered: Place[]
   selected: Place | null
   focus: [number, number] | null
   onSelect: (p: Place) => void
-  marketMode: boolean
-  selectedMarket: MarketArea | null
-  onMarketSelect: (area: MarketArea) => void
 }) {
   const node = useRef<HTMLDivElement>(null)
   const map = useRef<MapLibreMap | null>(null)
   const mapLibrary = useRef<typeof import('maplibre-gl') | null>(null)
   const markers = useRef<MapLibreMarker[]>([])
-  const marketCallback = useRef(onMarketSelect)
   const [mapReady, setMapReady] = useState(false)
   const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading')
-
-  useEffect(() => { marketCallback.current = onMarketSelect }, [onMarketSelect])
 
   useEffect(() => {
     if (!node.current || map.current) return
@@ -320,72 +301,6 @@ function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect, mar
   useEffect(() => {
     if (focus && map.current && mapReady) map.current.flyTo({ center: focus, zoom: 10, duration: 1200 })
   }, [focus, mapReady])
-
-  useEffect(() => {
-    const instance = map.current
-    if (!instance || mapStatus !== 'ready') return
-    if (!marketMode && !instance.getSource('rental-market')) return
-
-    if (!instance.getSource('rental-market')) {
-      instance.addSource('rental-market', {
-        type: 'geojson',
-        data: RENTAL_BOUNDARY_URL,
-        attribution: '© Tailte Éireann',
-      })
-      const beforeLayer = instance.getLayer('great-britain-muted') ? 'great-britain-muted' : undefined
-      instance.addLayer({
-        id: 'rental-market-fill',
-        type: 'fill',
-        source: 'rental-market',
-        paint: {
-          'fill-color': rentalMarketFillExpression as never,
-          'fill-opacity': 0.62,
-        },
-      }, beforeLayer)
-      instance.addLayer({
-        id: 'rental-market-line',
-        type: 'line',
-        source: 'rental-market',
-        paint: { 'line-color': '#fffdf5', 'line-opacity': 0.9, 'line-width': 1.2 },
-      }, beforeLayer)
-      instance.addLayer({
-        id: 'rental-market-highlight',
-        type: 'line',
-        source: 'rental-market',
-        filter: ['==', ['get', 'ENG_NAME_VALUE'], ''],
-        paint: { 'line-color': '#1d2a22', 'line-width': 3.2 },
-      }, beforeLayer)
-    }
-
-    const visibility = marketMode ? 'visible' : 'none'
-    ;['rental-market-fill', 'rental-market-line', 'rental-market-highlight'].forEach((id) => {
-      if (instance.getLayer(id)) instance.setLayoutProperty(id, 'visibility', visibility)
-    })
-    if (!marketMode) return
-
-    const selectMarket = (event: MapLayerMouseEvent) => {
-      const boundaryName = String(event.features?.[0]?.properties?.ENG_NAME_VALUE ?? '')
-      const area = propertyMarketByBoundary.get(boundaryName)
-      if (area) marketCallback.current(area)
-    }
-    const showPointer = () => { instance.getCanvas().style.cursor = 'pointer' }
-    const clearPointer = () => { instance.getCanvas().style.cursor = '' }
-    instance.on('click', 'rental-market-fill', selectMarket)
-    instance.on('mouseenter', 'rental-market-fill', showPointer)
-    instance.on('mouseleave', 'rental-market-fill', clearPointer)
-    return () => {
-      instance.off('click', 'rental-market-fill', selectMarket)
-      instance.off('mouseenter', 'rental-market-fill', showPointer)
-      instance.off('mouseleave', 'rental-market-fill', clearPointer)
-      clearPointer()
-    }
-  }, [mapStatus, marketMode])
-
-  useEffect(() => {
-    const instance = map.current
-    if (!instance?.getLayer('rental-market-highlight')) return
-    instance.setFilter('rental-market-highlight', ['==', ['get', 'ENG_NAME_VALUE'], selectedMarket?.boundaryName ?? ''])
-  }, [selectedMarket])
 
   return <>
     <div ref={node} className="map-canvas" aria-label="Map of places across Ireland" />
@@ -790,8 +705,6 @@ function App() {
   const [category, setCategory] = useState<'all' | Category>('all')
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'map' | 'list'>('map')
-  const [marketMode, setMarketMode] = useState(false)
-  const [selectedMarket, setSelectedMarket] = useState<MarketArea | null>(null)
   const [mapFocus, setMapFocus] = useState<[number, number] | null>(null)
   const [previewPlace, setPreviewPlace] = useState<Place | null>(null)
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState('')
@@ -1045,26 +958,12 @@ function App() {
       </div>
 
       <div className="map-area">
-        <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} onSelect={setPreviewPlace} marketMode={marketMode} selectedMarket={selectedMarket} onMarketSelect={setSelectedMarket} />
+        <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} onSelect={setPreviewPlace} />
         {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)}/>}
         {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
         {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />)}</div>}
-        {!query && view === 'map' && <button className={`market-toggle ${marketMode ? 'active' : ''}`} aria-pressed={marketMode} onClick={() => { setPreviewPlace(null); setSelectedMarket(null); setMarketMode((active) => !active) }}><Euro size={17}/>Rental value</button>}
-        <button className="view-toggle" onClick={() => { setPreviewPlace(null); setSelectedMarket(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
-        {!query && view === 'map' && !previewPlace && !marketMode && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
-        {!query && view === 'map' && marketMode && !previewPlace && <aside className="market-insight" aria-live="polite">
-          {selectedMarket ? <>
-            <div className="market-insight__top"><div><p className="eyebrow">Republic rental snapshot</p><h2>{selectedMarket.name}</h2></div><button onClick={() => setSelectedMarket(null)} aria-label="Close area details"><X/></button></div>
-            <span className="market-band" style={{ '--market-color': MARKET_COLORS[selectedMarket.band] } as React.CSSProperties}>{marketBandLabels[selectedMarket.band]}</span>
-            <div className="market-metrics"><div><small>Median sale price</small><strong>{euro.format(selectedMarket.salePrice)}</strong></div><div><small>New-tenancy rent</small><strong>{euro.format(selectedMarket.monthlyRent)}<em>/mo</em></strong></div><div><small>Indicative gross yield</small><strong>{selectedMarket.grossYield.toFixed(1)}%</strong></div></div>
-            <button className="market-back" onClick={() => setSelectedMarket(null)}>See colour key</button>
-          </> : <>
-            <div className="market-insight__top"><div><p className="eyebrow">Republic rental snapshot</p><h2>Price & rental value</h2></div><button onClick={() => setMarketMode(false)} aria-label="Close rental value layer"><X/></button></div>
-            <p className="market-intro">Tap a coloured area to compare its sale price, new-tenancy rent and indicative gross yield.</p>
-            <div className="market-legend"><span><i style={{ background: MARKET_COLORS['high-price'] }}/>€400k+ sale price</span><span><i style={{ background: MARKET_COLORS['medium-price'] }}/>€300k–€399k</span><span><i style={{ background: MARKET_COLORS['lower-price'] }}/>Under €300k</span><span><i style={{ background: MARKET_COLORS['high-yield'] }}/>6%+ gross yield</span></div>
-          </>}
-          <p className="market-note">CSO prices: 12 months to May 2026 · RTB rents: Q4 2025. Gross yield is rent × 12 ÷ price, before costs, tax, vacancy or finance. Green overrides the price band. Republic data only; this is a guide, not financial advice.</p>
-        </aside>}
+        <button className="view-toggle" onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
+        {!query && view === 'map' && !previewPlace && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
       </div>
     </section>
     <footer><span>Made for the long way round.</span><small>Wander Éire · Independent & free</small></footer>
