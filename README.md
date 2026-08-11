@@ -47,6 +47,8 @@ Run these files in the Supabase SQL Editor, in order:
 
 The final security step limits profile edits to `display_name`, so a normal user cannot turn themselves into an administrator.
 
+Content batches (e.g. `supabase/locations-batch-2.sql`) can be run any time afterwards to seed more locations — each upserts by `id`, so re-running is safe.
+
 In Supabase **Authentication → URL Configuration**, use `http://localhost:5173` as the local Site URL and add `http://localhost:5173/**` as a local redirect URL. Add the production site and `/reset-password` redirect when the app is deployed.
 
 To make an existing account an administrator, run this in the SQL Editor with the correct email:
