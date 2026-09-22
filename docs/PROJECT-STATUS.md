@@ -264,3 +264,97 @@ Fresh storage-trial checks are recorded above and in `MAP-STORAGE-TRIAL.md`.
 Current main-app preview: `http://127.0.0.1:5174/`; trial at `/geo/trial/`.
 Port 5173 was already occupied when starting this preview. Auth redirect flows on
 5174 were not retested and may need an allowed local redirect URL.
+
+## 2026-09-22 — Repo/Cloudflare re-link and MapLibre pins fix
+
+Session summary for future reference. Live app: https://wander-eire.markhoare28.workers.dev/
+
+### What happened
+
+The old GitHub repo and (separately) part of the Cloudflare setup were deleted by
+Mark outside of any session. This session rebuilt the deployment pipeline from
+scratch and fixed a real product bug along the way.
+
+1. Local codebase had 226 files of uncommitted work (3D map, topography, terrain
+   hardening) that had never been pushed. Committed as `19fac60`.
+2. Created a fresh GitHub repo: https://github.com/mzmarketingeire-collab/Wandereireapp1
+   Pushed via HTTPS using a user-supplied classic PAT embedded in the remote URL
+   for the push only, then reset `origin` back to the plain HTTPS URL afterward
+   (the token is never stored in `.git/config` or committed anywhere).
+3. Reconnected Cloudflare's native git integration ("Workers Builds") to the new
+   repo/branch (`master`), build command `npm run build`, deploy command
+   `npx wrangler deploy`.
+4. Root-caused the map showing a plain fallback style instead of MapTiler
+   satellite/terrain: the Cloudflare Workers Build had no build-time env vars.
+   `.env.local` is gitignored and only exists on Mark's machine, but Vite bakes
+   `VITE_*` vars in at build time, and the build runs on Cloudflare's own
+   servers. Fixed by adding `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and
+   `VITE_MAPTILER_API_KEY` under Cloudflare dashboard → wander-eire → Settings →
+   Builds → "Variables and Secrets", then triggering a rebuild.
+5. Map then loaded with the correct style but got stuck on "Loading the map..."
+   forever, with zero pins. Root cause was a two-file chained missing-asset bug:
+   - MapLibre GL JS resolves its own web-worker script URL **dynamically at
+     runtime** (`new URL(\`./${filename}\`, import.meta.url)`), which Vite's
+     static bundler cannot detect, so `maplibre-gl-worker.mjs` was never copied
+     into the production build. Cloudflare's SPA fallback
+     (`not_found_handling: 'single-page-application'`) then silently served
+     `index.html` (200, `text/html`) for that missing asset instead of a 404,
+     which masked the bug until the network request's content-type was checked.
+   - Fixed by copying `node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs`
+     verbatim into `public/assets/maplibre-gl-worker.mjs` (Vite's `public/` dir
+     is copied to the build output root unchanged). Commit `54cf48f`.
+   - That worker script itself has a static import of a second file,
+     `maplibre-gl-shared.mjs` (MapLibre's shared code-splitting chunk), which
+     had the exact same problem and also needed to be shipped by hand. Fixed by
+     copying `node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs` into
+     `public/assets/maplibre-gl-shared.mjs`. Commit `574a1f2`.
+   - Confirmed fixed by clearing the app's service worker (`public/sw.js` caches
+     `/assets/*` cache-first, which was serving a stale broken response even
+     after the server-side fix deployed) and hard-reloading: the map now loads
+     the MapTiler satellite/terrain style and all 122 places render as
+     clusters (32 counties).
+
+### Diagnostic techniques that worked (reusable for next time)
+
+- `fetch('/assets/whatever.mjs').then(r => r.headers.get('content-type'))` in
+  the browser console to catch an SPA-fallback 404 masquerading as a 200 HTML
+  response.
+- React Fiber introspection via `el.__reactFiber$...` DOM properties to read
+  component state/props directly from the console without React DevTools
+  (used to confirm `mapReady` was `true` while `map.isStyleLoaded()` was
+  `false`, isolating the bug to the clustering worker rather than React state).
+- `new Worker('/assets/maplibre-gl-worker.mjs', { type: 'module' })` run
+  directly in console to catch the worker's own module-evaluation error.
+- `grep -o 'from"\./[a-zA-Z0-9_.-]*"' <bundle>` on a MapLibre dist file to find
+  further static imports/chained dependencies before assuming a file is a safe
+  terminal copy target.
+- Clearing service workers/caches before re-testing any deploy:
+  `navigator.serviceWorker.getRegistrations()` → unregister each, then
+  `caches.keys()` → delete each. Always do this before concluding a fix
+  didn't work.
+
+### Known constraints carried into future sessions
+
+- Local `npm run build` / `wrangler deploy` cannot run in this sandboxed
+  Linux environment (native binary mismatches: rolldown for Vite, workerd for
+  wrangler). Cloudflare's own git-based "Workers Builds" CI is the only
+  working deploy path from here — push to `master` on the GitHub repo above
+  and Cloudflare builds/deploys automatically.
+- `api.cloudflare.com` and most non-github.com hosts are blocked by network
+  policy from both the cloud container and the local device shell, so the
+  Cloudflare REST API cannot be used directly; verification/config changes on
+  Cloudflare go through browser automation (Claude in Chrome) against the
+  dashboard instead.
+- Budget constraint remains €0 upfront / €0 ongoing (see AGENTS.md). R2 is not
+  activated. Don't enable paid services without explicit sign-off.
+- If any future MapLibre/Vite dependency upgrade changes worker filenames,
+  re-check `node_modules/maplibre-gl/dist/*.mjs` for new dynamically-resolved
+  worker/shared chunks and re-mirror them into `public/assets/`.
+
+### Status
+
+Deployment pipeline is fully working end-to-end (push to GitHub → Cloudflare
+Workers Build → live). Map, terrain, and all 122 place pins render correctly
+on the live site. Original SEO/tracking-stack work (Google Search Console,
+SerpBear, analytics, Astro subdomain article site for county-by-county
+content) has not been started yet and is the next planned phase.
