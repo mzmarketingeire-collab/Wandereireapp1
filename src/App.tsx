@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import type { Map as MapLibreMap, Marker as MapLibreMarker, StyleSpecification } from 'maplibre-gl'
+import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
-  ArrowLeft, Binoculars, Bookmark, Camera, Check, ChevronLeft, ChevronRight, Compass, Footprints,
+  ArrowLeft, Binoculars, Bookmark, Check, ChevronLeft, ChevronRight, Compass, Footprints,
   Landmark, List, LocateFixed, Map as MapIcon, MessageCircle, Mountain,
   LockKeyhole, Navigation, Search, SlidersHorizontal, TentTree,
   UserRound, Waves, X,
@@ -10,7 +10,10 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import { Navigate, Route, Routes, matchPath, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
+import { IRELAND_VIEW, IRELAND_CAMERA, landscapeRegions } from './map/ireland'
+import { makeLandscapeStyle } from './map/landscape-style'
 import './App.css'
+import './map/immersive.css'
 
 export type Category = 'trail' | 'historic' | 'viewpoint' | 'beach' | 'camp'
 export type Place = {
@@ -20,11 +23,26 @@ export type Place = {
 }
 
 export type Comment = { id: number; user_id: string; location_id: number; body: string; status: 'pending' | 'approved' | 'rejected'; created_at: string; author?: string }
-export type UserPhoto = { id: number; user_id: string; location_id: number; object_path: string; caption: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string; url?: string; expiresAt?: number }
-export type LocationPhoto = { id: number; location_id: number; object_path: string; position: number; created_at: string; url?: string; expiresAt?: number }
+export type LocationPhoto = {
+  id: number; location_id: number; object_path: string; position: number; created_at: string
+  bucket_id?: string; creator?: string | null; source_url?: string | null
+  license_name?: string | null; license_url?: string | null; url?: string; expiresAt?: number
+}
 
 const SIGNED_URL_TTL_SECONDS = 3600
 const signedUrlExpiresAt = () => Date.now() + SIGNED_URL_TTL_SECONDS * 1000
+export const OFFICIAL_PHOTO_BUCKET = 'official-location-photos'
+
+const resolveOfficialPhoto = async (photo: LocationPhoto) => {
+  if (!supabase) return photo
+  const bucket = photo.bucket_id || 'location-photos'
+  if (bucket === OFFICIAL_PHOTO_BUCKET) {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(photo.object_path)
+    return { ...photo, url: data.publicUrl, expiresAt: Number.MAX_SAFE_INTEGER }
+  }
+  const { data } = await supabase.storage.from(bucket).createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
+  return { ...photo, url: data?.signedUrl, expiresAt: signedUrlExpiresAt() }
+}
 
 export const categories = {
   trail: { label: 'Trails', color: '#1f7a4d', icon: Footprints },
@@ -34,165 +52,103 @@ export const categories = {
   camp: { label: 'Camping', color: '#6b4a85', icon: TentTree },
 } satisfies Record<Category, { label: string; color: string; icon: typeof Footprints }>
 
-const greatBritainMask = {
-  type: 'Feature' as const,
-  properties: { name: 'Great Britain' },
-  geometry: {
-    type: 'Polygon' as const,
-    coordinates: [[[-3.093831, 53.404547], [-3.09208, 53.404441], [-2.945009, 53.985], [-3.614701, 54.600937], [-3.630005, 54.615013], [-4.844169, 54.790971], [-5.082527, 55.061601], [-4.719112, 55.508473], [-5.047981, 55.783986], [-5.586398, 55.311146], [-5.644999, 56.275015], [-6.149981, 56.78501], [-5.786825, 57.818848], [-5.009999, 58.630013], [-4.211495, 58.550845], [-3.005005, 58.635], [-4.073828, 57.553025], [-3.055002, 57.690019], [-1.959281, 57.6848], [-2.219988, 56.870017], [-3.119003, 55.973793], [-2.085009, 55.909998], [-2.005676, 55.804903], [-1.114991, 54.624986], [-0.430485, 54.464376], [0.184981, 53.325014], [0.469977, 52.929999], [1.681531, 52.73952], [1.559988, 52.099998], [1.050562, 51.806761], [1.449865, 51.289428], [0.550334, 50.765739], [-0.787517, 50.774989], [-2.489998, 50.500019], [-2.956274, 50.69688], [-3.617448, 50.228356], [-4.542508, 50.341837], [-5.245023, 49.96], [-5.776567, 50.159678], [-4.30999, 51.210001], [-3.414851, 51.426009], [-3.422719, 51.426848], [-4.984367, 51.593466], [-5.267296, 51.9914], [-4.222347, 52.301356], [-4.770013, 52.840005], [-4.579999, 53.495004], [-3.093831, 53.404547]]],
-  },
+
+const placeFeatures = (items: Place[]) => ({
+  type: 'FeatureCollection' as const,
+  features: items.map((place) => ({
+    type: 'Feature' as const,
+    id: place.id,
+    properties: {
+      id: place.id,
+      name: place.name,
+      category: place.category,
+    },
+    geometry: {
+      type: 'Point' as const,
+      coordinates: place.coordinates,
+    },
+  })),
+})
+
+const addPlaceLayers = (instance: MapLibreMap, items: Place[]) => {
+  instance.addSource('places', {
+    type: 'geojson',
+    data: placeFeatures(items),
+    cluster: true,
+    clusterMaxZoom: 11,
+    clusterRadius: 56,
+  })
+  instance.addLayer({
+    id: 'place-clusters',
+    type: 'circle',
+    source: 'places',
+    filter: ['has', 'point_count'],
+    paint: {
+      'circle-color': ['step', ['get', 'point_count'], '#356b4b', 10, '#245a3c', 25, '#173f2a'],
+      'circle-radius': ['step', ['get', 'point_count'], 19, 10, 24, 25, 29],
+      'circle-stroke-color': '#fbf3e7',
+      'circle-stroke-width': 3,
+      'circle-opacity': 0.96,
+    },
+  })
+  instance.addLayer({
+    id: 'place-cluster-counts',
+    type: 'symbol',
+    source: 'places',
+    filter: ['has', 'point_count'],
+    layout: {
+      'text-field': ['get', 'point_count_abbreviated'],
+      'text-font': ['Open Sans Bold', 'Noto Sans Bold'],
+      'text-size': 12,
+    },
+    paint: {
+      'text-color': '#ffffff',
+    },
+  })
+  instance.addLayer({
+    id: 'place-points',
+    type: 'circle',
+    source: 'places',
+    filter: ['!', ['has', 'point_count']],
+    paint: {
+      'circle-color': [
+        'match', ['get', 'category'],
+        'trail', categories.trail.color,
+        'historic', categories.historic.color,
+        'viewpoint', categories.viewpoint.color,
+        'beach', categories.beach.color,
+        'camp', categories.camp.color,
+        '#1f7a4d',
+      ],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 5, 8, 10, 12, 14],
+      'circle-stroke-color': '#fbf3e7',
+      'circle-stroke-width': 3,
+      'circle-opacity': 0.98,
+    },
+  })
+  instance.addLayer({
+    id: 'place-labels',
+    type: 'symbol',
+    source: 'places',
+    minzoom: 10,
+    filter: ['!', ['has', 'point_count']],
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-font': ['Open Sans Semi Bold', 'Noto Sans Semi Bold'],
+      'text-size': 11,
+      'text-offset': [0, 1.9],
+      'text-anchor': 'top',
+      'text-max-width': 12,
+      'text-optional': true,
+    },
+    paint: {
+      'text-color': '#1e2a22',
+      'text-halo-color': 'rgba(251, 243, 231, 0.96)',
+      'text-halo-width': 1.8,
+    },
+  })
 }
 
-const makeFastMapStyle = (mapTilerKey?: string): StyleSpecification => {
-  const usingMapTiler = Boolean(mapTilerKey)
-  const encodedKey = usingMapTiler ? encodeURIComponent(mapTilerKey!) : ''
-  const tiles = usingMapTiler
-    ? [`https://api.maptiler.com/maps/outdoor-v4/256/{z}/{x}/{y}@2x.webp?key=${encodedKey}`]
-    : ['https://tile.openstreetmap.org/{z}/{x}/{y}.png']
-  const outdoorsLayers: StyleSpecification['layers'] = usingMapTiler ? [
-    {
-      id: 'contours-soft',
-      type: 'line',
-      source: 'contours',
-      'source-layer': 'contour',
-      minzoom: 9,
-      filter: ['all', ['!', ['in', ['get', 'nth_line'], ['literal', [5, 10]]]], ['!', ['has', 'glacier']]],
-      paint: {
-        'line-color': '#9b8f69',
-        'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.2, 13, 0.34, 16, 0.42],
-        'line-width': 0.7,
-      },
-    },
-    {
-      id: 'contours-index',
-      type: 'line',
-      source: 'contours',
-      'source-layer': 'contour',
-      minzoom: 9,
-      filter: ['all', ['in', ['get', 'nth_line'], ['literal', [5, 10]]], ['!', ['has', 'glacier']]],
-      paint: {
-        'line-color': '#756b4d',
-        'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.32, 14, 0.5],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 14, 1.2],
-      },
-    },
-    {
-      id: 'hiking-route-casing',
-      type: 'line',
-      source: 'outdoor-routes',
-      'source-layer': 'trail',
-      minzoom: 9,
-      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking'], true, false]],
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': 'rgba(255, 253, 246, 0.96)',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 2.4, 13, 4.4, 17, 6.5],
-      },
-    },
-    {
-      id: 'hiking-routes',
-      type: 'line',
-      source: 'outdoor-routes',
-      'source-layer': 'trail',
-      minzoom: 9,
-      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking'], true, false]],
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': ['match', ['get', 'color'], 'blue', '#367eb5', 'green', '#4d8a62', 'yellow', '#c79a2f', 'black', '#5a544b', '#c6533f'],
-        'line-opacity': 0.92,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.15, 13, 2.1, 17, 3.2],
-      },
-    },
-    {
-      id: 'cycling-routes',
-      type: 'line',
-      source: 'outdoor-routes',
-      'source-layer': 'trail',
-      minzoom: 9,
-      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'class'], 'bicycle']],
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': '#276ea2',
-        'line-opacity': 0.92,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.25, 14, 2.25, 17, 3],
-        'line-dasharray': [2, 1.4],
-      },
-    },
-    {
-      id: 'trail-labels',
-      type: 'symbol',
-      source: 'outdoor-routes',
-      'source-layer': 'trail',
-      minzoom: 12,
-      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['match', ['get', 'class'], ['foot', 'hiking', 'bicycle'], true, false]],
-      layout: {
-        'symbol-placement': 'line',
-        'symbol-spacing': 360,
-        'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name'], ['get', 'ref']],
-        'text-font': ['Open Sans Semi Bold', 'Noto Sans Semi Bold'],
-        'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 12],
-        'text-letter-spacing': 0.02,
-      },
-      paint: {
-        'text-color': ['match', ['get', 'class'], 'bicycle', '#1f5f8c', '#8d3b2d'],
-        'text-halo-color': 'rgba(255, 253, 246, 0.96)',
-        'text-halo-width': 1.8,
-      },
-    },
-  ] : []
-
-  return {
-    version: 8,
-    ...(usingMapTiler ? { glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${encodedKey}` } : {}),
-    sources: {
-      'base-map': {
-        type: 'raster',
-        tiles,
-        tileSize: 256,
-        minzoom: 0,
-        maxzoom: 18,
-        attribution: usingMapTiler
-          ? '<a href="https://www.maptiler.com/copyright/">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
-          : '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
-      },
-      ...(usingMapTiler ? {
-        contours: { type: 'vector' as const, url: `https://api.maptiler.com/tiles/contours-v2/tiles.json?key=${encodedKey}` },
-        'outdoor-routes': { type: 'vector' as const, url: `https://api.maptiler.com/tiles/outdoor/tiles.json?key=${encodedKey}` },
-      } : {}),
-      'great-britain-mask': { type: 'geojson', data: greatBritainMask },
-    },
-    layers: [
-      { id: 'sea', type: 'background', paint: { 'background-color': '#6fb9df' } },
-      {
-        id: 'outdoor-map',
-        type: 'raster',
-        source: 'base-map',
-        paint: {
-          'raster-opacity': 1,
-          'raster-saturation': -0.02,
-          'raster-contrast': 0.1,
-          'raster-brightness-min': 0.04,
-          'raster-brightness-max': 1,
-          'raster-resampling': 'linear',
-          'raster-fade-duration': 180,
-        },
-      },
-      ...outdoorsLayers,
-      {
-        id: 'great-britain-muted',
-        type: 'fill',
-        source: 'great-britain-mask',
-        paint: { 'fill-color': '#aeb1ad', 'fill-opacity': 1 },
-      },
-      {
-        id: 'great-britain-edge',
-        type: 'line',
-        source: 'great-britain-mask',
-        paint: { 'line-color': '#898e88', 'line-width': 1.2 },
-      },
-    ],
-  }
-}
 
 const places: Place[] = [
   { id: 1, name: 'Glendalough Spinc Trail', county: 'Wicklow', category: 'trail', coordinates: [-6.327, 53.006], cost: 'Free', distance: '9.5 km loop', kicker: 'A high trail above two glacial lakes', description: 'Climb through the pine forest to a sweeping boardwalk over the Spinc ridge, with the Upper Lake opening below you and the Wicklow Mountains beyond.', address: 'Upper Lake Car Park, Glendalough, Co. Wicklow', parking: 'Paid parking at the Upper Lake. Arrive before 10am on bright weekends.', facts: ['3–4 hours', 'Hard', 'Dogs on lead'] },
@@ -239,111 +195,233 @@ export function CategoryIcon({ category, size = 18 }: { category: Category; size
   return <Icon size={size} strokeWidth={2.4} aria-hidden="true" />
 }
 
-function MapCanvas({ places: allPlaces, filtered, selected, focus, onSelect }: {
+function MapCanvas({ places: allPlaces, filtered, selected, focus, userPosition, onSelect }: {
   places: Place[]
   filtered: Place[]
   selected: Place | null
   focus: [number, number] | null
-  onSelect: (p: Place) => void
+  userPosition: [number, number] | null
+  onSelect: (p: Place | null) => void
 }) {
   const node = useRef<HTMLDivElement>(null)
   const map = useRef<MapLibreMap | null>(null)
-  const mapLibrary = useRef<typeof import('maplibre-gl') | null>(null)
-  const markers = useRef<Map<number, { marker: MapLibreMarker; el: HTMLButtonElement }>>(new Map())
+  const userMarkerRef = useRef<{ setLngLat: (value: [number, number]) => any; remove: () => void } | null>(null)
+  const placesById = useRef(new Map<number, Place>())
+  const filteredRef = useRef(filtered)
+  const onSelectRef = useRef(onSelect)
   const [mapReady, setMapReady] = useState(false)
   const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const rawMapTilerKey = (import.meta.env.VITE_MAPTILER_API_KEY as string | undefined)?.trim()
+  const [mapTilerAvailable, setMapTilerAvailable] = useState<boolean | null>(rawMapTilerKey ? null : false)
+  const mapTilerKey = rawMapTilerKey && mapTilerAvailable ? rawMapTilerKey : undefined
+  const [threeDimensional, setThreeDimensional] = useState(false)
+  const threeDimensionalRef = useRef(threeDimensional)
+  threeDimensionalRef.current = threeDimensional
+  const [attempt, setAttempt] = useState(0)
+  const [mapMessage, setMapMessage] = useState('')
+  const duration = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1200
+
+  placesById.current = new Map(allPlaces.map((place) => [place.id, place]))
+  filteredRef.current = filtered
+  onSelectRef.current = onSelect
 
   useEffect(() => {
-    if (!node.current || map.current) return
+    let active = true
+    if (!rawMapTilerKey) { setMapTilerAvailable(false); return () => { active = false } }
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 6000)
+    void Promise.all([
+      fetch(`https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=${encodeURIComponent(rawMapTilerKey)}`, { signal: controller.signal }),
+      fetch(`https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${encodeURIComponent(rawMapTilerKey)}`, { signal: controller.signal }),
+    ]).then(([satellite, terrain]) => {
+      if (!active) return
+      setMapTilerAvailable(satellite.ok && terrain.ok)
+    }).catch(() => {
+      if (active) setMapTilerAvailable(false)
+    }).finally(() => {
+      window.clearTimeout(timeout)
+    })
+    return () => { active = false; controller.abort(); window.clearTimeout(timeout) }
+  }, [rawMapTilerKey])
+
+  useEffect(() => {
+    if (!rawMapTilerKey) setThreeDimensional(false)
+    else if (mapTilerAvailable === false) setThreeDimensional(false)
+  }, [rawMapTilerKey, mapTilerAvailable])
+
+  useEffect(() => {
+    if (!node.current || map.current || mapTilerAvailable === null) return
     let cancelled = false
-    const mapTilerKey = import.meta.env.VITE_MAPTILER_API_KEY as string | undefined
-    const mapStyle = makeFastMapStyle(mapTilerKey)
+    let fallingBack = false
+    const providerFailures: number[] = []
+    setMapReady(false)
+    setMapStatus('loading')
+    setMapMessage('')
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) {
+        setMapStatus('error')
+        setMapMessage('The landscape is taking longer to load. You can still browse the list.')
+      }
+    }, 20000)
+    const mapStyle = makeLandscapeStyle(mapTilerKey)
     void import('maplibre-gl').then((library) => {
       if (cancelled || !node.current) return
       const instance = new library.Map({
         container: node.current,
-        bounds: [[-12.1, 50.2], [-3.9, 56.4]],
-        fitBoundsOptions: { padding: 24, maxZoom: 5.9 },
-        maxBounds: [[-13.2, 49.5], [-2.2, 57.25]],
-        minZoom: 4.75, maxZoom: 16,
+        bounds: IRELAND_VIEW,
+        fitBoundsOptions: { padding: { top: 80, bottom: 110, left: 24, right: 24 }, maxZoom: 6.5 },
+        maxBounds: IRELAND_CAMERA,
+        minZoom: 4.5, maxZoom: 16, maxPitch: 65,
         style: mapStyle,
         attributionControl: { compact: true },
         fadeDuration: 0,
+        refreshExpiredTiles: false,
         renderWorldCopies: false,
       })
-      instance.addControl(new library.NavigationControl({ showCompass: false }), 'bottom-right')
-      mapLibrary.current = library
+      instance.addControl(new library.NavigationControl({ showCompass: true, visualizePitch: true }), 'bottom-right')
       map.current = instance
-      setMapReady(true)
+      instance.on('error', (event) => {
+        if (cancelled || event.error?.name === 'AbortError') return
+        if (!mapTilerKey || fallingBack) return
+        const sourceId = (event as typeof event & { sourceId?: string }).sourceId
+        if (sourceId === 'places' || sourceId === 'great-britain-mask') return
+        const now = Date.now()
+        providerFailures.push(now)
+        while (providerFailures[0] < now - 15000) providerFailures.shift()
+        if (providerFailures.length < 4) return
+        fallingBack = true
+        setThreeDimensional(false)
+        setMapTilerAvailable(false)
+      })
+      instance.once('load', () => {
+        if (cancelled) return
+        window.clearTimeout(timeout)
+        setMapStatus('ready')
+      })
       instance.once('style.load', () => {
-        if (!cancelled) setMapStatus('ready')
+        if (cancelled) return
+        addPlaceLayers(instance, filteredRef.current)
+        setMapReady(true)
+
+        instance.on('click', 'place-clusters', async (event) => {
+          const feature = event.features?.[0]
+          const clusterId = Number(feature?.properties?.cluster_id)
+          if (!feature || !Number.isFinite(clusterId) || feature.geometry.type !== 'Point') return
+          const source = instance.getSource('places') as GeoJSONSource
+          const clusterData = filteredRef.current
+          try {
+            const zoom = await source.getClusterExpansionZoom(clusterId)
+            if (cancelled || clusterData !== filteredRef.current) return
+            instance.easeTo({ center: feature.geometry.coordinates as [number, number], zoom, duration: duration() })
+          } catch {
+            // Filtering or unmounting can invalidate a cluster while its worker resolves.
+          }
+        })
+        instance.on('click', 'place-points', (event) => {
+          const id = Number(event.features?.[0]?.properties?.id)
+          const place = placesById.current.get(id)
+          if (place) onSelectRef.current(place)
+        })
+        for (const layer of ['place-clusters', 'place-points']) {
+          instance.on('mouseenter', layer, () => { instance.getCanvas().style.cursor = 'pointer' })
+          instance.on('mouseleave', layer, () => { instance.getCanvas().style.cursor = '' })
+        }
       })
     }).catch(() => {
-      if (!cancelled) setMapStatus('error')
+      if (!cancelled) { setMapStatus('error'); setMapMessage('The map could not start. Use the list to explore places.') }
     })
     return () => {
       cancelled = true
-      markers.current.forEach(({ marker }) => marker.remove())
-      markers.current.clear()
+      window.clearTimeout(timeout)
       map.current?.remove()
       map.current = null
-      mapLibrary.current = null
     }
-  }, [])
+  }, [attempt, mapTilerAvailable, mapTilerKey])
 
   useEffect(() => {
-    if (!map.current || !mapLibrary.current || !mapReady) return
-    const MarkerClass = mapLibrary.current.Marker
-    const placeIds = new Set(allPlaces.map((place) => place.id))
-
-    markers.current.forEach(({ marker }, id) => {
-      if (!placeIds.has(id)) {
-        marker.remove()
-        markers.current.delete(id)
-      }
-    })
-
-    allPlaces.forEach((place) => {
-      if (markers.current.has(place.id)) return
-      const el = document.createElement('button')
-      el.className = 'map-pin'
-      el.style.setProperty('--pin-color', categories[place.category].color)
-      el.setAttribute('aria-label', `Open ${place.name}`)
-      el.innerHTML = `<span>${place.category === 'trail' ? '↟' : place.category === 'historic' ? '⌂' : place.category === 'viewpoint' ? '◉' : place.category === 'beach' ? '≈' : '⌁'}</span>`
-      el.onclick = () => onSelect(place)
-      const marker = new MarkerClass({ element: el }).setLngLat(place.coordinates).addTo(map.current!)
-      markers.current.set(place.id, { marker, el })
-    })
-  }, [allPlaces, mapReady, onSelect])
-
-  const filteredIds = useMemo(() => new Set(filtered.map((place) => place.id)), [filtered])
+    if (!map.current || !mapReady || !mapTilerKey) return
+    const instance = map.current
+    if (threeDimensional) {
+      instance.setLayoutProperty('landscape-shading', 'visibility', 'none')
+      instance.setTerrain({ source: 'terrain-3d', exaggeration: 1.2 })
+    } else {
+      instance.setTerrain(null)
+      instance.setLayoutProperty('landscape-shading', 'visibility', 'visible')
+    }
+    instance.easeTo({ pitch: threeDimensional ? (instance.getZoom() >= 9 ? 58 : 28) : 0, duration: duration() })
+  }, [threeDimensional, mapReady, mapTilerKey])
 
   useEffect(() => {
-    markers.current.forEach(({ el }, id) => {
-      const dimmed = !filteredIds.has(id)
-      el.classList.toggle('map-pin--dim', dimmed)
-      el.classList.toggle('map-pin--active', selected?.id === id)
-      if (dimmed) {
-        el.setAttribute('aria-hidden', 'true')
-        el.setAttribute('tabindex', '-1')
+    if (!map.current || !mapReady) return
+    const source = map.current.getSource('places') as GeoJSONSource | undefined
+    source?.setData(placeFeatures(filtered))
+  }, [filtered, mapReady])
+
+  useEffect(() => {
+    if (!map.current || !mapReady) return
+    if (!userPosition) {
+      userMarkerRef.current?.remove()
+      userMarkerRef.current = null
+      return
+    }
+    let cancelled = false
+    void import('maplibre-gl').then((library) => {
+      if (cancelled || !map.current) return
+      if (!userMarkerRef.current) {
+        const markerElement = document.createElement('div')
+        markerElement.className = 'user-location-marker'
+        const marker = new library.Marker({ element: markerElement, anchor: 'center' })
+        marker.setLngLat(userPosition).addTo(map.current)
+        userMarkerRef.current = marker
       } else {
-        el.removeAttribute('aria-hidden')
-        el.removeAttribute('tabindex')
+        userMarkerRef.current.setLngLat(userPosition)
       }
     })
-  }, [filteredIds, selected])
+    return () => { cancelled = true }
+  }, [userPosition, mapReady])
+
+  useEffect(() => {
+    if (!map.current || !mapReady) return
+    map.current.setPaintProperty('place-points', 'circle-radius', [
+      'interpolate', ['linear'], ['zoom'],
+      4, ['case', ['==', ['get', 'id'], selected?.id ?? -1], 9, 5],
+      8, ['case', ['==', ['get', 'id'], selected?.id ?? -1], 15, 10],
+      12, ['case', ['==', ['get', 'id'], selected?.id ?? -1], 18, 14],
+    ])
+    map.current.setPaintProperty('place-points', 'circle-stroke-width', [
+      'case', ['==', ['get', 'id'], selected?.id ?? -1], 5, 3,
+    ])
+  }, [selected, mapReady])
 
   useEffect(() => {
     if (focus && map.current && mapReady) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      map.current.flyTo({ center: focus, zoom: 10, duration: reduceMotion ? 0 : 1200 })
+      map.current.flyTo({ center: focus, zoom: 12, pitch: threeDimensionalRef.current ? 58 : 0, duration: reduceMotion ? 0 : 1200 })
     }
   }, [focus, mapReady])
 
+  const overview = () => {
+    onSelectRef.current(null)
+    map.current?.fitBounds(IRELAND_VIEW, { padding: { top: 80, bottom: 110, left: 24, right: 24 }, maxZoom: 6.5, pitch: threeDimensional ? 28 : 0, bearing: 0, duration: duration() })
+  }
+
   return <>
     <div ref={node} className="map-canvas" aria-label="Map of places across Ireland" />
+    <div className="landscape-controls" aria-label="Landscape controls">
+      <button onClick={overview} disabled={!mapReady}><Compass size={16}/>Ireland</button>
+      <button aria-pressed={threeDimensional} onClick={() => setThreeDimensional((value) => !value)} disabled={!mapReady || !mapTilerKey}><Mountain size={16}/>{threeDimensional ? '3D on' : '2D view'}</button>
+      <label><span className="sr-only">Explore a landscape</span><select value="" disabled={!mapReady} onChange={(event) => {
+        const region = landscapeRegions.find((item) => item.name === event.target.value)
+        if (region) {
+          onSelectRef.current(null)
+          map.current?.flyTo({ center: region.center, zoom: region.zoom, bearing: region.bearing, pitch: threeDimensional ? 58 : 0, duration: duration() })
+        }
+      }}><option value="" disabled>Explore a region</option>{landscapeRegions.map((region) => <option key={region.name}>{region.name}</option>)}</select></label>
+    </div>
+    {mapTilerKey && <a className="map-provider" href="https://www.maptiler.com/" target="_blank" rel="noreferrer"><img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler"/></a>}
+    {mapTilerAvailable === false && <p className="landscape-fallback" role="status">Basic map · landscape imagery and 3D are unavailable right now.</p>}
     {mapStatus === 'loading' && <div className="map-loading" role="status"><span/>Loading the map…</div>}
-    {mapStatus === 'error' && <div className="map-loading map-loading--error" role="status">The map background is resting. The place pins still work.</div>}
+    {mapStatus === 'error' && <div className="map-loading map-loading--error" role="status">{mapMessage}<button onClick={() => setAttempt((value) => value + 1)}>Retry map</button></div>}
   </>
 }
 
@@ -362,6 +440,7 @@ function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[
     rail.current?.scrollTo({ left: next * (rail.current.clientWidth || 1), behavior: reduceMotion ? 'auto' : 'smooth' })
     setActive(next)
   }
+  const activePhoto = photos[active]
 
   return <aside className="location-gallery" aria-label={`${place.name} photo gallery`}>
     {photos.length ? <>
@@ -373,6 +452,7 @@ function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[
       </div>
       <div className="location-gallery__shade"/>
       <div className="location-gallery__meta"><span>Wander Éire field notes</span><strong>{place.county}</strong></div>
+      {activePhoto?.creator && <a className="location-gallery__credit" href={activePhoto.source_url || activePhoto.license_url || undefined} target="_blank" rel="noreferrer">Photo: {activePhoto.creator}{activePhoto.license_name ? ` · ${activePhoto.license_name}` : ''}</a>}
       {photos.length > 1 && <>
         <div className="location-gallery__arrows"><button onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous photo"><ChevronLeft/></button><button onClick={() => goTo(active + 1)} disabled={active === photos.length - 1} aria-label="Next photo"><ChevronRight/></button></div>
         <div className="location-gallery__dots" aria-label={`Photo ${active + 1} of ${photos.length}`}>{photos.map((photo, index) => <button key={photo.id} className={active === index ? 'active' : ''} onClick={() => goTo(index)} aria-label={`Show photo ${index + 1}`}/>)}</div>
@@ -381,12 +461,13 @@ function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[
   </aside>
 }
 
-export function PlaceRow({ place, onClick }: { place: Place; onClick: () => void }) {
-  return <button className="place-row" onClick={onClick}>
+export function PlaceRow({ place, onClick, onMap }: { place: Place; onClick: () => void; onMap?: () => void }) {
+  const row = <button className="place-row" onClick={onClick}>
     <span className="place-row__icon" style={{ background: categories[place.category].color }}><CategoryIcon category={place.category} /></span>
     <span className="place-row__copy"><strong>{place.name}</strong><small>{place.county} · {place.cost} · {place.distance}</small></span>
     <ChevronRight size={18} aria-hidden="true" />
   </button>
+  return onMap ? <div className="place-result">{row}<button className="place-result__map" onClick={onMap} aria-label={`Explore ${place.name} on the map`}><Mountain size={16}/>Explore landscape</button></div> : row
 }
 
 function PinPreview({ place, photoUrl, loading, onClose, onMore, onImageError }: { place: Place; photoUrl: string; loading: boolean; onClose: () => void; onMore: () => void; onImageError: () => void }) {
@@ -396,9 +477,13 @@ function PinPreview({ place, photoUrl, loading, onClose, onMore, onImageError }:
     <div className={`pin-preview__image ${loading ? 'loading' : ''}`}>
       {photoUrl ? <img src={photoUrl} alt={`Preview of ${place.name}`} loading="lazy" decoding="async" onError={onImageError}/> : !loading && <CategoryIcon category={place.category} size={38}/>}
     </div>
+    <div className="pin-preview__identity">
+      <h2>{place.name}</h2>
+      <p>{place.county}</p>
+    </div>
     <div className="pin-preview__glass">
       <span><CategoryIcon category={place.category} size={15}/>{activity}</span>
-      <button onClick={onMore}>Click for more<ChevronRight size={16}/></button>
+      <button onClick={onMore} aria-label={`View ${place.name} details`}>View place<ChevronRight size={16}/></button>
     </div>
   </aside>
 }
@@ -534,6 +619,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'map' | 'list'>('map')
   const [mapFocus, setMapFocus] = useState<[number, number] | null>(null)
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [previewPlace, setPreviewPlace] = useState<Place | null>(null)
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState('')
   const [previewPhotoLoading, setPreviewPhotoLoading] = useState(false)
@@ -552,12 +638,7 @@ function App() {
   const [commentBusy, setCommentBusy] = useState(false)
   const [commentMessage, setCommentMessage] = useState('')
   const [comments, setComments] = useState<Comment[]>([])
-  const [photos, setPhotos] = useState<UserPhoto[]>([])
   const [officialPhotos, setOfficialPhotos] = useState<LocationPhoto[]>([])
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoCaption, setPhotoCaption] = useState('')
-  const [photoBusy, setPhotoBusy] = useState(false)
-  const [photoMessage, setPhotoMessage] = useState('')
   const [notice, setNotice] = useState('')
   const placeMatch = matchPath('/place/:id', location.pathname)
   const selectedRouteId = placeMatch ? Number(placeMatch.params.id) : null
@@ -584,6 +665,23 @@ function App() {
     copyTimer.current = setTimeout(() => setCopyMessage('Tap to copy address'), 1600)
   }
 
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    let live = true
+    const updatePosition = (position: GeolocationPosition) => {
+      const next: [number, number] = [position.coords.longitude, position.coords.latitude]
+      if (live) setUserPosition(next)
+    }
+    const handleError = () => {
+      // Ignore permission and timeout errors here; the app still works without live travel tracking.
+    }
+    const watchId = navigator.geolocation.watchPosition(updatePosition, handleError, { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 })
+    return () => {
+      live = false
+      navigator.geolocation.clearWatch(watchId)
+    }
+  }, [])
+
   const locateUser = () => {
     const showLocationError = (message: string) => {
       setNotice(message)
@@ -592,7 +690,11 @@ function App() {
     }
     if (!navigator.geolocation) return showLocationError('Location services are unavailable in this browser.')
     navigator.geolocation.getCurrentPosition(
-      (position) => setMapFocus([position.coords.longitude, position.coords.latitude]),
+      (position) => {
+        const next: [number, number] = [position.coords.longitude, position.coords.latitude]
+        setUserPosition(next)
+        setMapFocus(next)
+      },
       (error) => showLocationError(error.code === error.PERMISSION_DENIED
         ? 'Location permission was denied. Enable it in your browser settings to find yourself on the map.'
         : error.code === error.TIMEOUT
@@ -645,12 +747,12 @@ function App() {
     setPreviewPhotoLoading(true)
     void (async () => {
       try {
-        const { data } = await client.from('location_photos').select('object_path').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
+        const { data } = await client.from('location_photos').select('*').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
         if (!data?.object_path) return
-        const signed = await client.storage.from('location-photos').createSignedUrl(data.object_path, SIGNED_URL_TTL_SECONDS)
-        if (signed.data?.signedUrl) {
-          previewPhotoCache.current[previewPlace.id] = { url: signed.data.signedUrl, expiresAt: signedUrlExpiresAt() }
-          if (active) setPreviewPhotoUrl(signed.data.signedUrl)
+        const photo = await resolveOfficialPhoto(data as LocationPhoto)
+        if (photo.url) {
+          previewPhotoCache.current[previewPlace.id] = { url: photo.url, expiresAt: photo.expiresAt ?? signedUrlExpiresAt() }
+          if (active) setPreviewPhotoUrl(photo.url)
         }
       } finally {
         if (active) setPreviewPhotoLoading(false)
@@ -660,33 +762,20 @@ function App() {
   }, [previewPlace])
 
   useEffect(() => {
-    if (!selected || !supabase) { setComments([]); setPhotos([]); setOfficialPhotos([]); return }
+    if (!selected || !supabase) { setComments([]); setOfficialPhotos([]); return }
     const client = supabase
     const selectedPlaceId = selected.id
     let active = true
     const isCurrent = () => active && selectedId.current === selectedPlaceId
-    setComments([]); setPhotos([]); setOfficialPhotos([])
-    setPhotoFile(null); setPhotoCaption(''); setPhotoMessage(''); setCommentMessage('')
+    setComments([]); setOfficialPhotos([]); setCommentMessage('')
     void Promise.all([
       client.from('comments').select('*').eq('location_id', selectedPlaceId).order('created_at'),
-      client.from('user_photos').select('*').eq('location_id', selectedPlaceId).order('created_at'),
       client.from('location_photos').select('*').eq('location_id', selectedPlaceId).order('position'),
-    ]).then(async ([commentsResult, photosResult, officialResult]) => {
+    ]).then(async ([commentsResult, officialResult]) => {
       if (commentsResult.data && isCurrent()) setComments(commentsResult.data as Comment[])
-      if (photosResult.data) {
-        const photoRows = photosResult.data as UserPhoto[]
-        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
-        const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
-        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
-        if (isCurrent()) setPhotos(withUrls)
-      }
       if (officialResult.data) {
         const photoRows = officialResult.data as LocationPhoto[]
-        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
-        const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
-        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
+        const withUrls = await Promise.all(photoRows.map(resolveOfficialPhoto))
         if (isCurrent()) setOfficialPhotos(withUrls.filter((photo) => photo.url))
       }
     })
@@ -695,43 +784,19 @@ function App() {
 
   const refreshPreviewPhoto = async () => {
     if (!previewPlace || !supabase) return
-    const { data: photo } = await supabase.from('location_photos').select('object_path').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
+    const { data: photo } = await supabase.from('location_photos').select('*').eq('location_id', previewPlace.id).eq('position', 1).maybeSingle()
     if (!photo?.object_path) return
-    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
-    if (data?.signedUrl) {
-      previewPhotoCache.current[previewPlace.id] = { url: data.signedUrl, expiresAt: signedUrlExpiresAt() }
-      setPreviewPhotoUrl(data.signedUrl)
+    const resolved = await resolveOfficialPhoto(photo as LocationPhoto)
+    if (resolved.url) {
+      previewPhotoCache.current[previewPlace.id] = { url: resolved.url, expiresAt: resolved.expiresAt ?? signedUrlExpiresAt() }
+      setPreviewPhotoUrl(resolved.url)
     }
   }
 
-  const refreshPhoto = async (photo: UserPhoto | LocationPhoto, official: boolean) => {
-    if (!supabase) return
-    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
-    if (!data?.signedUrl) return
-    const update = (item: UserPhoto | LocationPhoto) => item.id === photo.id ? { ...item, url: data.signedUrl, expiresAt: signedUrlExpiresAt() } : item
-    if (official) setOfficialPhotos((all) => all.map(update) as LocationPhoto[])
-    else setPhotos((all) => all.map(update) as UserPhoto[])
-  }
-
-  const uploadPhoto = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!selected || !viewer || !photoFile || !supabase) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(photoFile.type) || photoFile.size > 8 * 1024 * 1024) {
-      setPhotoMessage('Choose a JPG, PNG or WebP image smaller than 8 MB.'); return
-    }
-    setPhotoBusy(true); setPhotoMessage('')
-    const extension = photoFile.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
-    const objectPath = `${viewer.id}/${selected.id}/${crypto.randomUUID()}.${extension}`
-    const uploadResult = await supabase.storage.from('location-photos').upload(objectPath, photoFile, { contentType: photoFile.type, upsert: false })
-    if (uploadResult.error) { setPhotoMessage('Couldn’t send that photo — try again.'); setPhotoBusy(false); return }
-    const { data, error } = await supabase.from('user_photos').insert({ user_id: viewer.id, location_id: selected.id, object_path: objectPath, caption: photoCaption.trim() || null }).select().single()
-    if (error) {
-      await supabase.storage.from('location-photos').remove([objectPath])
-      setPhotoMessage('Couldn’t save that photo — try again.'); setPhotoBusy(false); return
-    }
-    const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, SIGNED_URL_TTL_SECONDS)
-    setPhotos((all) => [...all, { ...(data as UserPhoto), url: signed.data?.signedUrl, expiresAt: signedUrlExpiresAt() }])
-    setPhotoFile(null); setPhotoCaption(''); setPhotoBusy(false); setPhotoMessage('Submitted — this goes live once we’ve had a look.')
+  const refreshPhoto = async (photo: LocationPhoto) => {
+    const resolved = await resolveOfficialPhoto(photo)
+    if (!resolved.url) return
+    setOfficialPhotos((all) => all.map((item) => item.id === photo.id ? resolved : item))
   }
 
   const toggleRecord = async (kind: 'save' | 'visit', id: number) => {
@@ -766,6 +831,14 @@ function App() {
     setPendingAction(null)
   }
 
+  const explorePlace = (place: Place) => {
+    setQuery('')
+    setView('map')
+    setPreviewPlace(place)
+    setMapFocus([...place.coordinates])
+    navigate('/')
+  }
+
   const openPlace = (place: Place) => {
     setPreviewPlace(null)
     if (!viewer && !viewedIds.includes(place.id) && viewedIds.length >= 3) {
@@ -798,6 +871,7 @@ function App() {
         <div className="detail__actions">
           <button className={visited.includes(selected.id) ? 'active green' : ''} onClick={() => toggleRecord('visit', selected.id)}><Check size={19}/>{visited.includes(selected.id) ? 'Visited' : 'Mark visited'}</button>
           <button className={saved.includes(selected.id) ? 'active amber' : ''} onClick={() => toggleRecord('save', selected.id)}><Bookmark size={18} fill={saved.includes(selected.id) ? 'currentColor' : 'none'}/>{saved.includes(selected.id) ? 'Saved' : 'Save for later'}</button>
+          <button onClick={() => explorePlace(selected)}><Mountain size={18}/>Explore landscape</button>
         </div>
         <div className="detail__essentials"><div><small>Cost</small><strong>{selected.cost}</strong></div><div><small>Time & distance</small><strong>{selected.distance || 'Take your time'}</strong></div></div>
         <div className="fact-strip">{selected.facts.map((fact) => <span key={fact}>{fact}</span>)}</div>
@@ -806,15 +880,6 @@ function App() {
           <section className="detail-section"><p className="eyebrow">Arrival</p><h2>Find your way</h2>
             <button className="address" onClick={() => void copyAddress(selected.address)}><Navigation size={20}/><span><strong>{selected.address}</strong><small>{copyMessage}</small></span></button>
             <div className="parking-note"><span>Parking</span><p>{selected.parking}</p></div>
-          </section>
-          <section className="photo-section">
-            <div><p className="eyebrow">From the community</p><h2>Photos from the road</h2><p>Shared by people who stopped here.</p></div>
-            {photos.length > 0 && <div className="photo-grid">{photos.map((photo) => <figure key={photo.id}>{photo.url && <img src={photo.url} alt={photo.caption || `Visitor view of ${selected.name}`} loading="lazy" decoding="async" onError={() => void refreshPhoto(photo, false)}/>}<figcaption>{photo.status === 'pending' && <small>Pending review</small>}{photo.caption && <span>{photo.caption}</span>}</figcaption></figure>)}</div>}
-            {viewer ? <form className="photo-form" onSubmit={uploadPhoto}>
-              <label className="photo-picker"><Camera/><span><strong>{photoFile ? photoFile.name : 'Add your photo'}</strong><small>JPG, PNG or WebP · up to 8 MB</small></span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}/></label>
-              {photoFile && <><label>Optional caption<input value={photoCaption} maxLength={240} onChange={(event) => setPhotoCaption(event.target.value)} placeholder="A helpful detail about this view"/></label><button className="primary-button" disabled={photoBusy}>{photoBusy ? 'Uploading…' : 'Submit for review'}</button></>}
-              {photoMessage && <p className="photo-message" role="status">{photoMessage}</p>}
-            </form> : <button className="contribute-gate" onClick={() => setShowAuth(true)}><Camera/><span><strong>Got a photo from here?</strong><small>Sign in to add it to the guide.</small></span><ChevronRight/></button>}
           </section>
           <section className="community">
             <p className="eyebrow">Local knowledge</p><h2>Notes from the trail</h2><p className="community__intro">Useful details shared by people who’ve been there.</p>
@@ -832,11 +897,11 @@ function App() {
           </section>
         </div>
       </section>
-      <PhotoCarousel photos={officialPhotos} place={selected} onImageError={(photo) => void refreshPhoto(photo, true)}/>
+      <PhotoCarousel photos={officialPhotos} place={selected} onImageError={(photo) => void refreshPhoto(photo)}/>
     </main>
   })() : <ViewLoading/>
 
-  const mapView = <main className="app" aria-hidden={showAuth ? 'true' : undefined}>
+  const mapView = <main className="app landscape-app" aria-hidden={showAuth ? 'true' : undefined}>
     {notice && <p className="app-notice" role="status">{notice}</p>}
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Wander Éire home"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a>
@@ -845,7 +910,7 @@ function App() {
 
     <section className="map-shell" id="top">
       <div className="map-ui">
-        <div className="intro"><p className="eyebrow">Your next story starts here</p><h1>Go somewhere<br/><em>worth remembering.</em></h1></div>
+        <div className="intro"><p className="eyebrow">An island. A thousand ways to feel it.</p><h1>Follow your<br/><em>sense of wonder.</em></h1></div>
         <label className="search"><Search size={20} /><input value={query} onChange={(e) => { setQuery(e.target.value); setPreviewPlace(null) }} placeholder="Search places or counties" aria-label="Search places or counties" />{query ? <button onClick={() => setQuery('')} aria-label="Clear search"><X size={17}/></button> : <SlidersHorizontal size={18} />}</label>
         <nav className="filters" aria-label="Filter by category">
           <button className={category === 'all' ? 'active all' : ''} aria-pressed={category === 'all'} onClick={() => setCategory('all')}>All places</button>
@@ -854,10 +919,10 @@ function App() {
       </div>
 
       <div className="map-area">
-        <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} onSelect={setPreviewPlace} />
+        <MapCanvas places={locationItems} filtered={filtered} selected={previewPlace} focus={mapFocus} userPosition={userPosition} onSelect={setPreviewPlace} />
         {previewPlace && view === 'map' && !query && <PinPreview place={previewPlace} photoUrl={previewPhotoUrl} loading={previewPhotoLoading} onClose={() => setPreviewPlace(null)} onMore={() => openPlace(previewPlace)} onImageError={() => void refreshPreviewPhoto()}/>}
-        {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
-        {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} />)}</div>}
+        {query && <div className="search-results"><div className="drawer-handle"/><p className="eyebrow">{filtered.length} {filtered.length === 1 ? 'place' : 'places'} found</p>{filtered.length ? filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} onMap={() => explorePlace(p)} />) : <div className="empty"><Search/><h2>No trail here yet</h2><p>Try another place or widen your search.</p></div>}</div>}
+        {view === 'list' && !query && <div className="list-drawer"><div className="drawer-handle"/><div className="drawer-title"><div><p className="eyebrow">Across the island</p><h2>{category === 'all' ? 'All places' : categories[category].label}</h2></div><span>{filtered.length}</span></div>{filtered.map((p) => <PlaceRow key={p.id} place={p} onClick={() => openPlace(p)} onMap={() => explorePlace(p)} />)}</div>}
         <button className="view-toggle" aria-pressed={view === 'list'} onClick={() => { setPreviewPlace(null); setView(view === 'map' ? 'list' : 'map') }}>{view === 'map' ? <><List size={18}/>List</> : <><MapIcon size={18}/>Map</>}</button>
         {!query && view === 'map' && !previewPlace && <div className="map-caption"><span>32 counties.</span> One island to explore.<small>{filtered.length} places in this guide</small></div>}
       </div>

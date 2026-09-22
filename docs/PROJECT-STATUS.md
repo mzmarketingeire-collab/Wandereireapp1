@@ -1,0 +1,266 @@
+# Wander Éire: project status and session handoff
+
+Last updated: 21 September 2026 (Europe/Dublin).
+
+## Current phase
+
+Map framing/data correction on 21 September 2026: replaced the percentage-based
+default framing with a generous all-island overview that must show visible sea
+beyond all four coasts while leaving place-focused landscape zoom unchanged.
+The earlier wider view was still being forced inward by a tight MapLibre
+`maxBounds`; the camera boundary is now broad enough to permit the intended
+overview while still limiting navigation to Ireland and its surrounding waters.
+Corrected live Supabase location 22, Murlough Beach (Down), from the erroneous
+inland coordinate `54.2544, -5.9463` to the OpenStreetMap-mapped Murlough National
+Nature Reserve centre `54.2392238, -5.8413066`; updated the local seed to match.
+The live row was read back successfully. Chrome verified the wider overview and
+showed the focused beach pin on the coastal dune system beside the strand, with no
+browser warnings or errors. Build, lint, landscape validation and diff checks pass;
+lint retains the same five existing warnings.
+
+Product direction clarified on 21 September 2026: retain the information-rich
+MapLibre landscape experience reached through Explore landscape on place pages,
+including satellite imagery, topography and optional terrain pitch. Remove the
+separate Glendalough eye-level Three.js scene from the product UI because it is a
+visual downgrade from the terrain map and does not fit the current experience.
+Its prototype source and research remain in the repository as inactive reference
+only. A future high-fidelity custom terrain experience may be evaluated with
+Unreal Engine, but this is a long-term direction rather than approved implementation;
+delivery format, device support, performance and the €0 budget constraint must be
+resolved before work begins.
+
+Completed and verified: removed the pilot card, Glendalough Open 3D view action,
+immersive state and lazy runtime import. The prototype files remain untouched and
+inactive. The production build no longer emits the former 4.54 MB immersive scene
+chunk. Lint passes with the same five existing warnings, the production build and
+landscape style check pass, and `git diff --check` passes. In a fresh Chrome run,
+Glendalough's place page Explore landscape action opened the satellite/topography
+map focused on the place with terrain controls available; no browser warnings or
+errors were recorded.
+
+On 21 September 2026, the map's long-session failure handling was hardened after
+the user reported that tiles stopped loading with continued use. MapTiler is now
+held behind a completed six-second health check instead of being used immediately
+from the presence of a key. 3D remains opt-in. MapLibre no longer refreshes
+already-visible expired tiles during the same session, isolated tile errors no
+longer block the whole map, and four provider errors within 15 seconds trigger an
+automatic reload onto the basic map. Hillshade and 3D keep the separate DEM
+sources MapLibre recommends, but the hillshade layer is disabled while 3D terrain
+is active so both elevation tile sets are not downloaded simultaneously.
+
+Verified after this change: the landscape style check, lint, production build and
+`git diff --check` pass (lint retains the same five existing warnings). A fresh
+Chrome run cycled Wicklow, Kerry, Donegal and Mournes in 3D with repeated zoom-in
+and zoom-out passes; imagery stayed visible and the fresh tab recorded no console
+warnings or errors. This is a bounded stress test, not proof of all-day operation
+or of MapTiler quota availability. Provider-plan and usage-limit verification is
+still required before production deployment.
+
+Map regression traced to the app automatically enabling MapTiler terrain/3D on every load and then repeatedly requesting higher-detail map tiles as the user zoomed. The fallback path was also too weak, so repeated provider requests and a zoomed-in style load could leave the map in a stuck "couldn't load map" state. The fix keeps 3D terrain off by default, checks MapTiler health before enabling terrain layers, and falls back to the standard map instead of failing silently. User-location tracking is now live and displayed as a blue position pin, while the original place detail flow remains the default and terrain pitch is an optional map control.
+
+The earlier Glendalough immersive pilot is retired from the active UI. See
+`IMMERSIVE-PILOT.md` and `IMMERSIVE-IRELAND-RESEARCH.md` for preserved historical
+implementation and research notes. Do not restore or continue that scene without
+a new user decision; use the existing terrain map as the product experience.
+Future phase requested: destination weather and traffic-aware routing/ETA from
+the visitor's location. Reserve UI space and provider adapters; do not implement
+or activate providers yet. Location permission/manual-origin fallback and €0
+provider verification are required. Weather may later drive scene atmosphere.
+
+Fixed `PinPreview` to render the selected place's name and county visibly, with a
+named View place action. Build and lint passed (five existing warnings), and
+`git diff --check` passed. Browser verification of this latest small
+change is pending: Chrome automation timed out, then reported debugger unattached.
+Prior browser checks below predate the pin-name fix.
+
+Supabase Free storage trial completed successfully. A 758,889-byte real Wicklow
+PMTiles sample is hosted in the new `map-trial` bucket and renders in a local
+MapLibre development page. R2 remains on hold; no paid service or billing was
+enabled. The trial now includes the required visual baseline: MapTiler-hosted
+satellite imagery, Terrain RGB elevation, MapLibre 3D terrain, and hillshade.
+The main application now integrates all-island satellite imagery, 3D terrain and
+hillshade locally. It has not been deployed. Existing Supabase content currently
+shows 72 places; all-island map coverage does not mean every place has been curated.
+
+Read `docs/MAP-STORAGE-TRIAL.md` for reproducible checks, scope, measurements,
+R2 cost scenarios, and remaining limits. Next: measure representative detail and
+organisation usage before expanding the free-hosted dataset.
+
+## User intent and decisions
+
+- Compare the existing app with the user's Ireland map architecture proposal and
+  improve the app while reusing its existing UI, accounts, and community features.
+- The correct proposal is `IRELAND_MAP_PLATFORM_ARCHITECTURE.md`, originally in
+  `/Users/markhoare/Downloads/`; a verbatim snapshot lives beside this file.
+  The Roady NZ comparison document was explicitly rejected as the intended input.
+- Latest budget instruction: €0 upfront and €0 ongoing. Do not enable paid
+  services or billing without explicit agreement.
+- R2 activation is on hold. This supersedes the earlier conditional Cloudflare
+  approval for activation purposes; do not activate R2.
+- User authorized Cloudflare OAuth and installed the Supabase plugin.
+- MapLibre is already an application dependency, not an account or MCP to connect.
+- MapLibre is the chosen long-term renderer. The user prefers connecting it to
+  existing hosted satellite/elevation APIs instead of building those datasets.
+  A data provider is still required; MapLibre itself does not supply imagery or
+  elevation.
+- User wants lawful open map data alternatives, including a path to offline maps.
+  MapTiler satellite/elevation is integrated using the existing browser key.
+  A sustainable production data plan within €0 remains to be verified.
+
+## Workspace and baseline
+
+- Work in `/Users/markhoare/wander-eire-codex`, not the separate Downloads copy.
+- Branch at handoff: `master`; baseline commit `b30b589`.
+- React 19, TypeScript, Vite 8, MapLibre GL JS 6.2, Supabase JS 2.112,
+  Cloudflare Vite integration. See `package.json` for current versions.
+- Existing features: map/list/search/filter, location detail, auth, saves/visits,
+  community notes/photos, moderation and admin location management, PWA shell.
+- Current basemap uses MapTiler raster tiles with vector contour/trail overlays.
+  OSM raster fallback exists. This is not yet a self-hosted vector basemap.
+- App currently fetches all nonarchived locations and filters on the client.
+- PostGIS extension exists in schema, but spatial point/index/viewport RPC work
+  remains to be designed and verified against the live database.
+- Earlier browser check showed 72 places; this is an observation, not a fixed
+  inventory. README's original seven-place claim was stale.
+- `.env.local` already exists. Do not overwrite it or print its values.
+
+## Uncommitted implementation
+
+These changes predate this documentation handoff and must be preserved:
+
+- `src/App.tsx`: replaced per-place DOM markers with a clustered GeoJSON source
+  and MapLibre circle/symbol layers; cluster-click expansion, point selection,
+  filtering via source updates, selected-point styling, and map error guidance.
+- `src/App.css`: removed obsolete DOM marker styles.
+- `vite.config.ts`: excludes `maplibre-gl` from dependency optimization following
+  a development worker-module loading failure during browser checks.
+
+Before the storage trial, no bucket or archive had been created. The subsequent
+trial created a public `map-trial` bucket with a 10 MiB file cap and uploaded one
+758,889-byte archive. No application deployment, commit, database migration,
+client write policy, or billing change was performed. The private photo bucket
+was unchanged.
+
+New local trial files: `geo/trial/index.html`, `src/map/storage-trial.ts`,
+`scripts/check-map-storage.mjs`, `docs/MAP-STORAGE-TRIAL.md`. PMTiles 4.5.0 was
+added with an exact version and lockfile. Trial page is development-only.
+
+Fresh checks: range/CORS script passed (447 bytes); Chrome rendered and completed
+the MapLibre 3D landscape using satellite, Terrain RGB and hillshade. Final load:
+1.91 seconds and 113,423 bytes from the Supabase vector archive; MapTiler traffic
+was not measured. Build passed; lint passed with five existing warnings. npm audit
+and Supabase advisors flagged existing issues, recorded in the trial report. They
+are not fixed by this storage trial.
+
+## Verification and remaining issues
+
+Fresh main-app checks on 20 September 2026:
+
+- `npm run lint`: passed with five warnings (four component-export warnings and
+  an existing auth-modal ref cleanup warning).
+- `npm run build`: passed.
+- `git diff --check`: passed.
+- `node scripts/check-landscape.mjs`: passed. Validates both style variants,
+  separate DEM sources and island bounds including Northern Ireland.
+- Chrome at `http://127.0.0.1:5174/`: satellite country view and 72 places loaded;
+  Kerry shortcut visibly rendered mountains and lakes in 3D; 2D/3D toggle,
+  Glendalough search-to-map preview and Trails list (24 places) worked.
+- Mobile viewport 390×844: map, wrapped controls, provider attribution and filters
+  displayed. This is a responsive smoke check, not physical-device performance testing.
+
+Main-app implementation: `src/map/ireland.ts` defines island bounds and Wicklow,
+Kerry, Donegal and Mournes shortcuts; `src/map/landscape-style.ts` supplies satellite,
+separate terrain/hillshade DEMs and detail overlays. `src/App.tsx` integrates
+overview/3D controls, loading/error/retry UI and Explore landscape actions in search,
+list and place details. Provider logo and TileJSON attribution are retained.
+No-key OSM fallback remains. No billing, deployment or R2 activation occurred.
+
+Review before considering the clustering change complete:
+
+- Fixed singleton visibility at country zoom; points now scale with zoom.
+- Correction to earlier glyph concern: installed MapLibre 6 supports local fonts
+  without a glyph endpoint. Both style variants pass style-spec validation.
+- Check keyboard accessibility after DOM marker removal, mobile interaction,
+  individual point-to-detail navigation, and selected places inside clusters.
+- Cluster expansion now catches errors and checks lifecycle/filter changes.
+- Circle markers no longer have the original category icons; review usability.
+- Main-app terrain/hillshade integration is complete locally. Deployment, offline
+  downloads, first-class route geometry and viewport queries remain undone.
+- Separate prior review noted account deletion may remove storage metadata rather
+  than stored bytes; inspect and address separately before claiming this is fixed.
+
+## Connection status
+
+### Cloudflare
+
+Wrangler OAuth login succeeded and account access was verified previously.
+`npx wrangler r2 bucket list` returned API code 10042 requesting R2 enablement in
+the dashboard. OAuth success does not mean R2 is enabled. The latest user instruction keeps R2 activation on hold; no activation occurred
+in this continuation session.
+Do not copy Wrangler credentials into project files.
+
+### Supabase
+
+Verified through Supabase MCP on 20 September 2026 in the continuation session:
+
+- `list_projects` succeeded. `wander-eire-codex` project reference:
+  `stbkxmzoyonerkyacblp`, region `eu-west-1`, status `ACTIVE_HEALTHY`.
+- `get_organization` returned the `free` plan.
+- Read-only `execute_sql` (`select current_database(), current_user, version();`)
+  succeeded: database `postgres`, PostgreSQL 17.6.
+- MCP authentication and database read access are verified. No remote writes,
+  billing changes, or new services were performed.
+
+Reverify access in the new session. Read the Supabase skill before Supabase work.
+Live schema/RLS inspection and matching the local configured project before any
+mutation remain pending. Do not expose environment values.
+
+The continuation read the full Downloads proposal and preserved existing diffs.
+Storage-trial schema/advisor observations are recorded in MAP-STORAGE-TRIAL.md;
+no application schema migration was made. Main-app checks above are fresh.
+
+## Architecture direction under evaluation
+
+The proposal calls for MapLibre clustered layers and progressive disclosure,
+vector basemap, terrain/hillshade, PostGIS viewport queries, and first-class
+routes/POIs. Booking, AR and full offline regions can come later.
+
+Potential open-data path discussed: OSM Ireland and Northern Ireland extract from
+Geofabrik, Planetiler/Protomaps to generate PMTiles locally, then suitable hosting.
+This is a candidate, not an approved paid infrastructure commitment. Respect ODbL
+and source-specific terrain licences. OSM public tile servers are not an offline
+download source. Open-source software does not make all hosting free.
+
+R2 Standard pricing checked on 20 September 2026: free monthly 10 GB-month storage,
+1 million Class A and 10 million Class B operations; beyond that $0.015/GB-month,
+$4.50/million Class A, $0.36/million Class B; outbound bandwidth free. USD before
+tax. Other Cloudflare services can charge separately. Recheck before deciding.
+
+References:
+
+- https://developers.cloudflare.com/r2/pricing/
+- https://docs.protomaps.com/pmtiles/
+- https://download.geofabrik.de/europe/ireland-and-northern-ireland.html
+- https://github.com/onthegomap/planetiler
+- https://operations.osmfoundation.org/policies/tiles/
+
+## Next actions and phase gates
+
+1. Read this file and the proposal; inspect current diff without discarding it.
+2. Verify Supabase MCP tools and read-only project access in the new session.
+3. Continue accessibility and device testing of clustering and landscape controls.
+4. Measure a proposed Ireland map archive and assess a genuinely free deployment
+   path, including requests, storage, attribution, and overage behavior. Present
+   any unavoidable cost before enabling services. R2 activation remains on hold;
+   no paid service or billing activation is authorized.
+5. Prepare spatial schema/query changes after inspecting live schema and RLS;
+   preserve existing data and do not blindly rerun setup SQL against production.
+6. Verify the MapTiler account plan, usage and production terms before deployment;
+   open-source rendering does not guarantee unlimited free imagery/elevation.
+7. Update this status with checks, decisions, and blockers as work proceeds.
+
+Run locally: `npm run dev`; check: `npm run lint` and `npm run build`.
+Fresh storage-trial checks are recorded above and in `MAP-STORAGE-TRIAL.md`.
+Current main-app preview: `http://127.0.0.1:5174/`; trial at `/geo/trial/`.
+Port 5173 was already occupied when starting this preview. Auth redirect flows on
+5174 were not retested and may need an allowed local redirect URL.

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import type React from 'react'
 import { ArrowLeft, Bookmark, Camera, Check, Compass, LockKeyhole, LogOut, Map as MapIcon, MessageCircle, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { supabase } from './lib/supabase'
-import { CategoryIcon, PlaceRow, categories, fromDatabase, hasValidCoordinates, toDatabase } from './App'
-import type { Category, Comment, LocationPhoto, Place, UserPhoto, Viewer } from './App'
+import { CategoryIcon, OFFICIAL_PHOTO_BUCKET, PlaceRow, categories, fromDatabase, hasValidCoordinates, toDatabase } from './App'
+import type { Category, Comment, LocationPhoto, Place, Viewer } from './App'
 
 const SIGNED_URL_TTL_SECONDS = 3600
 const signedUrlExpiresAt = () => Date.now() + SIGNED_URL_TTL_SECONDS * 1000
@@ -40,7 +40,6 @@ export default function ProfileView({ viewer, places: allPlaces, saved, visited,
 export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack }: { viewer: Viewer; places: Place[]; onPlacesChange: (places: Place[]) => void; onBack: () => void }) {
   const [items, setItems] = useState<Place[]>(publicPlaces)
   const [comments, setComments] = useState<Comment[]>([])
-  const [photoQueue, setPhotoQueue] = useState<UserPhoto[]>([])
   const [officialPhotos, setOfficialPhotos] = useState<LocationPhoto[]>([])
   const [tab, setTab] = useState<'locations' | 'moderation'>('locations')
   const [adding, setAdding] = useState(false)
@@ -56,25 +55,18 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
     void Promise.all([
       client.from('locations').select('*').order('name'),
       client.from('comments').select('*').eq('status', 'pending').order('created_at'),
-      client.from('user_photos').select('*').eq('status', 'pending').order('created_at'),
       client.from('location_photos').select('*').order('position'),
-    ]).then(async ([locationsResult, commentsResult, photosResult, officialResult]) => {
+    ]).then(async ([locationsResult, commentsResult, officialResult]) => {
       if (locationsResult.data) setItems(locationsResult.data.map((row) => fromDatabase(row)).filter(hasValidCoordinates))
       if (commentsResult.data) setComments(commentsResult.data as Comment[])
-      if (photosResult.data) {
-        const photoRows = photosResult.data as UserPhoto[]
-        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
-        const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
-        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
-        setPhotoQueue(withUrls)
-      }
       if (officialResult.data) {
         const photoRows = officialResult.data as LocationPhoto[]
-        const { data } = await client.storage.from('location-photos').createSignedUrls(photoRows.map((photo) => photo.object_path), SIGNED_URL_TTL_SECONDS)
-        const expiresAt = signedUrlExpiresAt()
-        const urls = new Map(data?.map((item) => [item.path, item.signedUrl ?? undefined]))
-        const withUrls = photoRows.map((photo) => ({ ...photo, url: urls.get(photo.object_path), expiresAt }))
+        const withUrls = await Promise.all(photoRows.map(async (photo) => {
+          const bucket = photo.bucket_id || 'location-photos'
+          if (bucket === OFFICIAL_PHOTO_BUCKET) return { ...photo, url: client.storage.from(bucket).getPublicUrl(photo.object_path).data.publicUrl, expiresAt: Number.MAX_SAFE_INTEGER }
+          const { data } = await client.storage.from(bucket).createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
+          return { ...photo, url: data?.signedUrl, expiresAt: signedUrlExpiresAt() }
+        }))
         setOfficialPhotos(withUrls)
       }
       if (locationsResult.error || commentsResult.error || officialResult.error) setNotice('The official gallery needs its Supabase photo update before uploads will work.')
@@ -131,29 +123,14 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
     setNotice(status === 'approved' ? 'Contribution approved and now public.' : 'Contribution rejected.')
   }
 
-  const moderatePhoto = async (item: UserPhoto, status: 'approved' | 'rejected') => {
-    if (supabase && !viewer.demo) {
-      if (status === 'approved') {
-        const { error } = await supabase.from('user_photos').update({ status }).eq('id', item.id)
-        if (error) return setNotice('That photo could not be approved.')
-      } else {
-        const { error } = await supabase.from('user_photos').delete().eq('id', item.id)
-        if (error) return setNotice('That photo could not be rejected.')
-        const { error: storageError } = await supabase.storage.from('location-photos').remove([item.object_path])
-        if (storageError) console.warn('Rejected photo record deleted, but storage cleanup failed.', storageError)
-      }
-    }
-    setPhotoQueue((all) => all.filter((photo) => photo.id !== item.id))
-    setNotice(status === 'approved' ? 'Photo approved and now public.' : 'Photo rejected and removed.')
-  }
-
-  const refreshPhoto = async (photo: UserPhoto | LocationPhoto, official: boolean) => {
+  const refreshPhoto = async (photo: LocationPhoto) => {
     if (!supabase || viewer.demo) return
-    const { data } = await supabase.storage.from('location-photos').createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)
-    if (!data?.signedUrl) return
-    const update = (item: UserPhoto | LocationPhoto) => item.id === photo.id ? { ...item, url: data.signedUrl, expiresAt: signedUrlExpiresAt() } : item
-    if (official) setOfficialPhotos((all) => all.map(update) as LocationPhoto[])
-    else setPhotoQueue((all) => all.map(update) as UserPhoto[])
+    const bucket = photo.bucket_id || 'location-photos'
+    const url = bucket === OFFICIAL_PHOTO_BUCKET
+      ? supabase.storage.from(bucket).getPublicUrl(photo.object_path).data.publicUrl
+      : (await supabase.storage.from(bucket).createSignedUrl(photo.object_path, SIGNED_URL_TTL_SECONDS)).data?.signedUrl
+    if (!url) return
+    setOfficialPhotos((all) => all.map((item) => item.id === photo.id ? { ...item, url, expiresAt: bucket === OFFICIAL_PHOTO_BUCKET ? Number.MAX_SAFE_INTEGER : signedUrlExpiresAt() } : item))
   }
 
   const uploadOfficialPhoto = async (place: Place, file: File) => {
@@ -165,15 +142,15 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
     if (supabase && !viewer.demo) {
       const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
       const objectPath = `official/${place.id}/${crypto.randomUUID()}.${extension}`
-      const uploadResult = await supabase.storage.from('location-photos').upload(objectPath, file, { contentType: file.type, upsert: false })
+      const uploadResult = await supabase.storage.from(OFFICIAL_PHOTO_BUCKET).upload(objectPath, file, { contentType: file.type, cacheControl: '31536000', upsert: false })
       if (uploadResult.error) { setPhotoBusy(false); setNotice('That image could not be uploaded. Run the official gallery database update first.'); return }
-      const { data, error } = await supabase.from('location_photos').insert({ location_id: place.id, object_path: objectPath, position }).select().single()
+      const { data, error } = await supabase.from('location_photos').insert({ location_id: place.id, object_path: objectPath, bucket_id: OFFICIAL_PHOTO_BUCKET, position }).select().single()
       if (error) {
-        await supabase.storage.from('location-photos').remove([objectPath])
+        await supabase.storage.from(OFFICIAL_PHOTO_BUCKET).remove([objectPath])
         setPhotoBusy(false); setNotice('That gallery slot could not be saved.'); return
       }
-      const signed = await supabase.storage.from('location-photos').createSignedUrl(objectPath, SIGNED_URL_TTL_SECONDS)
-      setOfficialPhotos((all) => [...all, { ...(data as LocationPhoto), url: signed.data?.signedUrl, expiresAt: signedUrlExpiresAt() }].sort((a, b) => a.position - b.position))
+      const publicUrl = supabase.storage.from(OFFICIAL_PHOTO_BUCKET).getPublicUrl(objectPath).data.publicUrl
+      setOfficialPhotos((all) => [...all, { ...(data as LocationPhoto), url: publicUrl, expiresAt: Number.MAX_SAFE_INTEGER }].sort((a, b) => a.position - b.position))
     } else {
       setOfficialPhotos((all) => [...all, { id: Date.now(), location_id: place.id, object_path: URL.createObjectURL(file), position, created_at: new Date().toISOString(), url: URL.createObjectURL(file) }])
     }
@@ -185,7 +162,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
     if (supabase && !viewer.demo) {
       const { error: recordError } = await supabase.from('location_photos').delete().eq('id', photo.id)
       if (recordError) { setPhotoBusy(false); setNotice('That photo could not be removed.'); return }
-      const { error: storageError } = await supabase.storage.from('location-photos').remove([photo.object_path])
+      const { error: storageError } = await supabase.storage.from(photo.bucket_id || 'location-photos').remove([photo.object_path])
       if (storageError) console.warn('Official photo record deleted, but storage cleanup failed.', storageError)
     }
     setOfficialPhotos((all) => all.filter((item) => item.id !== photo.id))
@@ -193,9 +170,9 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
   }
 
   return <main className="admin-view">
-    <aside><a className="brand" href="#"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a><nav><button className={tab === 'locations' ? 'active' : ''} onClick={() => setTab('locations')}><MapIcon/>Locations</button><button className={tab === 'moderation' ? 'active' : ''} onClick={() => setTab('moderation')}><MessageCircle/>Moderation {comments.length + photoQueue.length > 0 && <span>{comments.length + photoQueue.length}</span>}</button></nav><div><p>{viewer.name}</p><small>Administrator</small><button onClick={onBack}><ArrowLeft/>Back to public map</button></div></aside>
+    <aside><a className="brand" href="#"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a><nav><button className={tab === 'locations' ? 'active' : ''} onClick={() => setTab('locations')}><MapIcon/>Locations</button><button className={tab === 'moderation' ? 'active' : ''} onClick={() => setTab('moderation')}><MessageCircle/>Moderation {comments.length > 0 && <span>{comments.length}</span>}</button></nav><div><p>{viewer.name}</p><small>Administrator</small><button onClick={onBack}><ArrowLeft/>Back to public map</button></div></aside>
     <section className="admin-main">
-      <header><div><p className="eyebrow">{tab === 'locations' ? 'The field guide' : 'Community care'}</p><h1>{tab === 'locations' ? 'Locations' : 'Moderation'}</h1><p>{tab === 'locations' ? `${items.filter((i) => !i.archived).length} live places across Ireland` : `${comments.length + photoQueue.length} contributions waiting on you`}</p></div>{tab === 'locations' && <button className="primary-button" onClick={() => setAdding(true)}><Plus/>Add location</button>}</header>
+      <header><div><p className="eyebrow">{tab === 'locations' ? 'The field guide' : 'Community care'}</p><h1>{tab === 'locations' ? 'Locations' : 'Moderation'}</h1><p>{tab === 'locations' ? `${items.filter((i) => !i.archived).length} live places across Ireland` : `${comments.length} contributions waiting on you`}</p></div>{tab === 'locations' && <button className="primary-button" onClick={() => setAdding(true)}><Plus/>Add location</button>}</header>
       {notice && <p className="admin-notice" role="status">{notice}</p>}
       {tab === 'locations' && <>
         {(adding || editing) && <form className="admin-form" onSubmit={publish}><div><p className="eyebrow">{editing ? 'Edit place' : 'New place'}</p><h2>{editing ? `Update ${editing.name}` : 'Add to the map'}</h2></div><button type="button" className="modal-close" onClick={() => { setAdding(false); setEditing(null) }} aria-label="Close form"><X/></button>
@@ -215,7 +192,7 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
             <div><p className="eyebrow">Official gallery</p><h3>Feature photography</h3><span>{editing ? `${officialPhotos.filter((photo) => photo.location_id === editing.id).length} of 3 photos` : 'Publish the location first, then edit it to add photos.'}</span></div>
             {editing && <div className="admin-photo-slots">{[1, 2, 3].map((position) => {
               const photo = officialPhotos.find((item) => item.location_id === editing.id && item.position === position)
-              return photo ? <figure key={position}>{photo.url && <img src={photo.url} alt={`${editing.name} gallery slot ${position}`} width="400" height="300" loading="lazy" decoding="async" onError={() => void refreshPhoto(photo, true)}/>}<figcaption><span>Photo {position}</span><button type="button" disabled={photoBusy} onClick={() => removeOfficialPhoto(photo)} aria-label={`Remove photo ${position}`}><Trash2/></button></figcaption></figure> : <label className="admin-photo-slot" key={position}><Camera/><strong>Photo {position}</strong><small>JPG, PNG or WebP</small><input type="file" disabled={photoBusy} accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadOfficialPhoto(editing, file); event.target.value = '' }}/></label>
+              return photo ? <figure key={position}>{photo.url && <img src={photo.url} alt={`${editing.name} gallery slot ${position}`} width="400" height="300" loading="lazy" decoding="async" onError={() => void refreshPhoto(photo)}/>}<figcaption><span>Photo {position}</span><button type="button" disabled={photoBusy} onClick={() => removeOfficialPhoto(photo)} aria-label={`Remove photo ${position}`}><Trash2/></button></figcaption></figure> : <label className="admin-photo-slot" key={position}><Camera/><strong>Photo {position}</strong><small>JPG, PNG or WebP</small><input type="file" disabled={photoBusy} accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadOfficialPhoto(editing, file); event.target.value = '' }}/></label>
             })}</div>}
           </section>
           <button className="primary-button" disabled={busy}>{busy ? 'Saving…' : editing ? 'Save changes' : 'Publish location'}</button>
@@ -223,9 +200,8 @@ export function AdminView({ viewer, places: publicPlaces, onPlacesChange, onBack
         <div className="admin-table"><div className="admin-table__head"><span>Location</span><span>Category</span><span>Status</span><span/></div>{items.map((place) => <div className={place.archived ? 'archived' : ''} key={place.id}><span><i style={{ background: categories[place.category].color }}><CategoryIcon category={place.category}/></i><b>{place.name}<small>{place.county}</small></b></span><span>{categories[place.category].label}</span><span>{place.archived ? 'Archived' : 'Live'}</span><span className="row-actions"><button onClick={() => openEdit(place)} aria-label={`Edit ${place.name}`}><Pencil/></button><button onClick={() => toggleArchive(place)} aria-label={`${place.archived ? 'Restore' : 'Archive'} ${place.name}`}><Trash2/></button></span></div>)}</div>
       </>}
       {tab === 'moderation' && <div className="moderation-list">
-        {photoQueue.map((item) => <article className="photo-review" key={`photo-${item.id}`}>{item.url && <img src={item.url} alt="Submitted location" width="130" height="100" loading="lazy" decoding="async" onError={() => void refreshPhoto(item, false)}/>}<div><p className="eyebrow">Photo · Location #{item.location_id} · {new Date(item.created_at).toLocaleDateString('en-IE')}</p>{item.caption && <blockquote>{item.caption}</blockquote>}<small>Submitted by {item.user_id.slice(0, 8)}…</small></div><div><button onClick={() => moderatePhoto(item, 'approved')}><Check/>Approve</button><button onClick={() => moderatePhoto(item, 'rejected')}><X/>Reject</button></div></article>)}
         {comments.map((item) => <article key={`comment-${item.id}`}><div><p className="eyebrow">Note · Location #{item.location_id} · {new Date(item.created_at).toLocaleDateString('en-IE')}</p><blockquote>{item.body}</blockquote><small>Submitted by {item.user_id.slice(0, 8)}…</small></div><div><button onClick={() => moderate(item, 'approved')}><Check/>Approve</button><button onClick={() => moderate(item, 'rejected')}><X/>Reject</button></div></article>)}
-        {!comments.length && !photoQueue.length && <div className="empty"><Check/><h2>Nothing waiting on you.</h2><p>The community queue is clear.</p></div>}
+        {!comments.length && <div className="empty"><Check/><h2>Nothing waiting on you.</h2><p>The community queue is clear.</p></div>}
       </div>}
     </section>
   </main>
