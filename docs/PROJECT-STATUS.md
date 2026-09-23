@@ -4,7 +4,7 @@ Last updated: 23 September 2026 (Europe/Dublin).
 
 ## Current phase
 
-SEO/AEO and organic growth implementation completed locally on 23 September 2026.
+SEO/AEO and organic growth implementation completed and deployed on 23 September 2026.
 The app now has canonical crawlable place URLs, 32 county guide hubs, 40
 inventory-qualified topic guides, a 196-URL sitemap, route-specific metadata and
 JSON-LD, visible quick answers, related internal links, and Cloudflare Worker HTML
@@ -25,6 +25,13 @@ requests return route-specific HTML, private routes are `noindex`, and old numer
 place URLs redirect to canonical slugs. Chrome verified the Wicklow guide at seven
 live places/two topics and the Glendalough page at three quick answers/three related
 places, with no console errors or horizontal overflow.
+
+Deployment commit `1d421d0` was pushed to `master` and the Cloudflare Workers
+test site updated successfully. Live checks confirmed 32 county links at
+`/guides`, seven crawlable place links in the Wicklow server HTML, canonical
+Glendalough metadata and TouristAttraction JSON-LD, the 196-URL sitemap, and the
+expected private-route exclusions in `robots.txt`. The deployed county hub is
+open in Chrome for review.
 
 External connection status: the existing GitHub remote is configured but the
 local `gh` CLI is unavailable. The Hostinger connector was missing its VPS and
