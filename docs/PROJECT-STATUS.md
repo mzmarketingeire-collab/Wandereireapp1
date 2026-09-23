@@ -1,8 +1,37 @@
 # Wander Éire: project status and session handoff
 
-Last updated: 21 September 2026 (Europe/Dublin).
+Last updated: 23 September 2026 (Europe/Dublin).
 
 ## Current phase
+
+SEO/AEO and organic growth implementation completed locally on 23 September 2026.
+The app now has canonical crawlable place URLs, 32 county guide hubs, 40
+inventory-qualified topic guides, a 196-URL sitemap, route-specific metadata and
+JSON-LD, visible quick answers, related internal links, and Cloudflare Worker HTML
+transformation so useful route content exists before React runs. The origin is
+environment-configurable for the planned custom domain; Cloudflare is not treated
+as the long-term analytics system.
+
+A portable measurement and editorial pipeline is scaffolded: consent-aware
+Microsoft Clarity, Google Search Console query ingestion, SerpBear rank ingestion,
+opportunity scoring, 40 reviewable evidence-led content briefs, and a weekly
+GitHub Actions pull-request workflow. Article prose is not auto-published; the
+automation handles factual inventory and drafts briefs for human verification.
+See `docs/SEO-AEO-GROWTH-SYSTEM.md`.
+
+Verified locally: TypeScript, scoped oxlint, production build and `git diff
+--check` pass; existing fast-refresh/ref cleanup warnings remain. Direct Worker
+requests return route-specific HTML, private routes are `noindex`, and old numeric
+place URLs redirect to canonical slugs. Chrome verified the Wicklow guide at seven
+live places/two topics and the Glendalough page at three quick answers/three related
+places, with no console errors or horizontal overflow.
+
+External connection status: the existing GitHub remote is configured but the
+local `gh` CLI is unavailable. The Hostinger connector was missing its VPS and
+ecommerce server registrations; both were added on 23 September. Codex must be
+restarted once before VPS inventory can be read and the exact SerpBear Docker
+project write can be confirmed. No VPS project, paid scraper, Clarity project,
+Search Console property, billing or R2 service was created or activated.
 
 Map framing/data correction on 21 September 2026: replaced the percentage-based
 default framing with a generous all-island overview that must show visible sea

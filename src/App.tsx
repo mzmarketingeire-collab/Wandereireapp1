@@ -8,7 +8,10 @@ import {
   UserRound, Waves, X,
 } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
-import { Navigate, Route, Routes, matchPath, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, matchPath, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { CountyGuide, GuideIndex, PlaceLinks, TopicGuide } from './guides'
+import { AnalyticsConsent, track } from './lib/analytics'
+import { absoluteUrl, placePath, slugify, usePageSeo } from './lib/seo'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { IRELAND_VIEW, IRELAND_CAMERA, landscapeRegions } from './map/ireland'
 import { makeLandscapeStyle } from './map/landscape-style'
@@ -28,6 +31,9 @@ export type LocationPhoto = {
   bucket_id?: string; creator?: string | null; source_url?: string | null
   license_name?: string | null; license_url?: string | null; url?: string; expiresAt?: number
 }
+
+const northernIrelandCounties = new Set(['Antrim', 'Armagh', 'Down', 'Fermanagh', 'Derry', 'Tyrone'])
+const addressCountry = (county: string) => northernIrelandCounties.has(county) ? 'GB' : 'IE'
 
 const SIGNED_URL_TTL_SECONDS = 3600
 const signedUrlExpiresAt = () => Date.now() + SIGNED_URL_TTL_SECONDS * 1000
@@ -462,11 +468,11 @@ function PhotoCarousel({ photos, place, onImageError }: { photos: LocationPhoto[
 }
 
 export function PlaceRow({ place, onClick, onMap }: { place: Place; onClick: () => void; onMap?: () => void }) {
-  const row = <button className="place-row" onClick={onClick}>
+  const row = <a className="place-row" href={placePath(place)} onClick={(event) => { event.preventDefault(); onClick() }}>
     <span className="place-row__icon" style={{ background: categories[place.category].color }}><CategoryIcon category={place.category} /></span>
     <span className="place-row__copy"><strong>{place.name}</strong><small>{place.county} · {place.cost} · {place.distance}</small></span>
     <ChevronRight size={18} aria-hidden="true" />
-  </button>
+  </a>
   return onMap ? <div className="place-result">{row}<button className="place-result__map" onClick={onMap} aria-label={`Explore ${place.name} on the map`}><Mountain size={16}/>Explore landscape</button></div> : row
 }
 
@@ -605,9 +611,34 @@ function PlaceRoute({ places: allPlaces, loading, children }: { places: Place[];
   const { id } = useParams()
   const numericId = Number(id)
   const place = Number.isInteger(numericId) ? allPlaces.find((item) => item.id === numericId) : undefined
+  const path = place ? placePath(place) : '/'
+  const description = place ? `${place.kicker}. Practical details for visiting ${place.name} in ${place.county}, including cost, distance, parking and terrain.` : 'Loading a Wander Eire place guide.'
+  usePageSeo({
+    title: place ? `${place.name}, ${place.county} | Wander Éire` : 'Wander Éire',
+    description,
+    path,
+    robots: place ? undefined : 'noindex, follow',
+    structuredData: place ? {
+      '@context': 'https://schema.org', '@type': 'TouristAttraction', name: place.name, description: place.description,
+      url: absoluteUrl(path), address: { '@type': 'PostalAddress', streetAddress: place.address, addressCountry: addressCountry(place.county) },
+      geo: { '@type': 'GeoCoordinates', latitude: place.coordinates[1], longitude: place.coordinates[0] },
+      isAccessibleForFree: place.cost.toLowerCase().includes('free'),
+    } : undefined,
+  })
   if (place) return children(place)
   if (loading) return <ViewLoading/>
   return <Navigate to="/" replace/>
+}
+
+function MapSeo() {
+  const description = 'Find unforgettable trails, ruins, beaches and wild places across all 32 counties of Ireland.'
+  usePageSeo({ title: 'Wander Éire - Go somewhere worth remembering', description, path: '/', structuredData: { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Wander Éire', url: absoluteUrl('/'), description } })
+  return null
+}
+
+function PrivateSeo() {
+  usePageSeo({ title: 'Wander Éire', description: 'Private Wander Éire account area.', path: window.location.pathname, robots: 'noindex, nofollow' })
+  return null
 }
 
 function App() {
@@ -640,7 +671,7 @@ function App() {
   const [comments, setComments] = useState<Comment[]>([])
   const [officialPhotos, setOfficialPhotos] = useState<LocationPhoto[]>([])
   const [notice, setNotice] = useState('')
-  const placeMatch = matchPath('/place/:id', location.pathname)
+  const placeMatch = matchPath('/place/:id/:slug?', location.pathname)
   const selectedRouteId = placeMatch ? Number(placeMatch.params.id) : null
   const selected = Number.isInteger(selectedRouteId) ? locationItems.find((place) => place.id === selectedRouteId) ?? null : null
   const closePlace = () => (location.state as { fromMap?: boolean } | null)?.fromMap ? navigate(-1) : navigate('/', { replace: true })
@@ -819,7 +850,7 @@ function App() {
 
   const authenticated = (next: Viewer) => {
     setViewer(next); setShowAuth(false)
-    if (pendingPlace) { navigate(`/place/${pendingPlace.id}`, { state: { fromMap: true } }); setPendingPlace(null) }
+    if (pendingPlace) { navigate(placePath(pendingPlace), { state: { fromMap: true } }); setPendingPlace(null) }
     if (pendingAction && selected) {
       if (pendingAction === 'save') setSaved((items) => items.includes(selected.id) ? items : [...items, selected.id])
       else setVisited((items) => items.includes(selected.id) ? items : [...items, selected.id])
@@ -848,7 +879,8 @@ function App() {
       const next = [...viewedIds, place.id]
       setViewedIds(next); sessionStorage.setItem('wander-eire-viewed', JSON.stringify(next))
     }
-    navigate(`/place/${place.id}`, { state: { fromMap: true } })
+    track('place_open')
+    navigate(placePath(place), { state: { fromMap: true } })
   }
 
   const signOut = async () => {
@@ -858,6 +890,7 @@ function App() {
 
   const detailView = selected ? (() => {
     const cat = categories[selected.category]
+    const related = locationItems.filter((place) => place.county === selected.county && place.id !== selected.id).slice(0, 3)
     return <main className="app detail" aria-hidden={showAuth ? 'true' : undefined} style={{ '--accent': cat.color } as React.CSSProperties}>
       {notice && <p className="app-notice" role="status">{notice}</p>}
       <button className="round-button detail-back" onClick={closePlace} aria-label="Back to map"><ArrowLeft /></button>
@@ -881,6 +914,8 @@ function App() {
             <button className="address" onClick={() => void copyAddress(selected.address)}><Navigation size={20}/><span><strong>{selected.address}</strong><small>{copyMessage}</small></span></button>
             <div className="parking-note"><span>Parking</span><p>{selected.parking}</p></div>
           </section>
+          <section className="detail-section quick-answers"><p className="eyebrow">Quick answers</p><h2>Before you set out</h2><dl><div><dt>How much does it cost?</dt><dd>{selected.cost}.</dd></div><div><dt>How long should I allow?</dt><dd>{selected.distance || 'Take your time and plan around local conditions'}.</dd></div><div><dt>Where can I park?</dt><dd>{selected.parking}</dd></div></dl></section>
+          {related.length > 0 && <section className="detail-section related-places"><p className="eyebrow">Keep exploring</p><h2>More in {selected.county}</h2><PlaceLinks places={related}/><Link className="county-guide-link" to={`/guides/${slugify(selected.county)}`}>See the full {selected.county} guide<ChevronRight size={17}/></Link></section>}
           <section className="community">
             <p className="eyebrow">Local knowledge</p><h2>Notes from the trail</h2><p className="community__intro">Useful details shared by people who’ve been there.</p>
             {comments.map((item) => { const own = viewer?.id === item.user_id; return <article key={item.id}><span>{own ? viewer.name.slice(0, 1).toUpperCase() : 'W'}</span><div><strong>{own ? 'You' : 'A fellow wanderer'}</strong>{item.status === 'pending' && <small>Pending review</small>}<p>{item.body}</p></div></article> })}
@@ -905,7 +940,7 @@ function App() {
     {notice && <p className="app-notice" role="status">{notice}</p>}
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Wander Éire home"><span className="brand-mark"><Compass /></span><span>Wander <em>Éire</em></span></a>
-      <div className="topbar__actions"><button className="round-button" onClick={locateUser} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? navigate('/profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
+      <div className="topbar__actions"><Link className="guide-nav-link" to="/guides">County guides</Link><button className="round-button" onClick={locateUser} aria-label="Find my location"><LocateFixed /></button><button className="round-button ink" onClick={() => viewer ? navigate('/profile') : setShowAuth(true)} aria-label={viewer ? 'Open profile' : 'Sign in'}>{viewer ? <span className="avatar-mini">{viewer.name.slice(0, 1).toUpperCase()}</span> : <UserRound />}</button></div>
     </header>
 
     <section className="map-shell" id="top">
@@ -935,18 +970,22 @@ function App() {
     ? <Suspense fallback={<ViewLoading/>}><AdminView viewer={viewer} places={locationItems} onPlacesChange={setLocationItems} onBack={() => navigate('/')} /></Suspense>
     : viewer ? adminDenied : mapView
   const profileView = viewer
-    ? <Suspense fallback={<ViewLoading/>}><ProfileView viewer={viewer} places={locationItems} saved={saved} visited={visited} onOpen={(place) => navigate(`/place/${place.id}`)} onBack={() => navigate('/')} onAdmin={() => navigate('/admin')} onSignOut={signOut} onViewerChange={setViewer} /></Suspense>
+    ? <Suspense fallback={<ViewLoading/>}><ProfileView viewer={viewer} places={locationItems} saved={saved} visited={visited} onOpen={(place) => navigate(placePath(place))} onBack={() => navigate('/')} onAdmin={() => navigate('/admin')} onSignOut={signOut} onViewerChange={setViewer} /></Suspense>
     : mapView
 
   return <>
     <Routes>
-      <Route path="/" element={mapView}/>
-      <Route path="/place/:id" element={<PlaceRoute places={locationItems} loading={locationsLoading}>{() => detailView}</PlaceRoute>}/>
-      <Route path="/profile" element={profileView}/>
-      <Route path="/admin" element={adminView}/>
-      <Route path="/reset-password" element={<Suspense fallback={<ViewLoading/>}><ResetPasswordView onDone={() => navigate(viewer ? '/profile' : '/', { replace: true })} /></Suspense>}/>
+      <Route path="/" element={<><MapSeo/>{mapView}</>}/>
+      <Route path="/place/:id/:slug?" element={<PlaceRoute places={locationItems} loading={locationsLoading}>{() => detailView}</PlaceRoute>}/>
+      <Route path="/guides" element={<GuideIndex places={locationItems}/>}/>
+      <Route path="/guides/:countySlug" element={<CountyGuide places={locationItems}/>}/>
+      <Route path="/guides/:countySlug/:topicSlug" element={<TopicGuide places={locationItems}/>}/>
+      <Route path="/profile" element={<><PrivateSeo/>{profileView}</>}/>
+      <Route path="/admin" element={<><PrivateSeo/>{adminView}</>}/>
+      <Route path="/reset-password" element={<><PrivateSeo/><Suspense fallback={<ViewLoading/>}><ResetPasswordView onDone={() => navigate(viewer ? '/profile' : '/', { replace: true })} /></Suspense></>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
+    <AnalyticsConsent/>
     {showAuth && <AuthModal admin={location.pathname === '/admin'} onClose={() => { setShowAuth(false); setPendingPlace(null); if (location.pathname === '/admin') navigate('/') }} onAuthenticated={authenticated} />}
   </>
 }

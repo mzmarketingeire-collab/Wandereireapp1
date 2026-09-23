@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/clean-dist.mjs && tsc -b && vite build",
+    "build": "node scripts/generate-seo-data.mjs && node scripts/clean-dist.mjs && tsc -b && vite build",
+    "content:briefs": "node scripts/build-content-briefs.mjs",
+    "seo:gsc": "node scripts/search-intent-report.mjs",
+    "seo:ranks": "node scripts/serpbear-report.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },

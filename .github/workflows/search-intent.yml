@@ -1,0 +1,55 @@
+name: Search intent and content briefs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+      SERPBEAR_API_KEY: ${{ secrets.SERPBEAR_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Refresh public SEO inventory
+        run: node scripts/generate-seo-data.mjs
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      - name: Pull Search Console intent
+        if: ${{ env.GSC_SERVICE_ACCOUNT_JSON != '' }}
+        run: node scripts/search-intent-report.mjs
+        env:
+          GSC_SITE_URL: ${{ vars.GSC_SITE_URL }}
+      - name: Pull rank tracking
+        if: ${{ env.SERPBEAR_API_KEY != '' }}
+        run: node scripts/serpbear-report.mjs
+        env:
+          SERPBEAR_URL: ${{ vars.SERPBEAR_URL }}
+          SERPBEAR_DOMAIN: ${{ vars.SERPBEAR_DOMAIN }}
+      - run: node scripts/build-content-briefs.mjs
+      - name: Open editorial review pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A public/seo/places.json public/sitemap.xml public/robots.txt content/briefs/generated reports
+          git diff --cached --quiet && exit 0
+          branch="automation/search-intent-$(date -u +%Y-%m-%d)"
+          git config user.name "wander-eire-automation"
+          git config user.email "actions@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -m "content: refresh search intent briefs"
+          git push --force-with-lease origin "$branch"
+          gh pr create --title "Content: weekly search intent review" --body "Updates Search Console opportunities, rank data, and editorial briefs. No article is auto-published." --base master --head "$branch"

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profile
+Disallow: /reset-password
+
+Sitemap: https://wander-eire.markhoare28.workers.dev/sitemap.xml

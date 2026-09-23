@@ -1,0 +1,3777 @@
+{
+  "generatedAt": "2026-09-23T11:17:03.671Z",
+  "places": [
+    {
+      "id": 1,
+      "name": "Glendalough Spinc Trail",
+      "county": "Wicklow",
+      "category": "trail",
+      "latitude": 53.006,
+      "longitude": -6.327,
+      "cost": "Free",
+      "distance": "9.5 km loop",
+      "kicker": "A high trail above two glacial lakes",
+      "description": "Climb through the pine forest to a sweeping boardwalk over the Spinc ridge, with the Upper Lake opening below you and the Wicklow Mountains beyond.",
+      "address": "Upper Lake Car Park, Glendalough, Co. Wicklow",
+      "parking": "Paid parking at the Upper Lake. Arrive before 10am on bright weekends.",
+      "facts": [
+        "3–4 hours",
+        "Hard",
+        "Dogs on lead"
+      ],
+      "updated_at": "2026-08-06T20:01:53.264+00:00",
+      "slug": "glendalough-spinc-trail",
+      "path": "/place/1/glendalough-spinc-trail"
+    },
+    {
+      "id": 2,
+      "name": "Dunluce Castle",
+      "county": "Antrim",
+      "category": "historic",
+      "latitude": 55.211,
+      "longitude": -6.579,
+      "cost": "€6",
+      "distance": "45 min visit",
+      "kicker": "A cliff-edge castle with a wild history",
+      "description": "Cross the narrow bridge to the dramatic ruins of Dunluce, perched above Atlantic caves and the Causeway Coast.",
+      "address": "87 Dunluce Road, Bushmills, BT57 8UY",
+      "parking": "Small free car park beside the visitor centre.",
+      "facts": [
+        "Ruins",
+        "Sea views",
+        "Family friendly"
+      ],
+      "updated_at": "2026-08-06T20:00:09.598+00:00",
+      "slug": "dunluce-castle",
+      "path": "/place/2/dunluce-castle"
+    },
+    {
+      "id": 3,
+      "name": "Cliffs of Moher",
+      "county": "Clare",
+      "category": "viewpoint",
+      "latitude": 52.971,
+      "longitude": -9.431,
+      "cost": "€12 parking",
+      "distance": "1–8 km",
+      "kicker": "Ireland’s most famous Atlantic edge",
+      "description": "Walk the clifftop path as dark shale walls rise over the Atlantic. On a clear day, the Aran Islands sit low on the horizon.",
+      "address": "Cliffs of Moher, Liscannor, Co. Clare, V95 KN9T",
+      "parking": "Main visitor-centre parking includes admission. Book online for quieter times.",
+      "facts": [
+        "214 m high",
+        "Exposed path",
+        "Visitor centre"
+      ],
+      "updated_at": "2026-08-06T19:49:15.6+00:00",
+      "slug": "cliffs-of-moher",
+      "path": "/place/3/cliffs-of-moher"
+    },
+    {
+      "id": 4,
+      "name": "Inch Beach",
+      "county": "Kerry",
+      "category": "beach",
+      "latitude": 52.141,
+      "longitude": -9.981,
+      "cost": "Free",
+      "distance": "5 km strand",
+      "kicker": "A long golden strand on the Dingle peninsula",
+      "description": "Walk, swim or watch surfers from this broad sandy spit with mountain views in almost every direction.",
+      "address": "Inch, Co. Kerry",
+      "parking": "Park on the firm section of beach near the entrance; mind tide times.",
+      "facts": [
+        "Swimming",
+        "Surf hire",
+        "Dog friendly"
+      ],
+      "updated_at": "2026-08-06T17:32:18.744279+00:00",
+      "slug": "inch-beach",
+      "path": "/place/4/inch-beach"
+    },
+    {
+      "id": 5,
+      "name": "Glenveagh National Park",
+      "county": "Donegal",
+      "category": "camp",
+      "latitude": 55.032,
+      "longitude": -8.004,
+      "cost": "Free entry",
+      "distance": "8 km trail",
+      "kicker": "Lakeside trails in Donegal’s mountain heart",
+      "description": "Follow the valley road beside Lough Veagh to the castle gardens, surrounded by rugged Derryveagh peaks.",
+      "address": "Church Hill, Letterkenny, Co. Donegal, F92 P993",
+      "parking": "Free visitor-centre car park. Shuttle to the castle runs seasonally.",
+      "facts": [
+        "Shuttle bus",
+        "Cafe",
+        "No wild camping"
+      ],
+      "updated_at": "2026-08-06T17:32:18.744279+00:00",
+      "slug": "glenveagh-national-park",
+      "path": "/place/5/glenveagh-national-park"
+    },
+    {
+      "id": 6,
+      "name": "Slieve League",
+      "county": "Donegal",
+      "category": "viewpoint",
+      "latitude": 54.628,
+      "longitude": -8.685,
+      "cost": "€5 parking",
+      "distance": "2.8 km",
+      "kicker": "Immense sea cliffs at the edge of Europe",
+      "description": "A steep coastal viewpoint where the Donegal mountains fall straight into the Atlantic. The upper path is for confident walkers only.",
+      "address": "Bunglas Road, Teelin, Co. Donegal",
+      "parking": "Lower car park with seasonal shuttle; limited access higher up.",
+      "facts": [
+        "601 m high",
+        "Steep",
+        "Shuttle available"
+      ],
+      "updated_at": "2026-08-06T17:32:18.744279+00:00",
+      "slug": "slieve-league",
+      "path": "/place/6/slieve-league"
+    },
+    {
+      "id": 7,
+      "name": "Rock of Cashel",
+      "county": "Tipperary",
+      "category": "historic",
+      "latitude": 52.52,
+      "longitude": -7.891,
+      "cost": "€8",
+      "distance": "1 hour visit",
+      "kicker": "A limestone crown above the Golden Vale",
+      "description": "Explore a remarkable collection of medieval buildings gathered on a dramatic outcrop above Cashel town.",
+      "address": "St. Patrick’s Rock, Cashel, Co. Tipperary",
+      "parking": "Paid public parking in Cashel, a short uphill walk away.",
+      "facts": [
+        "12th century",
+        "Guided tours",
+        "Indoor & outdoor"
+      ],
+      "updated_at": "2026-08-06T17:32:18.744279+00:00",
+      "slug": "rock-of-cashel",
+      "path": "/place/7/rock-of-cashel"
+    },
+    {
+      "id": 8,
+      "name": "Giant’s Causeway",
+      "county": "Antrim",
+      "category": "viewpoint",
+      "latitude": 55.2408,
+      "longitude": -6.5116,
+      "cost": "Free (paid visitor centre parking)",
+      "distance": "1 mile return",
+      "kicker": "40,000 basalt columns on the Causeway Coast",
+      "description": "Walk out onto the hexagonal stones formed by an ancient volcanic eruption, with myth attributing them to the giant Finn McCool. The clifftop path gives free access to the stones without going through the visitor centre.",
+      "address": "Giant’s Causeway, Bushmills, Co. Antrim, BT57 8SU",
+      "parking": "Paid National Trust visitor-centre parking; free roadside and clifftop-path alternatives nearby.",
+      "facts": [
+        "UNESCO World Heritage",
+        "40,000 columns",
+        "Coastal path"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "giant-s-causeway",
+      "path": "/place/8/giant-s-causeway"
+    },
+    {
+      "id": 9,
+      "name": "Poulnabrone Dolmen",
+      "county": "Clare",
+      "category": "historic",
+      "latitude": 53.0083,
+      "longitude": -9.1439,
+      "cost": "Free",
+      "distance": "5 min walk from car park",
+      "kicker": "A 5,000-year-old portal tomb on the Burren’s limestone pavement",
+      "description": "One of Ireland’s oldest and most photographed monuments, standing alone on exposed karst limestone. Excavations found the remains of over 30 people beneath the capstone.",
+      "address": "Poulnabrone, Co. Clare",
+      "parking": "Free roadside car park on the R480.",
+      "facts": [
+        "Neolithic, c. 3800 BC",
+        "Roadside access",
+        "Open all year"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "poulnabrone-dolmen",
+      "path": "/place/9/poulnabrone-dolmen"
+    },
+    {
+      "id": 10,
+      "name": "Mussenden Temple & Downhill Demesne",
+      "county": "Derry",
+      "category": "viewpoint",
+      "latitude": 55.1662,
+      "longitude": -6.8215,
+      "cost": "Free (paid NT parking, or free at Bishop’s Gate)",
+      "distance": "1.5 km of grounds",
+      "kicker": "A cliff-edge library modelled on an Italian temple",
+      "description": "This 18th-century rotunda, built as a library for an eccentric bishop, sits close enough to the cliff edge that it looks ready to fall in. The demesne’s ruined mansion and gardens spread out behind it above the Atlantic.",
+      "address": "Downhill Demesne, Mussenden Road, Castlerock, Co. Derry~Londonderry, BT51 4RP",
+      "parking": "National Trust car park charges a fee; free parking further along the A2 at Bishop’s Gate.",
+      "facts": [
+        "Built 1785",
+        "Clifftop setting",
+        "National Trust"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "mussenden-temple-downhill-demesne",
+      "path": "/place/10/mussenden-temple-downhill-demesne"
+    },
+    {
+      "id": 11,
+      "name": "Keem Bay",
+      "county": "Mayo",
+      "category": "beach",
+      "latitude": 53.9727,
+      "longitude": -10.2144,
+      "cost": "Free (pay & display fills early in summer)",
+      "distance": "Roadside cove",
+      "kicker": "Ireland’s most-loved beach, ringed by cliffs",
+      "description": "A horseshoe of white sand at the western tip of Achill Island, hemmed in by steep green cliffs on three sides and the open Atlantic on the fourth. Regularly voted Ireland’s best beach.",
+      "address": "Keem Bay, Achill Island, Co. Mayo",
+      "parking": "Car park above the beach; arrive before 11am on summer days.",
+      "facts": [
+        "Blue Flag",
+        "Lifeguarded (summer)",
+        "Cliff-ringed cove"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "keem-bay",
+      "path": "/place/11/keem-bay"
+    },
+    {
+      "id": 12,
+      "name": "Dog’s Bay & Gurteen Bay",
+      "county": "Galway",
+      "category": "beach",
+      "latitude": 53.3853,
+      "longitude": -9.9159,
+      "cost": "Free",
+      "distance": "3 km around the headland",
+      "kicker": "A tombolo of two white shell-sand beaches",
+      "description": "Back-to-back beaches joined by a narrow spit near Roundstone, with turquoise water and sand made almost entirely of tiny fossilised shells. One of Connemara’s most striking coastal walks.",
+      "address": "Dog’s Bay, Roundstone, Co. Galway",
+      "parking": "Free car parking behind both beaches.",
+      "facts": [
+        "Shell sand",
+        "Tombolo",
+        "Swimming & walking"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "dog-s-bay-gurteen-bay",
+      "path": "/place/12/dog-s-bay-gurteen-bay"
+    },
+    {
+      "id": 13,
+      "name": "Cobh Waterfront & Titanic Memorial",
+      "county": "Cork",
+      "category": "historic",
+      "latitude": 51.8505,
+      "longitude": -8.2951,
+      "cost": "Free",
+      "distance": "2 km promenade walk",
+      "kicker": "The Titanic’s last port of call",
+      "description": "Walk the pastel harbour-front promenade where 123 passengers boarded the Titanic in 1912, its final stop before the Atlantic. The Lusitania Peace Memorial and cathedral views add to a town built on emigration history.",
+      "address": "Cobh Promenade, Co. Cork",
+      "parking": "Free on-street parking around the town; paid car parks near the seafront.",
+      "facts": [
+        "Titanic’s last port",
+        "Heritage town",
+        "Harbour views"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "cobh-waterfront-titanic-memorial",
+      "path": "/place/13/cobh-waterfront-titanic-memorial"
+    },
+    {
+      "id": 14,
+      "name": "Slieve Gullion Passage Tomb",
+      "county": "Armagh",
+      "category": "viewpoint",
+      "latitude": 54.118,
+      "longitude": -6.4361,
+      "cost": "Free",
+      "distance": "1.5 km return from top car park",
+      "kicker": "The highest surviving passage tomb in Ireland or Britain",
+      "description": "Climb from the forest-drive car park to the Neolithic South Cairn on Armagh’s highest summit, with a small lake in the crater behind it and panoramic views over the Ring of Gullion.",
+      "address": "Slieve Gullion Forest Park, Newry Road, Co. Armagh",
+      "parking": "Free car park at the top of the scenic forest drive.",
+      "facts": [
+        "576 m summit",
+        "Neolithic passage tomb",
+        "Ring of Gullion views"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "slieve-gullion-passage-tomb",
+      "path": "/place/14/slieve-gullion-passage-tomb"
+    },
+    {
+      "id": 15,
+      "name": "Trinity College Campus",
+      "county": "Dublin",
+      "category": "historic",
+      "latitude": 53.3438,
+      "longitude": -6.2546,
+      "cost": "Free (paid Book of Kells/Long Room)",
+      "distance": "Self-guided campus walk",
+      "kicker": "Ireland’s oldest university, in the heart of the city",
+      "description": "Wander cobbled squares dating to 1592, past the Campanile and the Rubrics to the Old Library building. The Long Room and Book of Kells need a ticket; the campus itself doesn’t.",
+      "address": "Trinity College, College Green, Dublin 2",
+      "parking": "No on-site parking; use city-centre paid car parks or public transport.",
+      "facts": [
+        "Founded 1592",
+        "Free campus access",
+        "Paid Book of Kells"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "trinity-college-campus",
+      "path": "/place/15/trinity-college-campus"
+    },
+    {
+      "id": 16,
+      "name": "Benbulben View at Drumcliffe",
+      "county": "Sligo",
+      "category": "viewpoint",
+      "latitude": 54.3339,
+      "longitude": -8.5109,
+      "cost": "Free",
+      "distance": "Roadside stop",
+      "kicker": "Yeats country, under Ireland’s iconic table mountain",
+      "description": "Visit W.B. Yeats’s grave in Drumcliffe churchyard with Benbulben’s flat-topped silhouette rising behind it, the view that shaped his best-known epitaph.",
+      "address": "Drumcliffe Church, Co. Sligo",
+      "parking": "Free car park at the church.",
+      "facts": [
+        "Yeats’s grave",
+        "Iconic mountain backdrop",
+        "5 min stop"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "benbulben-view-at-drumcliffe",
+      "path": "/place/16/benbulben-view-at-drumcliffe"
+    },
+    {
+      "id": 17,
+      "name": "Hill of Tara",
+      "county": "Meath",
+      "category": "historic",
+      "latitude": 53.5766,
+      "longitude": -6.6106,
+      "cost": "Free",
+      "distance": "2 km of walking paths",
+      "kicker": "The ancient seat of Ireland’s High Kings",
+      "description": "Walk the open grassy mounds of a royal and ceremonial site used for over 5,000 years, including the Stone of Destiny where High Kings were once crowned, with views across the Boyne Valley.",
+      "address": "Hill of Tara, Co. Meath",
+      "parking": "Free car park at the visitor centre.",
+      "facts": [
+        "5,000+ years of use",
+        "Stone of Destiny",
+        "Open access"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "hill-of-tara",
+      "path": "/place/17/hill-of-tara"
+    },
+    {
+      "id": 18,
+      "name": "Glenbarrow Waterfall Loop",
+      "county": "Laois",
+      "category": "trail",
+      "latitude": 53.1538,
+      "longitude": -7.5391,
+      "cost": "Free",
+      "distance": "7 km loop",
+      "kicker": "A three-tiered waterfall hidden in the Slieve Bloom Mountains",
+      "description": "Follow the River Barrow upstream through mature conifer woodland to Clamp Hole, where the water tumbles over three rocky tiers. The midlands hide some of Ireland’s quietest walking country, and this loop rarely sees a queue.",
+      "address": "Glenbarrow car park, Rosenallis, Co. Laois",
+      "parking": "Free car park at the trailhead, signposted from Rosenallis village.",
+      "facts": [
+        "7 km loop",
+        "Moderate",
+        "Waymarked"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "glenbarrow-waterfall-loop",
+      "path": "/place/18/glenbarrow-waterfall-loop"
+    },
+    {
+      "id": 19,
+      "name": "Magho Viewpoint, Lough Navar Forest",
+      "county": "Fermanagh",
+      "category": "viewpoint",
+      "latitude": 54.4506,
+      "longitude": -7.9427,
+      "cost": "Free",
+      "distance": "7 mile forest drive",
+      "kicker": "A 300m clifftop panorama over Lower Lough Erne",
+      "description": "Drive the Lough Navar Forest Drive to its highest point for a sweeping view across the lough’s scattered islands, stretching into Donegal, Sligo and Tyrone on a clear day.",
+      "address": "Lough Navar Forest, Derrygonnelly, Co. Fermanagh",
+      "parking": "Free car park at the viewpoint, reached via the forest drive.",
+      "facts": [
+        "300 m high",
+        "Car-accessible",
+        "Picnic area"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "magho-viewpoint-lough-navar-forest",
+      "path": "/place/19/magho-viewpoint-lough-navar-forest"
+    },
+    {
+      "id": 20,
+      "name": "Lough Boora Discovery Park",
+      "county": "Offaly",
+      "category": "trail",
+      "latitude": 53.2333,
+      "longitude": -7.6167,
+      "cost": "Free",
+      "distance": "2.8 km sculpture loop",
+      "kicker": "A reclaimed bogland trail strung with large-scale sculpture",
+      "description": "Follow the sculpture loop across former industrial cutaway bog, now a wetland sanctuary, passing two dozen artworks built from rail line, timber and stone.",
+      "address": "Lough Boora Discovery Park, Kilcormac, Co. Offaly",
+      "parking": "Free car park, open 8am-6pm year-round.",
+      "facts": [
+        "2.8 km loop",
+        "Flat & accessible",
+        "Wildlife hide"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "lough-boora-discovery-park",
+      "path": "/place/20/lough-boora-discovery-park"
+    },
+    {
+      "id": 21,
+      "name": "Clare Glens",
+      "county": "Limerick",
+      "category": "trail",
+      "latitude": 52.697,
+      "longitude": -8.387,
+      "cost": "Free",
+      "distance": "4 km loop",
+      "kicker": "A red sandstone gorge of cascading waterfalls",
+      "description": "Cross footbridges through mixed woodland as the Clare River drops through a series of falls on the Limerick-Tipperary border, one of the midlands’ best-kept walking secrets.",
+      "address": "Clare Glens car park, Murroe, Co. Limerick",
+      "parking": "Free roadside car park beside the bridge, signposted from Murroe and Newport.",
+      "facts": [
+        "4 km loop",
+        "Easy-moderate",
+        "Picnic area"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "clare-glens",
+      "path": "/place/21/clare-glens"
+    },
+    {
+      "id": 22,
+      "name": "Murlough Beach",
+      "county": "Down",
+      "category": "beach",
+      "latitude": 54.2392238,
+      "longitude": -5.8413066,
+      "cost": "Free entry, paid car park",
+      "distance": "4 mile strand",
+      "kicker": "Four miles of dune-backed strand beneath the Mournes",
+      "description": "Boardwalks cross a 6,000-year-old dune system to a long golden beach with the Mourne Mountains rising behind it, one of the finest coastal nature reserves in the north.",
+      "address": "Murlough National Nature Reserve, Dundrum, Co. Down",
+      "parking": "National Trust car park, seasonal charge (roughly £3-£7); free for NT members.",
+      "facts": [
+        "4 mile strand",
+        "Dune trails",
+        "Blue Flag"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "murlough-beach",
+      "path": "/place/22/murlough-beach"
+    },
+    {
+      "id": 23,
+      "name": "Cavan Burren Park",
+      "county": "Cavan",
+      "category": "historic",
+      "latitude": 54.2119,
+      "longitude": -7.7194,
+      "cost": "Free",
+      "distance": "3 km loop",
+      "kicker": "A megalithic landscape of tombs and pre-bog walls",
+      "description": "Wander a small, spiritual landscape of wedge and portal tombs, hut sites and stone-age field walls, overlooked by Cuilcagh Mountain, then follow the Cavan Way onward to the Shannon Pot, source of Ireland’s longest river.",
+      "address": "Cavan Burren Park, Blacklion, Co. Cavan",
+      "parking": "Free car park with interpretive centre and picnic area.",
+      "facts": [
+        "5,000+ years old",
+        "5 waymarked trails",
+        "Accessible path"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "cavan-burren-park",
+      "path": "/place/23/cavan-burren-park"
+    },
+    {
+      "id": 24,
+      "name": "Slieve Foye & Carlingford Lough Loop",
+      "county": "Louth",
+      "category": "viewpoint",
+      "latitude": 54.0486,
+      "longitude": -6.1889,
+      "cost": "Free",
+      "distance": "9 km loop",
+      "kicker": "A mountain loop above Ireland’s fjord-like lough",
+      "description": "Climb from the medieval streets of Carlingford through forestry and open mountain to the 589m summit of Slieve Foye, with the lough, the Mournes and the Cooley Peninsula spread out below.",
+      "address": "Carlingford Tourist Office car park, Co. Louth",
+      "parking": "Free car parking beside the harbour in Carlingford.",
+      "facts": [
+        "9 km loop",
+        "589 m summit",
+        "Waymarked"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "slieve-foye-carlingford-lough-loop",
+      "path": "/place/24/slieve-foye-carlingford-lough-loop"
+    },
+    {
+      "id": 25,
+      "name": "Davagh Forest (OM Dark Sky Park)",
+      "county": "Tyrone",
+      "category": "camp",
+      "latitude": 54.718,
+      "longitude": -6.918,
+      "cost": "Free",
+      "distance": "3.4 km Solar Walk",
+      "kicker": "Stargazing and a Bronze Age stone circle complex",
+      "description": "One of Ireland’s few designated Dark Sky Parks, in the foothills of the Sperrins. Follow the Solar Walk boardwalk from the observatory out to the Beaghmore Stone Circles, laid out by astronomers 4,000 years before this one existed.",
+      "address": "Davagh Forest, Cookstown, Co. Tyrone",
+      "parking": "Free car parks (upper and lower) on site.",
+      "facts": [
+        "Dark Sky Park",
+        "3.4 km Solar Walk",
+        "Bronze Age circles"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "davagh-forest-om-dark-sky-park",
+      "path": "/place/25/davagh-forest-om-dark-sky-park"
+    },
+    {
+      "id": 26,
+      "name": "Ballinesker Beach, Curracloe",
+      "county": "Wexford",
+      "category": "beach",
+      "latitude": 52.4028,
+      "longitude": -6.3597,
+      "cost": "Free",
+      "distance": "8 mile strand",
+      "kicker": "An eight-mile strand that stood in for Normandy",
+      "description": "Steven Spielberg filmed the D-Day landing scenes of Saving Private Ryan on this vast stretch of dune-backed sand. On an ordinary day it’s simply one of the east coast’s best beaches for a long walk.",
+      "address": "Curracloe Beach, Co. Wexford",
+      "parking": "Free car parks at Ballinesker, White Gap and Culletons Gap.",
+      "facts": [
+        "8 mile strand",
+        "Boardwalk access",
+        "Filming location"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "ballinesker-beach-curracloe",
+      "path": "/place/26/ballinesker-beach-curracloe"
+    },
+    {
+      "id": 27,
+      "name": "Woodstock Gardens & Forest Park",
+      "county": "Kilkenny",
+      "category": "trail",
+      "latitude": 52.5044,
+      "longitude": -7.0733,
+      "cost": "Free (small car-park charge near the gardens)",
+      "distance": "3 km of trails",
+      "kicker": "Victorian gardens and an ivy-covered avenue above the Nore",
+      "description": "Wander terraced gardens, a noble fir avenue and woodland walks above the ruins of Woodstock House, with the River Nore and Inistioge village below.",
+      "address": "Woodstock Gardens, Inistioge, Co. Kilkenny",
+      "parking": "Small free car park near the village bridge; paid car park at the main gardens entrance.",
+      "facts": [
+        "Victorian gardens",
+        "River views",
+        "Dawn-dusk"
+      ],
+      "updated_at": "2026-08-10T20:13:46.099427+00:00",
+      "slug": "woodstock-gardens-forest-park",
+      "path": "/place/27/woodstock-gardens-forest-park"
+    },
+    {
+      "id": 28,
+      "name": "Brownshill Dolmen",
+      "county": "Carlow",
+      "category": "historic",
+      "latitude": 52.8412,
+      "longitude": -6.8814,
+      "cost": "Free",
+      "distance": "Roadside stop",
+      "kicker": "Europe’s heaviest capstone, balanced for 5,000 years",
+      "description": "Stand beneath the largest known capstone of any dolmen in Europe, an estimated 100+ tonne slab of granite resting on three uprights just outside Carlow town.",
+      "address": "Brownshill Dolmen, Kernanstown, Co. Carlow",
+      "parking": "Free car park at the site, signposted from Carlow town.",
+      "facts": [
+        "100+ tonne capstone",
+        "Neolithic portal tomb",
+        "3 km from Carlow town"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "brownshill-dolmen",
+      "path": "/place/28/brownshill-dolmen"
+    },
+    {
+      "id": 29,
+      "name": "Altamont Gardens",
+      "county": "Carlow",
+      "category": "trail",
+      "latitude": 52.7264,
+      "longitude": -6.7345,
+      "cost": "Free",
+      "distance": "3.2 km lakeside walk",
+      "kicker": "A romantic garden above the River Slaney",
+      "description": "Wander sweeping lawns, a spring-fed lake and an ancient oak wood at one of Ireland’s finest gardens, laid out over three generations and gifted to the state in 1999. Entry has always been free.",
+      "address": "Altamont Gardens, Ballon, Co. Carlow, R93 W240",
+      "parking": "Free car park at the visitor centre.",
+      "facts": [
+        "40-acre gardens",
+        "OPW-run, free entry",
+        "Ice Age glen walk"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "altamont-gardens",
+      "path": "/place/29/altamont-gardens"
+    },
+    {
+      "id": 30,
+      "name": "The Curragh Plains",
+      "county": "Kildare",
+      "category": "trail",
+      "latitude": 53.1667,
+      "longitude": -6.8167,
+      "cost": "Free",
+      "distance": "Open access plain",
+      "kicker": "A vast open common at the heart of Irish horse racing",
+      "description": "Walk or picnic across nearly 5,000 acres of unfenced grassland, grazed since the Bronze Age and still home to racehorse strings on their morning gallops beside the racecourse.",
+      "address": "The Curragh, Co. Kildare",
+      "parking": "Free roadside parking around the plain.",
+      "facts": [
+        "~5,000 acres",
+        "Common land since antiquity",
+        "Home of Irish horse racing"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "the-curragh-plains",
+      "path": "/place/30/the-curragh-plains"
+    },
+    {
+      "id": 31,
+      "name": "Castletown House Parkland",
+      "county": "Kildare",
+      "category": "trail",
+      "latitude": 53.3547,
+      "longitude": -6.5372,
+      "cost": "Free (paid house tours)",
+      "distance": "4 km riverside trails",
+      "kicker": "Ireland’s grandest Palladian house, with free parkland to explore",
+      "description": "Walk the tree-lined avenue and riverside paths of Ireland’s largest and earliest Palladian house, past follies and the Liffey — the guided house tour is the only part that costs anything.",
+      "address": "Castletown House, Celbridge, Co. Kildare, W23 RP62",
+      "parking": "Free car park on site.",
+      "facts": [
+        "Built 1722",
+        "Free parkland access",
+        "Liffey-side walks"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "castletown-house-parkland",
+      "path": "/place/31/castletown-house-parkland"
+    },
+    {
+      "id": 32,
+      "name": "Glencar Waterfall",
+      "county": "Leitrim",
+      "category": "viewpoint",
+      "latitude": 54.34,
+      "longitude": -8.369,
+      "cost": "Free",
+      "distance": "10 min return walk",
+      "kicker": "The waterfall Yeats made famous in verse",
+      "description": "A short path leads to a 15-metre cascade tumbling into wooded Glencar Lake, the setting for W.B. Yeats’s poem “The Stolen Child” and one of the northwest’s easiest big-view walks.",
+      "address": "Glencar Waterfall, Co. Leitrim",
+      "parking": "Free car park at the trailhead on the R284.",
+      "facts": [
+        "15 m falls",
+        "Yeats connection",
+        "10-minute walk"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "glencar-waterfall",
+      "path": "/place/32/glencar-waterfall"
+    },
+    {
+      "id": 33,
+      "name": "Lough Rynn Estate",
+      "county": "Leitrim",
+      "category": "trail",
+      "latitude": 53.9032,
+      "longitude": -7.8554,
+      "cost": "Free",
+      "distance": "6 km of trails",
+      "kicker": "A lakeside demesne once home to the Earls of Leitrim",
+      "description": "Follow woodland and lakeshore trails through a 300-year-old estate, past a ruined castle, walled garden and Lough Rynn itself, with a mile-long lakeside walk that rarely feels busy.",
+      "address": "Lough Rynn Estate, Mohill, Co. Leitrim, N41 KV81",
+      "parking": "Free car park at the estate entrance.",
+      "facts": [
+        "300+ years old",
+        "6 km of trails",
+        "Lakeshore walk"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "lough-rynn-estate",
+      "path": "/place/33/lough-rynn-estate"
+    },
+    {
+      "id": 34,
+      "name": "Royal Canal Greenway – Richmond Harbour",
+      "county": "Longford",
+      "category": "trail",
+      "latitude": 53.733,
+      "longitude": -7.908,
+      "cost": "Free",
+      "distance": "Flat greenway, any length",
+      "kicker": "A traffic-free towpath where the Royal Canal meets the Shannon",
+      "description": "Walk or cycle the flat towpath where the 145 km Royal Canal Greenway reaches its western end at a quiet stone harbour, with locks, an old dry dock and swans for company.",
+      "address": "Richmond Harbour, Cloondara, Co. Longford",
+      "parking": "Free car park at the harbour.",
+      "facts": [
+        "145 km greenway",
+        "Flat & traffic-free",
+        "Canal meets Shannon"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "royal-canal-greenway-richmond-harbour",
+      "path": "/place/34/royal-canal-greenway-richmond-harbour"
+    },
+    {
+      "id": 35,
+      "name": "Ardagh Heritage Village",
+      "county": "Longford",
+      "category": "historic",
+      "latitude": 53.667,
+      "longitude": -7.693,
+      "cost": "Free",
+      "distance": "Self-guided village walk",
+      "kicker": "A tidy Victorian estate village frozen in time",
+      "description": "Wander a picture-book cluster of thatched and slated cottages built around a green by the Fetherston family in the 1860s, with a small heritage centre and holy well a short walk beyond.",
+      "address": "Ardagh, Co. Longford",
+      "parking": "Free parking on the village green.",
+      "facts": [
+        "Built 1860s",
+        "Tidy Towns winner",
+        "Holy well nearby"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "ardagh-heritage-village",
+      "path": "/place/35/ardagh-heritage-village"
+    },
+    {
+      "id": 36,
+      "name": "Rossmore Forest Park",
+      "county": "Monaghan",
+      "category": "trail",
+      "latitude": 54.2214,
+      "longitude": -6.993,
+      "cost": "Free",
+      "distance": "10 km of trails",
+      "kicker": "Lakeside forest trails around a ruined Victorian castle",
+      "description": "Follow waymarked trails through mixed woodland and past several small lakes to the ruins of Rossmore Castle, once one of Ulster’s grandest houses.",
+      "address": "Rossmore Forest Park, Monaghan, Co. Monaghan",
+      "parking": "Free car park at the entrance.",
+      "facts": [
+        "10 km of trails",
+        "Ruined castle",
+        "Several small lakes"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "rossmore-forest-park",
+      "path": "/place/36/rossmore-forest-park"
+    },
+    {
+      "id": 37,
+      "name": "Monaghan County Museum",
+      "county": "Monaghan",
+      "category": "historic",
+      "latitude": 54.2555,
+      "longitude": -6.97,
+      "cost": "Free",
+      "distance": "30-45 min visit",
+      "kicker": "An award-winning free museum, now on the new Peace Campus",
+      "description": "See the 14th-century Cross of Clogher and centuries of local history in a museum that has twice won the Council of Europe Museum Prize, all at no charge. It moved from Hill Street to the new Monaghan Peace Campus in 2024.",
+      "address": "Monaghan Peace Campus, Plantation Road, Monaghan, Co. Monaghan, H18 RP20",
+      "parking": "Free car parking at the Peace Campus.",
+      "facts": [
+        "Free entry",
+        "Council of Europe Prize winner",
+        "Cross of Clogher"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "monaghan-county-museum",
+      "path": "/place/37/monaghan-county-museum"
+    },
+    {
+      "id": 38,
+      "name": "Lough Key Forest Park",
+      "county": "Roscommon",
+      "category": "trail",
+      "latitude": 53.9821,
+      "longitude": -8.246,
+      "cost": "Free entry (paid car park)",
+      "distance": "9 km of trails",
+      "kicker": "Island-dotted lake trails around a fairytale forest park",
+      "description": "Wander lakeshore and woodland trails past follies, a moon gate and an underground tunnel network to views over island-studded Lough Key; the treetop canopy walk and boat trips cost extra, but the park itself is free.",
+      "address": "Lough Key Forest Park, Boyle, Co. Roscommon",
+      "parking": "Paid car park (small daily charge).",
+      "facts": [
+        "9 km of trails",
+        "Free park entry",
+        "Islands & follies"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "lough-key-forest-park",
+      "path": "/place/38/lough-key-forest-park"
+    },
+    {
+      "id": 39,
+      "name": "Rathcroghan (Cruachan Aí)",
+      "county": "Roscommon",
+      "category": "historic",
+      "latitude": 53.7717,
+      "longitude": -8.3987,
+      "cost": "Free (paid visitor centre)",
+      "distance": "Open access mounds",
+      "kicker": "Connacht’s royal capital and the mythical home of Queen Maeve",
+      "description": "Walk between more than 240 archaeological monuments scattered across open farmland, the ceremonial capital of Connacht for over 4,000 years and the legendary seat of Queen Maeve. The fields are free to explore, though the exhibition centre in the village charges.",
+      "address": "Rathcroghan, Tulsk, Co. Roscommon",
+      "parking": "Free roadside parking near the monuments.",
+      "facts": [
+        "240+ monuments",
+        "4,000+ years of use",
+        "Legendary seat of Queen Maeve"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "rathcroghan-cruachan-ai",
+      "path": "/place/39/rathcroghan-cruachan-ai"
+    },
+    {
+      "id": 40,
+      "name": "Mahon Falls",
+      "county": "Waterford",
+      "category": "viewpoint",
+      "latitude": 52.2237,
+      "longitude": -7.5412,
+      "cost": "Free",
+      "distance": "3 km return",
+      "kicker": "A dramatic cascade at the head of a glacial valley",
+      "description": "Follow a rough path up a U-shaped glacial valley in the Comeraghs to where the Mahon River drops over a rock face, one of the most photographed short walks in the southeast.",
+      "address": "Mahon Falls, Comeragh Mountains, Co. Waterford",
+      "parking": "Free car park at the trailhead.",
+      "facts": [
+        "3 km return",
+        "Glacial valley",
+        "Comeragh Mountains"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "mahon-falls",
+      "path": "/place/40/mahon-falls"
+    },
+    {
+      "id": 41,
+      "name": "Waterford Greenway",
+      "county": "Waterford",
+      "category": "trail",
+      "latitude": 52.2593,
+      "longitude": -7.1101,
+      "cost": "Free",
+      "distance": "46 km one-way",
+      "kicker": "Ireland’s longest off-road greenway, on an old railway line",
+      "description": "Walk or cycle a flat, fully off-road former railway line from Waterford city to Dungarvan, crossing viaducts and the 400 m Ballyvoyle Tunnel with sea views along the final stretch.",
+      "address": "Waterford Greenway, Kilmeaden, Co. Waterford",
+      "parking": "Free car parks at multiple access points along the route.",
+      "facts": [
+        "46 km one-way",
+        "Fully traffic-free",
+        "Viaducts & tunnels"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "waterford-greenway",
+      "path": "/place/41/waterford-greenway"
+    },
+    {
+      "id": 42,
+      "name": "Hill of Uisneach",
+      "county": "Westmeath",
+      "category": "historic",
+      "latitude": 53.4886,
+      "longitude": -7.5628,
+      "cost": "Free to view from the road; guided hilltop walk ~€16pp (seasonal, pre-booked)",
+      "distance": "2 km hilltop loop (guided)",
+      "kicker": "The mythical centre of Ireland",
+      "description": "The broad hill said to be the ceremonial and spiritual centre of ancient Ireland, topped by the Cat Stone marking the meeting point of the five provinces, sits on private working farmland. It’s visible and free from the surrounding road, but reaching the summit means joining a seasonal, pre-booked guided walk.",
+      "address": "Hill of Uisneach, Ballymore, Co. Westmeath",
+      "parking": "Parking provided as part of the guided-walk booking.",
+      "facts": [
+        "182 m summit",
+        "Cat Stone",
+        "Access via guided walk only"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "hill-of-uisneach",
+      "path": "/place/42/hill-of-uisneach"
+    },
+    {
+      "id": 43,
+      "name": "Fore Abbey & the Seven Wonders of Fore",
+      "county": "Westmeath",
+      "category": "historic",
+      "latitude": 53.6975,
+      "longitude": -7.2417,
+      "cost": "Free",
+      "distance": "1 km village walk",
+      "kicker": "A ruined Benedictine abbey and its seven medieval “wonders”",
+      "description": "Explore the ruins of a 7th-century monastic site tucked into a quiet valley, still associated with seven local “wonders” including a mill without a stream and a tree said never to burn.",
+      "address": "Fore Abbey, Fore, Co. Westmeath",
+      "parking": "Free car park in the village.",
+      "facts": [
+        "Founded 7th century",
+        "Seven Wonders of Fore",
+        "Anchorite’s cell"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "fore-abbey-the-seven-wonders-of-fore",
+      "path": "/place/43/fore-abbey-the-seven-wonders-of-fore"
+    },
+    {
+      "id": 44,
+      "name": "Torc Waterfall",
+      "county": "Kerry",
+      "category": "viewpoint",
+      "latitude": 52.005,
+      "longitude": -9.507,
+      "cost": "Free (paid car park at the base)",
+      "distance": "400 m return (or 8 km loop)",
+      "kicker": "Killarney National Park’s most-photographed waterfall",
+      "description": "Climb a short path to where the Owengarriff River drops 20 metres through mossy woodland, then continue up the Old Kenmare Road for views over the Killarney lakes — inside a national park that never charges for entry.",
+      "address": "Torc Waterfall, Killarney National Park, Co. Kerry",
+      "parking": "Paid car park at the trailhead on the N71.",
+      "facts": [
+        "20 m waterfall",
+        "Free national park entry",
+        "Lake views from the ridge"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "torc-waterfall",
+      "path": "/place/44/torc-waterfall"
+    },
+    {
+      "id": 45,
+      "name": "Phoenix Park",
+      "county": "Dublin",
+      "category": "trail",
+      "latitude": 53.36,
+      "longitude": -6.325,
+      "cost": "Free",
+      "distance": "11 km perimeter, open access",
+      "kicker": "One of Europe’s largest enclosed city parks",
+      "description": "Roam 700 hectares of parkland minutes from the city centre, home to a wild fallow deer herd, the Wellington Monument and the President’s residence, with free walking and cycling trails throughout.",
+      "address": "Phoenix Park, Dublin 8",
+      "parking": "Free car parking within the park.",
+      "facts": [
+        "707 hectares",
+        "Wild deer herd",
+        "Free, open 24 hours"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "phoenix-park",
+      "path": "/place/45/phoenix-park"
+    },
+    {
+      "id": 46,
+      "name": "Diamond Hill, Connemara National Park",
+      "county": "Galway",
+      "category": "trail",
+      "latitude": 53.5486,
+      "longitude": -9.9036,
+      "cost": "Free",
+      "distance": "7 km loop (or 3 km lower loop)",
+      "kicker": "A quartzite peak with the best view in Connemara",
+      "description": "Climb a boardwalked and stepped trail through bogland and heath to the 442 m summit of Diamond Hill, with the Twelve Bens, Kylemore Abbey and the Atlantic all visible from the top. Entry to the national park is free.",
+      "address": "Connemara National Park, Letterfrack, Co. Galway",
+      "parking": "Free car park at the visitor centre.",
+      "facts": [
+        "442 m summit",
+        "Free national park entry",
+        "Twelve Bens views"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "diamond-hill-connemara-national-park",
+      "path": "/place/46/diamond-hill-connemara-national-park"
+    },
+    {
+      "id": 47,
+      "name": "Gougane Barra",
+      "county": "Cork",
+      "category": "viewpoint",
+      "latitude": 51.839,
+      "longitude": -9.319,
+      "cost": "Free (€5 forest park car park charge)",
+      "distance": "1.5 km lakeside loop",
+      "kicker": "A hidden lake where the River Lee begins",
+      "description": "Walk the forested shore of a mountain-ringed lake to St Finbarr’s tiny oratory on its own island, connected by a causeway — the spot where Cork’s patron saint founded a monastery, and where the River Lee rises.",
+      "address": "Gougane Barra, Ballingeary, Co. Cork",
+      "parking": "Coillte forest park car park, €5 charge.",
+      "facts": [
+        "Source of the River Lee",
+        "St Finbarr’s oratory",
+        "Forest park loop"
+      ],
+      "updated_at": "2026-09-03T18:12:41.361156+00:00",
+      "slug": "gougane-barra",
+      "path": "/place/47/gougane-barra"
+    },
+    {
+      "id": 48,
+      "name": "Croagh Patrick",
+      "county": "Mayo",
+      "category": "trail",
+      "latitude": 53.7783,
+      "longitude": -9.6315,
+      "cost": "Free",
+      "distance": "7 km return",
+      "kicker": "Ireland’s holy mountain, climbed by pilgrims for 1,500 years",
+      "description": "Climb the scree-topped cone above Clew Bay on the same path pilgrims have walked (some barefoot) since St Patrick’s 40-day fast here in 441 AD, with the bay’s scattered “drowned drumlin” islands opening out below.",
+      "address": "Murrisk, near Westport, Co. Mayo",
+      "parking": "Free car park at Murrisk, at the foot of the mountain.",
+      "facts": [
+        "764 m summit",
+        "Reek Sunday pilgrimage",
+        "Steep scree near top"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "croagh-patrick",
+      "path": "/place/48/croagh-patrick"
+    },
+    {
+      "id": 49,
+      "name": "Downpatrick Head",
+      "county": "Mayo",
+      "category": "viewpoint",
+      "latitude": 54.326,
+      "longitude": -9.3457,
+      "cost": "Free",
+      "distance": "1 km loop",
+      "kicker": "A clifftop blowhole beside the sea stack of Dún Briste",
+      "description": "Walk the open clifftop to Dún Briste, a 45m sea stack that sheared from the mainland in a 1393 storm, marooning a family who were rescued the next day, plus a roaring blowhole underfoot — mind the unfenced edges.",
+      "address": "Ballycastle, Co. Mayo",
+      "parking": "Free car park at the site, 6 km north of Ballycastle village.",
+      "facts": [
+        "Dún Briste stack, 45 m",
+        "Wild Atlantic Way signature point",
+        "Unfenced cliffs"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "downpatrick-head",
+      "path": "/place/49/downpatrick-head"
+    },
+    {
+      "id": 50,
+      "name": "Malin Head",
+      "county": "Donegal",
+      "category": "viewpoint",
+      "latitude": 55.3708,
+      "longitude": -7.3839,
+      "cost": "Free",
+      "distance": "1-2 km loop",
+      "kicker": "The most northerly point on mainland Ireland",
+      "description": "Walk the headland to Banba’s Crown, an 1805 signal tower, past the huge “EIRE 80” marker cut into the cliff to warn WWII pilots of neutral ground, with Inishowen’s Atlantic edge stretching out on every side.",
+      "address": "Banba’s Crown, Malin Head, Co. Donegal",
+      "parking": "Free car park at Banba’s Crown.",
+      "facts": [
+        "Ireland’s northernmost point",
+        "1805 signal tower",
+        "WWII “EIRE 80” marker"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "malin-head",
+      "path": "/place/50/malin-head"
+    },
+    {
+      "id": 51,
+      "name": "Fanad Head Lighthouse",
+      "county": "Donegal",
+      "category": "viewpoint",
+      "latitude": 55.2763,
+      "longitude": -7.6317,
+      "cost": "Free grounds (paid tower tour)",
+      "distance": "Roadside/headland access",
+      "kicker": "Regularly voted one of the most beautiful lighthouses in the world",
+      "description": "First lit on St Patrick’s Day 1817 after the wreck of HMS Saldanha claimed 250 lives nearby. The grounds and headland views are free; climbing the 76-step tower is a paid tour.",
+      "address": "Fanad Head, near Portsalon, Co. Donegal",
+      "parking": "Free car park at the lighthouse.",
+      "facts": [
+        "First lit 1817",
+        "22 m tower, 76 steps",
+        "One of the world’s prettiest lighthouses"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "fanad-head-lighthouse",
+      "path": "/place/51/fanad-head-lighthouse"
+    },
+    {
+      "id": 52,
+      "name": "Mount Errigal",
+      "county": "Donegal",
+      "category": "trail",
+      "latitude": 55.0339,
+      "longitude": -8.12,
+      "cost": "Free",
+      "distance": "5 km return",
+      "kicker": "Donegal’s highest peak, glowing pink at sunset",
+      "description": "Climb the quartzite scree of Errigal’s near-perfect cone, the highest of the Derryveagh range’s “Seven Sisters”, for a summit view across Donegal’s loughs and coastline that has been called Ireland’s answer to Fuji.",
+      "address": "R251 car park, near Dunlewey/Gweedore, Co. Donegal",
+      "parking": "Free roadside car park on the R251.",
+      "facts": [
+        "751 m summit",
+        "Quartzite scree ridge",
+        "Highest peak in Donegal"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "mount-errigal",
+      "path": "/place/52/mount-errigal"
+    },
+    {
+      "id": 53,
+      "name": "Fair Head",
+      "county": "Antrim",
+      "category": "viewpoint",
+      "latitude": 55.2211,
+      "longitude": -6.154,
+      "cost": "Free (small seasonal car-park donation)",
+      "distance": "8-9 km loop",
+      "kicker": "Ireland’s biggest cliff face, a dolerite wall popular with rock climbers",
+      "description": "Walk the plateau above a 100m-plus sheer dolerite cliff formed 60 million years ago, past the Lough na Cranagh crannóg, with views to Rathlin Island and Scotland’s Mull of Kintyre on a clear day.",
+      "address": "Coolanlough Road, near Ballycastle, Co. Antrim",
+      "parking": "Small seasonal car-park charge at Ballyvoy/Coolanlough Road.",
+      "facts": [
+        "5 km dolerite cliff",
+        "Views to Scotland",
+        "Popular climbing venue"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "fair-head",
+      "path": "/place/53/fair-head"
+    },
+    {
+      "id": 54,
+      "name": "Dark Hedges",
+      "county": "Antrim",
+      "category": "historic",
+      "latitude": 55.1383,
+      "longitude": -6.3838,
+      "cost": "Free",
+      "distance": "500 m avenue",
+      "kicker": "A beech-tree tunnel made famous as Game of Thrones’ Kingsroad",
+      "description": "Walk the gnarled avenue of beech trees planted by the Stuart family around 1775 as the entrance to Gracehill House, fewer than 90 of the original ~150 now standing, still one of the most photographed roads in Ireland.",
+      "address": "Bregagh Road, Stranocum, Ballymoney, Co. Antrim, BT53 8PX",
+      "parking": "Small pay-and-display car park nearby; road itself is public.",
+      "facts": [
+        "Planted c. 1775",
+        "Game of Thrones filming site",
+        "Fewer than 90 trees remain"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "dark-hedges",
+      "path": "/place/54/dark-hedges"
+    },
+    {
+      "id": 55,
+      "name": "Giant’s Ring",
+      "county": "Down",
+      "category": "historic",
+      "latitude": 54.5403,
+      "longitude": -5.95,
+      "cost": "Free",
+      "distance": "1 km loop",
+      "kicker": "A 5,000-year-old Neolithic henge on Belfast’s edge",
+      "description": "Walk the perimeter of a huge circular earthwork bank, 180m across and up to 3.5m high, enclosing a central passage-tomb dolmen dating to around 3000 BC — open access with no ticket booth.",
+      "address": "Off Ballynahatty Road, near Shaw’s Bridge, Belfast, Co. Down",
+      "parking": "Park at Minnowburn/Shaw’s Bridge and walk across the field.",
+      "facts": [
+        "180 m diameter henge",
+        "Dolmen c. 3000 BC",
+        "State Care monument"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "giant-s-ring",
+      "path": "/place/55/giant-s-ring"
+    },
+    {
+      "id": 56,
+      "name": "Cave Hill Country Park",
+      "county": "Antrim",
+      "category": "trail",
+      "latitude": 54.6428,
+      "longitude": -5.9422,
+      "cost": "Free",
+      "distance": "6-8 km of trails",
+      "kicker": "Belfast’s basalt hilltop, said to have inspired Gulliver’s Travels",
+      "description": "Climb to McArt’s Fort, an ancient promontory fort atop the cliff profile nicknamed “Napoleon’s Nose”, where Wolfe Tone and the United Irishmen are said to have met in 1795, with the whole of Belfast and Belfast Lough spread out below.",
+      "address": "Belfast Castle car park, Antrim Road, Belfast, BT15 5GR",
+      "parking": "Free car park at Belfast Castle.",
+      "facts": [
+        "368 m summit",
+        "McArt’s Fort",
+        "Views to Scotland"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "cave-hill-country-park",
+      "path": "/place/56/cave-hill-country-park"
+    },
+    {
+      "id": 57,
+      "name": "Divis and the Black Mountain",
+      "county": "Antrim",
+      "category": "trail",
+      "latitude": 54.5978,
+      "longitude": -6.0064,
+      "cost": "Free",
+      "distance": "5 km return",
+      "kicker": "A former army lookout turned open moorland above Belfast",
+      "description": "Walk open heather moorland to Divis’s 478m summit trig point, past the site of a WWII plane-crash memorial on ground once used by the British Army, for panoramic views over Belfast and Belfast Lough.",
+      "address": "Divis Road, Upper Springfield Road, Belfast, Co. Antrim",
+      "parking": "Free National Trust car park (café/upper car park closed for construction until spring 2027).",
+      "facts": [
+        "478 m summit",
+        "Former military site",
+        "National Trust-managed"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "divis-and-the-black-mountain",
+      "path": "/place/57/divis-and-the-black-mountain"
+    },
+    {
+      "id": 58,
+      "name": "Portstewart Strand",
+      "county": "Derry",
+      "category": "beach",
+      "latitude": 55.1696,
+      "longitude": -6.7454,
+      "cost": "Free (paid NT car park for non-members)",
+      "distance": "3 km strand",
+      "kicker": "A two-mile Blue Flag beach where you can still drive onto the sand",
+      "description": "Walk a broad strand backed by 6,000-year-old dunes up to 30m high, one of the few Irish beaches where cars are still permitted onto the sand, and the starting point of the 33-mile Causeway Coast Way.",
+      "address": "Strand Road, Portstewart, Co. Derry~Londonderry",
+      "parking": "National Trust car park; free for members, paid for non-members.",
+      "facts": [
+        "Blue Flag",
+        "~3 km strand",
+        "Start of Causeway Coast Way"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "portstewart-strand",
+      "path": "/place/58/portstewart-strand"
+    },
+    {
+      "id": 59,
+      "name": "Whitepark Bay",
+      "county": "Antrim",
+      "category": "beach",
+      "latitude": 55.2322,
+      "longitude": -6.4047,
+      "cost": "Free",
+      "distance": "2-3 km beach walk",
+      "kicker": "A secluded, mile-wide sandy bay far quieter than the Causeway crowds",
+      "description": "Walk a broad National Trust beach backed by ancient dunes home to at least nine orchid species, with fossils regularly exposed in cliff landslips — beautiful, but unsuitable for swimming due to rip currents.",
+      "address": "Off the B15/A2 coast road, near Ballintoy, Co. Antrim",
+      "parking": "Free National Trust car park.",
+      "facts": [
+        "~3 mile beach",
+        "National Trust since 1938",
+        "Rare dune orchids"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "whitepark-bay",
+      "path": "/place/59/whitepark-bay"
+    },
+    {
+      "id": 60,
+      "name": "Ballintoy Harbour",
+      "county": "Antrim",
+      "category": "viewpoint",
+      "latitude": 55.2442,
+      "longitude": -6.3694,
+      "cost": "Free (small pay car park)",
+      "distance": "Short harbourside stroll",
+      "kicker": "A tiny working harbour that played the Iron Islands’ port of Pyke in Game of Thrones",
+      "description": "A tiny working harbour with whitewashed limestone walls set against dark basalt cliffs, made famous by its Game of Thrones appearances.",
+      "address": "Harbour Road, Ballintoy, Ballycastle, Co. Antrim, BT54 6NA",
+      "parking": "Small pay car park above the harbour.",
+      "facts": [
+        "Game of Thrones filming site",
+        "Working fishing harbour",
+        "Coastal path to Whitepark Bay"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "ballintoy-harbour",
+      "path": "/place/60/ballintoy-harbour"
+    },
+    {
+      "id": 61,
+      "name": "Slemish Mountain",
+      "county": "Antrim",
+      "category": "trail",
+      "latitude": 54.8819,
+      "longitude": -6.0964,
+      "cost": "Free",
+      "distance": "2.5 km return",
+      "kicker": "The volcanic plug where St Patrick is said to have herded sheep",
+      "description": "Climb the eroded core of an extinct volcano where tradition holds a young, enslaved St Patrick tended sheep for six years — still Antrim’s biggest gathering point every St Patrick’s Day.",
+      "address": "Slemish car park, near Broughshane, Co. Antrim",
+      "parking": "Free car park at the trailhead (toilets on site).",
+      "facts": [
+        "437 m summit",
+        "St Patrick legend",
+        "Popular St Patrick’s Day climb"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "slemish-mountain",
+      "path": "/place/61/slemish-mountain"
+    },
+    {
+      "id": 62,
+      "name": "Killiney Hill Park",
+      "county": "Dublin",
+      "category": "viewpoint",
+      "latitude": 53.2699,
+      "longitude": -6.0973,
+      "cost": "Free",
+      "distance": "2-3 km of paths",
+      "kicker": "Dublin’s “Bay of Naples” view over Killiney Bay",
+      "description": "Walk looped paths through gorse and woodland to an 1742 famine-relief obelisk at the summit, with sweeping views over Killiney Bay to the Wicklow Mountains that have long earned the area its “Bay of Naples” nickname.",
+      "address": "Victoria/Killiney Hill car park, off Vico Road, Dublin",
+      "parking": "Free car park off Vico Road/Dalkey Avenue.",
+      "facts": [
+        "153 m hill",
+        "1742 famine-relief obelisk",
+        "Views to Wicklow Mountains"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "killiney-hill-park",
+      "path": "/place/62/killiney-hill-park"
+    },
+    {
+      "id": 63,
+      "name": "Howth Cliff Walk",
+      "county": "Dublin",
+      "category": "trail",
+      "latitude": 53.3894,
+      "longitude": -6.0653,
+      "cost": "Free",
+      "distance": "7.8 km loop",
+      "kicker": "A clifftop loop above Dublin Bay, easily reached by DART",
+      "description": "Follow the clifftop path around Howth Head past the 1814 Baily Lighthouse, with views to Ireland’s Eye, Lambay Island and, on a clear day, Wales — one of Dublin’s most popular free walks, right at the end of the DART line.",
+      "address": "Howth village or Summit car park, Howth, Dublin",
+      "parking": "Free car parking near Howth village and at the Summit.",
+      "facts": [
+        "7.8 km loop",
+        "Baily Lighthouse, 1814",
+        "DART accessible"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "howth-cliff-walk",
+      "path": "/place/63/howth-cliff-walk"
+    },
+    {
+      "id": 64,
+      "name": "Bray to Greystones Cliff Walk",
+      "county": "Wicklow",
+      "category": "trail",
+      "latitude": 53.1905,
+      "longitude": -6.0842,
+      "cost": "Free",
+      "distance": "7.1 km one-way",
+      "kicker": "A railway-side clifftop path between two seaside towns",
+      "description": "Follow a path cut by 1840s railway workers along the cliffs between Bray and Greystones, with views to the Sugar Loaf and the Irish Sea; sections have closed intermittently after landslides, so check local conditions before setting out.",
+      "address": "Bray seafront (bandstand), Co. Wicklow",
+      "parking": "Free on-street and seafront parking in Bray.",
+      "facts": [
+        "7.1 km one-way",
+        "Cut by rail workers in the 1840s",
+        "Occasional landslide closures"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "bray-to-greystones-cliff-walk",
+      "path": "/place/64/bray-to-greystones-cliff-walk"
+    },
+    {
+      "id": 65,
+      "name": "Lough Tay (Guinness Lake), Sally Gap",
+      "county": "Wicklow",
+      "category": "viewpoint",
+      "latitude": 53.106,
+      "longitude": -6.2668,
+      "cost": "Free",
+      "distance": "Roadside viewpoint",
+      "kicker": "A jet-black lake with a white sand beach that looks like a poured pint of stout",
+      "description": "Stop at the roadside viewpoints above Lough Tay, framed by the cliffs of Luggala, where the Guinness family estate’s imported white sand completes the illusion — the lake shore itself is private, but the view from the R759 is free and unforgettable.",
+      "address": "R759, near Sally Gap, Co. Wicklow",
+      "parking": "Free roadside car parks (J.B. Malone / Ballinastoe Wood) on the R759.",
+      "facts": [
+        "Nicknamed “Guinness Lake”",
+        "Sally Gap ~500 m pass",
+        "View only, lake shore is private"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "lough-tay-guinness-lake-sally-gap",
+      "path": "/place/65/lough-tay-guinness-lake-sally-gap"
+    },
+    {
+      "id": 66,
+      "name": "Glendalough Monastic City",
+      "county": "Wicklow",
+      "category": "historic",
+      "latitude": 53.0103,
+      "longitude": -6.3275,
+      "cost": "Free (paid visitor-centre exhibition)",
+      "distance": "1-2 km loop",
+      "kicker": "A 6th-century monastic settlement, free to explore beside a paid exhibition",
+      "description": "Wander the graveyard, cathedral ruins, St Kevin’s Church and 30m round tower of the monastery St Kevin founded around 570 AD — the site and grounds are free and open year-round, only the visitor-centre exhibition next door charges.",
+      "address": "Glendalough Visitor Centre, near Laragh, Co. Wicklow",
+      "parking": "Paid car park at the visitor centre; site access itself is free.",
+      "facts": [
+        "Founded c. 570 AD",
+        "Round tower ~30 m",
+        "Free site, paid exhibition only"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "glendalough-monastic-city",
+      "path": "/place/66/glendalough-monastic-city"
+    },
+    {
+      "id": 67,
+      "name": "Sky Road, Clifden",
+      "county": "Galway",
+      "category": "viewpoint",
+      "latitude": 53.49,
+      "longitude": -10.055,
+      "cost": "Free",
+      "distance": "16 km loop",
+      "kicker": "A cliff-top loop road around Connemara’s most dramatic coastline",
+      "description": "Drive or walk the loop around the Kingston peninsula past the ruins of Clifden Castle (c. 1818) and the monument to town founder John D’Arcy, with the Atlantic and Connemara’s islands opening out from the high point.",
+      "address": "Clifden town, Co. Galway",
+      "parking": "Free car park at the loop’s highest point; roadside parking elsewhere.",
+      "facts": [
+        "16 km loop",
+        "Ruined Clifden Castle, c. 1818",
+        "Free, open access road"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "sky-road-clifden",
+      "path": "/place/67/sky-road-clifden"
+    },
+    {
+      "id": 68,
+      "name": "Coole Park",
+      "county": "Galway",
+      "category": "trail",
+      "latitude": 53.0965,
+      "longitude": -8.835,
+      "cost": "Free (paid visitor-centre exhibition)",
+      "distance": "1-5.5 km of trails",
+      "kicker": "Lady Gregory’s estate, where Yeats carved his initials into a tree",
+      "description": "Walk looped nature trails to the “Autograph Tree”, a copper beech carved with the initials of W.B. Yeats (1898), G.B. Shaw, J.M. Synge and other figures of the Irish Literary Revival who gathered here, the setting for Yeats’s “The Wild Swans at Coole”.",
+      "address": "Coole Park, off the N18, near Gort, Co. Galway",
+      "parking": "Free car park at the visitor centre.",
+      "facts": [
+        "Autograph Tree",
+        "Irish Literary Revival hub",
+        "Free nature-reserve trails"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "coole-park",
+      "path": "/place/68/coole-park"
+    },
+    {
+      "id": 69,
+      "name": "Athenry Town Walls",
+      "county": "Galway",
+      "category": "historic",
+      "latitude": 53.3,
+      "longitude": -8.7461,
+      "cost": "Free (Athenry Castle charges separately)",
+      "distance": "1-2 km walking route",
+      "kicker": "Ireland’s best-preserved medieval town walls",
+      "description": "Walk sections of the 13th-century walls raised under an 1310 murage grant, roughly 70% of the original circuit still standing around an almost untouched medieval street plan — the walls and streets are free, only the separate castle charges admission.",
+      "address": "Athenry town centre, Co. Galway",
+      "parking": "Free on-street parking in Athenry.",
+      "facts": [
+        "Walls from 1310",
+        "~70% of circuit survives",
+        "Best-preserved in Ireland"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "athenry-town-walls",
+      "path": "/place/69/athenry-town-walls"
+    },
+    {
+      "id": 70,
+      "name": "Lough Gur",
+      "county": "Limerick",
+      "category": "historic",
+      "latitude": 52.5142,
+      "longitude": -8.5419,
+      "cost": "Free (paid visitor-centre exhibition)",
+      "distance": "Several km of lakeshore trails",
+      "kicker": "Ireland’s largest stone circle beside a lake settled for 6,000 years",
+      "description": "Walk to the Grange Stone Circle, 113 standing stones aligned to the summer solstice sunrise, then follow the horseshoe-shaped lake past wedge tombs and early Christian remains — the stone circle and lakeshore are free, the visitor centre exhibition is not.",
+      "address": "Grange Stone Circle, near Bruff/Holycross, Co. Limerick",
+      "parking": "Free car park at the stone circle; paid parking at the visitor centre.",
+      "facts": [
+        "113-stone circle",
+        "Solstice alignment",
+        "6,000 years of settlement"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "lough-gur",
+      "path": "/place/70/lough-gur"
+    },
+    {
+      "id": 71,
+      "name": "Kilkee Cliff Walk",
+      "county": "Clare",
+      "category": "trail",
+      "latitude": 52.68,
+      "longitude": -9.66,
+      "cost": "Free",
+      "distance": "8 km loop",
+      "kicker": "A quieter answer to the Cliffs of Moher, on the Loop Head Peninsula",
+      "description": "Follow the loop around Kilkee’s Duggerna Reef and West End cliffs, unfenced Atlantic drama without the Cliffs of Moher crowds, on the same Loop Head Peninsula as the 1854 lighthouse further west.",
+      "address": "Kilkee town/West End, Co. Clare",
+      "parking": "Free on-street parking in Kilkee.",
+      "facts": [
+        "8 km loop",
+        "Unfenced cliff path",
+        "Loop Head Peninsula"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "kilkee-cliff-walk",
+      "path": "/place/71/kilkee-cliff-walk"
+    },
+    {
+      "id": 72,
+      "name": "The Vee",
+      "county": "Waterford",
+      "category": "viewpoint",
+      "latitude": 52.2423,
+      "longitude": -7.9561,
+      "cost": "Free",
+      "distance": "Roadside viewpoint",
+      "kicker": "A hairpin mountain pass with a chevron-shaped view over the Golden Vale",
+      "description": "Stop at the V-shaped bend on the old Lismore-Clogheen coach road through the Knockmealdowns, past a famine-era memorial cairn, for a sweeping view over the Golden Vale — spectacular when the rhododendrons bloom in late May.",
+      "address": "R668, between Clogheen, Co. Tipperary and Lismore, Co. Waterford",
+      "parking": "Free car park at the viewpoint.",
+      "facts": [
+        "~610 m pass",
+        "Famine memorial cairn",
+        "Rhododendrons bloom late May"
+      ],
+      "updated_at": "2026-09-03T18:09:06.658821+00:00",
+      "slug": "the-vee",
+      "path": "/place/72/the-vee"
+    },
+    {
+      "id": 73,
+      "name": "Carrauntoohil",
+      "county": "Kerry",
+      "category": "trail",
+      "latitude": 51.9994496,
+      "longitude": -9.7426932,
+      "cost": "Free",
+      "distance": "12 km return · 5-7 hours",
+      "kicker": "Ireland’s highest summit above the MacGillycuddy’s Reeks",
+      "description": "Follow the Hag’s Glen beneath steep mountain walls before the final climb to Ireland’s 1,039 m summit. This is a serious mountain day: cloud, wind and wet rock can change the character of the route quickly.",
+      "address": "Cronin’s Yard, Mealis, Beaufort, Co. Kerry",
+      "parking": "Paid parking and facilities at Cronin’s Yard; arrive early on fair-weather weekends.",
+      "facts": [
+        "1,039 m summit",
+        "Strenuous",
+        "Mountain skills needed"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "carrauntoohil",
+      "path": "/place/73/carrauntoohil"
+    },
+    {
+      "id": 74,
+      "name": "Gap of Dunloe",
+      "county": "Kerry",
+      "category": "trail",
+      "latitude": 51.9943895,
+      "longitude": -9.6442886,
+      "cost": "Free",
+      "distance": "11 km through-route",
+      "kicker": "A narrow mountain pass threaded between five dark lakes",
+      "description": "Walk or cycle the old road as it winds between the MacGillycuddy’s Reeks and Purple Mountain, passing stone bridges, glacial lakes and some of Kerry’s grandest close-range mountain scenery.",
+      "address": "Kate Kearney’s Cottage, Gap of Dunloe, Beaufort, Co. Kerry",
+      "parking": "Limited parking near Kate Kearney’s Cottage; do not obstruct residents or jarvey access.",
+      "facts": [
+        "11 km pass",
+        "Walking & cycling",
+        "Shared road"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "gap-of-dunloe",
+      "path": "/place/74/gap-of-dunloe"
+    },
+    {
+      "id": 75,
+      "name": "Slea Head",
+      "county": "Kerry",
+      "category": "viewpoint",
+      "latitude": 52.0980902,
+      "longitude": -10.455304,
+      "cost": "Free",
+      "distance": "Roadside viewpoints and coastal walks",
+      "kicker": "Atlantic cliffs at the far edge of the Dingle Peninsula",
+      "description": "Look across to the Blasket Islands from a coast of sea cliffs, green headlands and stone-walled fields. The best experience comes from stopping at marked pull-ins and walking short sections away from the road.",
+      "address": "Slea Head Drive, Dún Chaoin, Co. Kerry",
+      "parking": "Use signed viewing areas only; roadside space is tight in summer.",
+      "facts": [
+        "Blasket views",
+        "Wild Atlantic Way",
+        "Exposed coast"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "slea-head",
+      "path": "/place/75/slea-head"
+    },
+    {
+      "id": 76,
+      "name": "Mizen Head",
+      "county": "Cork",
+      "category": "viewpoint",
+      "latitude": 51.4500965,
+      "longitude": -9.819755,
+      "cost": "Paid visitor centre",
+      "distance": "2 km return to signal station",
+      "kicker": "A dramatic signal station above Atlantic sea arches",
+      "description": "Cross the arched footbridge to the old signal station on Ireland’s south-westerly edge. Clifftop paths reveal deep inlets, offshore rocks and the full force of the Atlantic below.",
+      "address": "Mizen Head Visitor Centre, Goleen, Co. Cork",
+      "parking": "Large visitor-centre car park; opening and admission vary seasonally.",
+      "facts": [
+        "Clifftop bridge",
+        "Signal station",
+        "Seasonal hours"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "mizen-head",
+      "path": "/place/76/mizen-head"
+    },
+    {
+      "id": 77,
+      "name": "Barleycove Beach",
+      "county": "Cork",
+      "category": "beach",
+      "latitude": 51.468395,
+      "longitude": -9.7764791,
+      "cost": "Free",
+      "distance": "2 km strand walk",
+      "kicker": "A broad dune-backed beach near Mizen Head",
+      "description": "A floating footbridge crosses the tidal channel to pale sand and a protected dune system formed after the 1755 Lisbon earthquake. Low tide opens a generous sweep for walking.",
+      "address": "Barleycove, Goleen, Co. Cork",
+      "parking": "Public parking beside the access road; spaces fill quickly on warm days.",
+      "facts": [
+        "Dune system",
+        "Tidal channel",
+        "Swimming beach"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "barleycove-beach",
+      "path": "/place/77/barleycove-beach"
+    },
+    {
+      "id": 78,
+      "name": "Ballyhoura Forest Trails",
+      "county": "Limerick",
+      "category": "trail",
+      "latitude": 52.319412,
+      "longitude": -8.506468,
+      "cost": "Free trails · paid parking",
+      "distance": "2-51 km routes",
+      "kicker": "Forest walking and Ireland’s largest mountain-bike trail network",
+      "description": "Choose a short nature trail or one of the purpose-built cycling loops climbing through Ballyhoura Forest. Upper sections are exposed, while the trailhead has toilets, showers and a bike wash.",
+      "address": "Glenosheen Trailhead, Ardpatrick, Co. Limerick",
+      "parking": "Barrier car park at the trailhead; the operator currently charges for parking.",
+      "facts": [
+        "Waymarked loops",
+        "Walking & MTB",
+        "Trailhead facilities"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "ballyhoura-forest-trails",
+      "path": "/place/78/ballyhoura-forest-trails"
+    },
+    {
+      "id": 79,
+      "name": "Galtymore",
+      "county": "Tipperary",
+      "category": "trail",
+      "latitude": 52.3660028,
+      "longitude": -8.1791761,
+      "cost": "Free",
+      "distance": "11 km return · 4-5 hours",
+      "kicker": "The highest point of the Galtee Mountains",
+      "description": "Climb from the Black Road to a broad summit with views across the Golden Vale. The upper mountain is open and boggy, with steep ground and little shelter when cloud comes down.",
+      "address": "Black Road trailhead, Skeheenarinky, Co. Tipperary",
+      "parking": "Small free trailhead car park; park considerately and leave gates clear.",
+      "facts": [
+        "919 m summit",
+        "Strenuous",
+        "Open mountain"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "galtymore",
+      "path": "/place/79/galtymore"
+    },
+    {
+      "id": 80,
+      "name": "Coumshingaun Lough",
+      "county": "Waterford",
+      "category": "trail",
+      "latitude": 52.249754,
+      "longitude": -7.5222964,
+      "cost": "Free",
+      "distance": "7.5 km loop · 4-5 hours",
+      "kicker": "A glacial amphitheatre high in the Comeragh Mountains",
+      "description": "Climb onto the rim above a dark corrie lake for one of Ireland’s most arresting mountain views. The full circuit is steep and exposed; the lower out-and-back still gives a fine view into the coum.",
+      "address": "Kilclooney Wood car park, Comeragh Mountains, Co. Waterford",
+      "parking": "Small free car park; overflow must not block the narrow road.",
+      "facts": [
+        "Corrie lake",
+        "Steep terrain",
+        "Navigation required"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "coumshingaun-lough",
+      "path": "/place/80/coumshingaun-lough"
+    },
+    {
+      "id": 81,
+      "name": "Tramore Beach",
+      "county": "Waterford",
+      "category": "beach",
+      "latitude": 52.152397,
+      "longitude": -7.1127627,
+      "cost": "Free",
+      "distance": "5 km strand",
+      "kicker": "A long Atlantic strand beside Tramore’s promenade",
+      "description": "Walk from the lively promenade towards the quieter dunes and tidal backstrand, with a wide horizon and dependable sea air. Swimming conditions can change, so follow local lifeguard guidance.",
+      "address": "Tramore Promenade, Co. Waterford",
+      "parking": "Several public car parks serve the promenade; some spaces may be pay and display.",
+      "facts": [
+        "5 km strand",
+        "Promenade access",
+        "Seasonal lifeguards"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "tramore-beach",
+      "path": "/place/81/tramore-beach"
+    },
+    {
+      "id": 82,
+      "name": "Hook Head Lighthouse",
+      "county": "Wexford",
+      "category": "historic",
+      "latitude": 52.1237579,
+      "longitude": -6.9294595,
+      "cost": "Free grounds · paid tour",
+      "distance": "1 km headland wander",
+      "kicker": "One of the world’s oldest working lighthouses",
+      "description": "Walk the limestone headland around the striped medieval tower, watching Atlantic swell break across the rocks. Guided tours climb inside the lighthouse; the surrounding coast remains the main spectacle.",
+      "address": "Hook Lighthouse, Churchtown, Hook Head, Co. Wexford",
+      "parking": "Free on-site visitor parking; check tour times before travelling.",
+      "facts": [
+        "800 years old",
+        "Working lighthouse",
+        "Coastal geology"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "hook-head-lighthouse",
+      "path": "/place/82/hook-head-lighthouse"
+    },
+    {
+      "id": 83,
+      "name": "Raven Point Nature Reserve",
+      "county": "Wexford",
+      "category": "trail",
+      "latitude": 52.363297,
+      "longitude": -6.3684344,
+      "cost": "Free",
+      "distance": "8 km forest and beach loop",
+      "kicker": "Pine woodland meeting the dunes of Curracloe",
+      "description": "Follow sandy forest tracks through the Raven before returning along a vast strand. The reserve protects an important dune system, so stay on established paths and keep dogs under close control.",
+      "address": "Raven Wood, Curracloe, Co. Wexford",
+      "parking": "Use the public beach access car parks at Curracloe or Culleton’s Gap.",
+      "facts": [
+        "Coastal forest",
+        "Dune reserve",
+        "Flat walking"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "raven-point-nature-reserve",
+      "path": "/place/83/raven-point-nature-reserve"
+    },
+    {
+      "id": 84,
+      "name": "Brittas Bay",
+      "county": "Wicklow",
+      "category": "beach",
+      "latitude": 52.8831479,
+      "longitude": -6.0575796,
+      "cost": "Free beach · seasonal parking charge",
+      "distance": "5 km strand",
+      "kicker": "Wicklow’s sweeping dune-backed east-coast beach",
+      "description": "A broad ribbon of sand runs below protected dunes, with room for long walks even on busy days. Boardwalks reduce erosion and give straightforward access from the main car parks.",
+      "address": "Brittas Bay, Co. Wicklow",
+      "parking": "North and south car parks may charge seasonally; roadside parking is restricted.",
+      "facts": [
+        "Blue Flag beach",
+        "Dune system",
+        "Boardwalk access"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "brittas-bay",
+      "path": "/place/84/brittas-bay"
+    },
+    {
+      "id": 85,
+      "name": "Djouce Mountain",
+      "county": "Wicklow",
+      "category": "trail",
+      "latitude": 53.1308589,
+      "longitude": -6.2399125,
+      "cost": "Free",
+      "distance": "8 km return · 3-4 hours",
+      "kicker": "A Wicklow summit above the dark waters of Lough Tay",
+      "description": "Boardwalk and mountain path climb from the Sally Gap road to broad views over Lough Tay, Powerscourt and the Wicklow uplands. Conditions are exposed and the peat surface is fragile off trail.",
+      "address": "JB Malone car park, Old Military Road, Co. Wicklow",
+      "parking": "Small free car park; alternative access from Ballinastoe is longer.",
+      "facts": [
+        "725 m summit",
+        "Boardwalk sections",
+        "Exposed ridge"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "djouce-mountain",
+      "path": "/place/85/djouce-mountain"
+    },
+    {
+      "id": 86,
+      "name": "Avondale Forest Park",
+      "county": "Wicklow",
+      "category": "trail",
+      "latitude": 52.9133775,
+      "longitude": -6.2225064,
+      "cost": "Free forest access · paid attractions",
+      "distance": "2-5 km trails",
+      "kicker": "Mature woodland around the birthplace of Irish forestry",
+      "description": "Walk beneath giant trees on riverside and estate trails surrounding Avondale House. The forest paths are independent of the ticketed house and treetop attraction.",
+      "address": "Avondale Forest Park, Rathdrum, Co. Wicklow",
+      "parking": "Large on-site car park; parking or attraction charges may apply.",
+      "facts": [
+        "Forest trails",
+        "Historic estate",
+        "Treetop walk"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "avondale-forest-park",
+      "path": "/place/86/avondale-forest-park"
+    },
+    {
+      "id": 87,
+      "name": "Dollymount Strand",
+      "county": "Dublin",
+      "category": "beach",
+      "latitude": 53.3669862,
+      "longitude": -6.1456874,
+      "cost": "Free",
+      "distance": "5 km strand",
+      "kicker": "A wild-feeling city beach on North Bull Island",
+      "description": "Walk a long sandy strand with Dublin Bay, Howth and the Poolbeg chimneys on the horizon. The island is an internationally important nature reserve, especially for wintering birds.",
+      "address": "North Bull Island, Clontarf, Dublin 5",
+      "parking": "Use designated island and causeway parking; restrictions change during busy periods.",
+      "facts": [
+        "UNESCO biosphere",
+        "City beach",
+        "Bird reserve"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "dollymount-strand",
+      "path": "/place/87/dollymount-strand"
+    },
+    {
+      "id": 88,
+      "name": "Newgrange",
+      "county": "Meath",
+      "category": "historic",
+      "latitude": 53.6946974,
+      "longitude": -6.4755522,
+      "cost": "Paid guided visit",
+      "distance": "Visitor-centre transfer and tour",
+      "kicker": "A 5,000-year-old passage tomb aligned to the winter solstice",
+      "description": "Enter the great kerbed mound as part of a guided Brú na Bóinne visit and see Neolithic art carved into its stones. Access is controlled from the visitor centre, not directly at the monument.",
+      "address": "Brú na Bóinne Visitor Centre, Donore, Co. Meath",
+      "parking": "Free visitor-centre parking; advance booking is strongly recommended.",
+      "facts": [
+        "UNESCO World Heritage",
+        "c. 3200 BC",
+        "Guided access"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "newgrange",
+      "path": "/place/88/newgrange"
+    },
+    {
+      "id": 89,
+      "name": "Trim Castle",
+      "county": "Meath",
+      "category": "historic",
+      "latitude": 53.5542857,
+      "longitude": -6.7897751,
+      "cost": "Free grounds · paid keep tour",
+      "distance": "1.5 km riverside circuit",
+      "kicker": "Ireland’s largest Anglo-Norman castle beside the Boyne",
+      "description": "Walk around the massive curtain walls and along the river to see the fortress from every angle. A guided ticket gives access to the unusual cruciform keep.",
+      "address": "Castle Street, Trim, Co. Meath",
+      "parking": "Town car parks and limited on-street spaces nearby; check local restrictions.",
+      "facts": [
+        "12th century",
+        "Riverside walk",
+        "Guided keep"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "trim-castle",
+      "path": "/place/89/trim-castle"
+    },
+    {
+      "id": 90,
+      "name": "Killykeen Forest Park",
+      "county": "Cavan",
+      "category": "trail",
+      "latitude": 54.0120661,
+      "longitude": -7.48638,
+      "cost": "Free",
+      "distance": "3-8 km loops",
+      "kicker": "Woodland trails among the islands of Lough Oughter",
+      "description": "Easy forest tracks thread between small lakes, mixed woodland and quiet picnic clearings on the Lough Oughter system. It is a gentle place for walking, cycling and watching the water.",
+      "address": "Killykeen Forest Park, Killeshandra, Co. Cavan",
+      "parking": "Free forest car parks; opening gates and access can vary.",
+      "facts": [
+        "Lakeside forest",
+        "Family trails",
+        "Picnic areas"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "killykeen-forest-park",
+      "path": "/place/90/killykeen-forest-park"
+    },
+    {
+      "id": 91,
+      "name": "Clonmacnoise",
+      "county": "Offaly",
+      "category": "historic",
+      "latitude": 53.3263135,
+      "longitude": -7.9857432,
+      "cost": "Paid visitor site",
+      "distance": "1-2 hours",
+      "kicker": "A monastic city beside a bend in the Shannon",
+      "description": "Round towers, high crosses and roofless churches gather on open ground above the river. The setting makes the early medieval site feel connected to the old water routes that sustained it.",
+      "address": "Clonmacnoise, Shannonbridge, Co. Offaly",
+      "parking": "Free visitor parking included with site access; check seasonal opening.",
+      "facts": [
+        "Founded c. 544",
+        "High crosses",
+        "Shannon views"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "clonmacnoise",
+      "path": "/place/91/clonmacnoise"
+    },
+    {
+      "id": 92,
+      "name": "Ridge of Capard",
+      "county": "Laois",
+      "category": "viewpoint",
+      "latitude": 53.0907048,
+      "longitude": -7.4898735,
+      "cost": "Free",
+      "distance": "2 km loop",
+      "kicker": "A boardwalk to wide views from the Slieve Blooms",
+      "description": "A short woodland climb and boardwalk lead to a high open ridge overlooking the central plain. On a clear day the view reaches far beyond Laois across Ireland’s midlands.",
+      "address": "Ridge of Capard car park, Slieve Bloom Mountains, Co. Laois",
+      "parking": "Free forest car park at the trailhead.",
+      "facts": [
+        "Boardwalk trail",
+        "Panoramic views",
+        "Short loop"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "ridge-of-capard",
+      "path": "/place/92/ridge-of-capard"
+    },
+    {
+      "id": 93,
+      "name": "Kilkenny Castle Park",
+      "county": "Kilkenny",
+      "category": "historic",
+      "latitude": 52.6502876,
+      "longitude": -7.2495286,
+      "cost": "Free park · paid castle",
+      "distance": "2 km park circuit",
+      "kicker": "A riverside castle and open park in the heart of Kilkenny",
+      "description": "Approach the great stone façade across sweeping lawns, then follow paths towards the River Nore. The park is free to roam while the restored castle rooms require admission.",
+      "address": "The Parade, Kilkenny, Co. Kilkenny",
+      "parking": "Use city-centre public car parks; the castle has no visitor parking.",
+      "facts": [
+        "Norman origins",
+        "Free parkland",
+        "City centre"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "kilkenny-castle-park",
+      "path": "/place/93/kilkenny-castle-park"
+    },
+    {
+      "id": 94,
+      "name": "Birr Castle Gardens",
+      "county": "Offaly",
+      "category": "historic",
+      "latitude": 53.095342,
+      "longitude": -7.91476,
+      "cost": "Paid admission",
+      "distance": "2-4 km of garden paths",
+      "kicker": "Historic gardens surrounding the Great Telescope",
+      "description": "Explore mature woodland, formal terraces and lakes around a lived-in castle. The immense Leviathan telescope recalls the estate’s remarkable nineteenth-century scientific work.",
+      "address": "Birr Castle Demesne, Birr, Co. Offaly",
+      "parking": "Visitor parking near the main entrance; check opening dates and admission.",
+      "facts": [
+        "Great Telescope",
+        "Historic gardens",
+        "Seasonal opening"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "birr-castle-gardens",
+      "path": "/place/94/birr-castle-gardens"
+    },
+    {
+      "id": 95,
+      "name": "Portumna Forest Park",
+      "county": "Galway",
+      "category": "trail",
+      "latitude": 53.0816461,
+      "longitude": -8.2416767,
+      "cost": "Free",
+      "distance": "1.5-10 km trails",
+      "kicker": "Lakeshore woodland beside Portumna Castle",
+      "description": "Choose accessible forest paths or longer loops through old oak woodland to the shore of Lough Derg. Red squirrels and fallow deer reward a quiet pace.",
+      "address": "Portumna Forest Park, Portumna, Co. Galway",
+      "parking": "Free parking at the forest entrance and nearby harbour area.",
+      "facts": [
+        "Lough Derg",
+        "Woodland loops",
+        "Wildlife watching"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "portumna-forest-park",
+      "path": "/place/95/portumna-forest-park"
+    },
+    {
+      "id": 96,
+      "name": "Dún Aonghasa",
+      "county": "Galway",
+      "category": "historic",
+      "latitude": 53.1254572,
+      "longitude": -9.7665848,
+      "cost": "Paid visitor site",
+      "distance": "2 km return over rough ground",
+      "kicker": "A prehistoric stone fort poised above Atlantic cliffs",
+      "description": "Climb across limestone pavement to concentric stone walls ending abruptly at a sheer cliff edge. There is no barrier at the cliff, and the exposed setting demands care in wind.",
+      "address": "Kilmurvey, Inis Mór, Aran Islands, Co. Galway",
+      "parking": "Leave bicycles at the visitor area; no private cars are needed on the approach.",
+      "facts": [
+        "Prehistoric fort",
+        "Cliff edge",
+        "Rough limestone"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "dun-aonghasa",
+      "path": "/place/96/dun-aonghasa"
+    },
+    {
+      "id": 97,
+      "name": "Kylemore Abbey",
+      "county": "Galway",
+      "category": "historic",
+      "latitude": 53.5617436,
+      "longitude": -9.8894116,
+      "cost": "Paid admission",
+      "distance": "2-4 km estate visit",
+      "kicker": "A lakeside Victorian castle beneath Connemara mountains",
+      "description": "The abbey’s pale façade reflects in Pollacapall Lough, backed by steep wooded slopes. Estate paths link the house, Gothic church and walled garden.",
+      "address": "Kylemore Abbey, Connemara, Co. Galway",
+      "parking": "Large free visitor car park; admission required beyond the entrance.",
+      "facts": [
+        "Victorian estate",
+        "Walled garden",
+        "Lakeside setting"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "kylemore-abbey",
+      "path": "/place/97/kylemore-abbey"
+    },
+    {
+      "id": 98,
+      "name": "Mullaghmore Loop, Burren National Park",
+      "county": "Clare",
+      "category": "trail",
+      "latitude": 52.996707,
+      "longitude": -9.0372419,
+      "cost": "Free",
+      "distance": "7.5 km loop",
+      "kicker": "Terraced limestone and a wild Burren summit",
+      "description": "A remote route crosses open limestone pavement beside Lough Gealáin before circling Mullaghmore. The rock is rough, waymarking can be subtle and there is little shelter.",
+      "address": "Gortlecka trailhead, Burren National Park, Co. Clare",
+      "parking": "Small free P1 car park at Gortlecka; never block the narrow road or gates.",
+      "facts": [
+        "7.5 km loop",
+        "Very difficult",
+        "Limestone pavement"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "mullaghmore-loop-burren-national-park",
+      "path": "/place/98/mullaghmore-loop-burren-national-park"
+    },
+    {
+      "id": 99,
+      "name": "Lahinch Beach",
+      "county": "Clare",
+      "category": "beach",
+      "latitude": 52.937279,
+      "longitude": -9.3560882,
+      "cost": "Free",
+      "distance": "2 km strand",
+      "kicker": "A broad surf beach facing the Atlantic",
+      "description": "Walk the promenade and open sand with views south towards the Cliffs of Moher. Swell and currents can be powerful, making local safety advice essential for swimmers.",
+      "address": "Lahinch Promenade, Co. Clare",
+      "parking": "Town and promenade parking includes paid and time-limited spaces.",
+      "facts": [
+        "Surf beach",
+        "Promenade",
+        "Atlantic sunsets"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "lahinch-beach",
+      "path": "/place/99/lahinch-beach"
+    },
+    {
+      "id": 100,
+      "name": "Enniscrone Beach",
+      "county": "Sligo",
+      "category": "beach",
+      "latitude": 54.209245,
+      "longitude": -9.1277325,
+      "cost": "Free",
+      "distance": "5 km strand",
+      "kicker": "Golden sand and dunes at the mouth of Killala Bay",
+      "description": "A long, open strand curves towards the Ox Mountains, giving ample room for walking and sea views. The dunes are protected, so use signed paths to reach the beach.",
+      "address": "Enniscrone, Co. Sligo",
+      "parking": "Public beach parking near the pier and main access points.",
+      "facts": [
+        "5 km strand",
+        "Dune system",
+        "Seasonal lifeguards"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "enniscrone-beach",
+      "path": "/place/100/enniscrone-beach"
+    },
+    {
+      "id": 101,
+      "name": "Knocknarea",
+      "county": "Sligo",
+      "category": "trail",
+      "latitude": 54.2587642,
+      "longitude": -8.5744955,
+      "cost": "Free",
+      "distance": "6 km loop · 2-3 hours",
+      "kicker": "Queen Maeve’s cairn above Sligo Bay",
+      "description": "Climb through woodland and open mountain to a huge unopened passage-tomb cairn. Keep off the cairn itself and take in views over Strandhill, Benbulben and the Atlantic.",
+      "address": "Queen Maeve Trail, Rathcarrick, Strandhill, Co. Sligo",
+      "parking": "Dedicated trail car park; alternative access from Strandhill is longer.",
+      "facts": [
+        "327 m summit",
+        "Neolithic cairn",
+        "Coastal panorama"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "knocknarea",
+      "path": "/place/101/knocknarea"
+    },
+    {
+      "id": 102,
+      "name": "Céide Fields",
+      "county": "Mayo",
+      "category": "historic",
+      "latitude": 54.3073032,
+      "longitude": -9.4581309,
+      "cost": "Paid visitor centre",
+      "distance": "1-2 km boardwalk visit",
+      "kicker": "A Stone Age field system preserved beneath blanket bog",
+      "description": "Boardwalks cross an exposed cliff-top landscape where stone walls lay hidden under peat for millennia. The visitor centre explains how farming communities shaped this coast more than 5,000 years ago.",
+      "address": "Céide Fields, Ballycastle, Co. Mayo",
+      "parking": "Free visitor-centre car park; check seasonal opening.",
+      "facts": [
+        "Neolithic landscape",
+        "Clifftop bog",
+        "Visitor centre"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "ceide-fields",
+      "path": "/place/102/ceide-fields"
+    },
+    {
+      "id": 103,
+      "name": "Wild Nephin National Park",
+      "county": "Mayo",
+      "category": "trail",
+      "latitude": 54.0370094,
+      "longitude": -9.6083412,
+      "cost": "Free",
+      "distance": "2-40 km routes",
+      "kicker": "Ireland’s largest roadless wilderness",
+      "description": "Walk forest loops at Letterkeen or commit to remote mountain and bog routes beneath the Nephin Beg range. Longer journeys demand navigation, self-sufficiency and a reliable weather window.",
+      "address": "Letterkeen trailhead, Newport, Co. Mayo",
+      "parking": "Free trailhead parking; approach roads are narrow and remote.",
+      "facts": [
+        "Dark Sky Park",
+        "Remote wilderness",
+        "Multiple routes"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "wild-nephin-national-park",
+      "path": "/place/103/wild-nephin-national-park"
+    },
+    {
+      "id": 104,
+      "name": "Mulranny Beach",
+      "county": "Mayo",
+      "category": "beach",
+      "latitude": 53.897445,
+      "longitude": -9.784688,
+      "cost": "Free",
+      "distance": "1-3 km shore walk",
+      "kicker": "A sheltered strand overlooking the islands of Clew Bay",
+      "description": "A causeway reaches sand, salt marsh and machair beneath the Nephin Beg mountains. The Great Western Greenway passes through the village just above the shore.",
+      "address": "Mulranny Beach, Mulranny, Co. Mayo",
+      "parking": "Free public car park near the causeway; spaces are limited in summer.",
+      "facts": [
+        "Clew Bay views",
+        "Greenway access",
+        "Machair habitat"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "mulranny-beach",
+      "path": "/place/104/mulranny-beach"
+    },
+    {
+      "id": 105,
+      "name": "Silver Strand, Malin Beg",
+      "county": "Donegal",
+      "category": "beach",
+      "latitude": 54.6638672,
+      "longitude": -8.7731391,
+      "cost": "Free",
+      "distance": "170 steps to the beach",
+      "kicker": "A horseshoe cove enclosed by high Donegal cliffs",
+      "description": "From the viewing area, a steep staircase descends to pale sand and clear Atlantic water. The climb back is substantial, and tides can reduce the available beach.",
+      "address": "Malin Beg, Glencolmcille, Co. Donegal",
+      "parking": "Small free cliff-top car park; turning space is limited.",
+      "facts": [
+        "Horseshoe cove",
+        "170 steps",
+        "Cliff-top view"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "silver-strand-malin-beg",
+      "path": "/place/105/silver-strand-malin-beg"
+    },
+    {
+      "id": 106,
+      "name": "Ards Forest Park",
+      "county": "Donegal",
+      "category": "trail",
+      "latitude": 55.15293,
+      "longitude": -7.90589,
+      "cost": "Free trails · parking charge may apply",
+      "distance": "1-13 km loops",
+      "kicker": "Woodland, beaches and headlands around Sheephaven Bay",
+      "description": "Marked trails move from deep forest to salt marsh, dunes and small sandy coves. Few Irish forest parks offer this much coastline within an easy network of loops.",
+      "address": "Ards Forest Park, Creeslough, Co. Donegal",
+      "parking": "Main forest car park at the N56 entrance; check current barrier charge.",
+      "facts": [
+        "Coastal forest",
+        "Waymarked loops",
+        "Sheephaven Bay"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "ards-forest-park",
+      "path": "/place/106/ards-forest-park"
+    },
+    {
+      "id": 107,
+      "name": "Grianán of Aileach",
+      "county": "Donegal",
+      "category": "historic",
+      "latitude": 55.023832,
+      "longitude": -7.4274544,
+      "cost": "Free",
+      "distance": "Short walk from car park",
+      "kicker": "An ancient ringfort commanding the Inishowen hills",
+      "description": "Climb through thick circular walls to a parapet view across Lough Swilly, Lough Foyle and the surrounding counties. The exposed hilltop can be windy even on clear days.",
+      "address": "Grianán of Aileach, Burt, Co. Donegal",
+      "parking": "Free car park below the fort; final access road is narrow.",
+      "facts": [
+        "Stone ringfort",
+        "Hilltop panorama",
+        "Ancient royal site"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "grianan-of-aileach",
+      "path": "/place/107/grianan-of-aileach"
+    },
+    {
+      "id": 108,
+      "name": "Marble Arch Caves",
+      "county": "Fermanagh",
+      "category": "trail",
+      "latitude": 54.2585187,
+      "longitude": -7.8131855,
+      "cost": "Paid cave tour · free trails",
+      "distance": "75-minute tour or 3 km gorge walk",
+      "kicker": "Underground rivers beneath the Cuilcagh landscape",
+      "description": "A guided route enters a limestone world of chambers, pools and flowing water. Above ground, the free Cladagh Glen trail follows a wooded gorge towards the cave resurgence.",
+      "address": "Marble Arch Caves, Florencecourt, Co. Fermanagh",
+      "parking": "Free visitor parking; cave tours should be booked and can be affected by water levels.",
+      "facts": [
+        "UNESCO Global Geopark",
+        "Guided cave",
+        "Woodland gorge"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "marble-arch-caves",
+      "path": "/place/108/marble-arch-caves"
+    },
+    {
+      "id": 109,
+      "name": "Florence Court",
+      "county": "Fermanagh",
+      "category": "historic",
+      "latitude": 54.2582563,
+      "longitude": -7.7306108,
+      "cost": "Paid house · estate access varies",
+      "distance": "2-9 km estate trails",
+      "kicker": "An eighteenth-century house below Cuilcagh Mountain",
+      "description": "Woodland and mountain-view trails spread around a grand National Trust house, kitchen garden and historic farmyard. The estate is also home to the original Irish yew.",
+      "address": "Florence Court, Enniskillen, Co. Fermanagh, BT92 1DB",
+      "parking": "National Trust car park; admission and parking arrangements vary by season.",
+      "facts": [
+        "Georgian house",
+        "Estate trails",
+        "Original Irish yew"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "florence-court",
+      "path": "/place/109/florence-court"
+    },
+    {
+      "id": 110,
+      "name": "Beaghmore Stone Circles",
+      "county": "Tyrone",
+      "category": "historic",
+      "latitude": 54.7013563,
+      "longitude": -6.9389598,
+      "cost": "Free",
+      "distance": "1 km boardwalk circuit",
+      "kicker": "Bronze Age circles laid out beneath Sperrin skies",
+      "description": "Boardwalks cross open bog to a complex of low stone circles, alignments and cairns. The isolated setting and broad sky are as memorable as the subtle archaeology.",
+      "address": "Beaghmore Road, Cookstown, Co. Tyrone",
+      "parking": "Free roadside car park beside the site.",
+      "facts": [
+        "Bronze Age",
+        "Seven circles",
+        "Dark skies"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "beaghmore-stone-circles",
+      "path": "/place/110/beaghmore-stone-circles"
+    },
+    {
+      "id": 111,
+      "name": "Gortin Glen Forest Park",
+      "county": "Tyrone",
+      "category": "trail",
+      "latitude": 54.6841602,
+      "longitude": -7.2461194,
+      "cost": "Free",
+      "distance": "1-8 km trails",
+      "kicker": "Sperrin woodland with a panoramic forest drive",
+      "description": "Walk signed forest trails or follow the scenic drive to viewpoints over the Owenkillew valley. Play areas and short loops make it accessible without losing the mountain setting.",
+      "address": "Gortin Glen Forest Park, Omagh, Co. Tyrone",
+      "parking": "Free visitor car parks; scenic-drive gates may close in poor conditions.",
+      "facts": [
+        "Sperrin views",
+        "Forest drive",
+        "Family trails"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "gortin-glen-forest-park",
+      "path": "/place/111/gortin-glen-forest-park"
+    },
+    {
+      "id": 112,
+      "name": "Navan Fort",
+      "county": "Armagh",
+      "category": "historic",
+      "latitude": 54.347995,
+      "longitude": -6.6981756,
+      "cost": "Free earthworks · paid visitor centre",
+      "distance": "2 km site walk",
+      "kicker": "The ceremonial heart of ancient Ulster",
+      "description": "Walk the great circular enclosure and climb the central mound associated with Emain Macha in Irish mythology. Exhibitions and living-history activities operate from the nearby visitor centre.",
+      "address": "Navan Centre & Fort, Killylea Road, Armagh, BT60 4LD",
+      "parking": "Free visitor-centre parking; check centre opening and event prices.",
+      "facts": [
+        "Ancient Ulster",
+        "Mythological site",
+        "Hilltop earthworks"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "navan-fort",
+      "path": "/place/112/navan-fort"
+    },
+    {
+      "id": 113,
+      "name": "Gosford Forest Park",
+      "county": "Armagh",
+      "category": "camp",
+      "latitude": 54.306504,
+      "longitude": -6.5147344,
+      "cost": "Park entry charge may apply",
+      "distance": "2-16 km trails",
+      "kicker": "Woodland trails, wildlife and managed camping around Gosford Castle",
+      "description": "Forest roads and walking loops pass arboretum trees, ponds and glimpses of the castle. A managed campsite and caravan area make this a practical overnight outdoor base rather than wild camping.",
+      "address": "Gosford Forest Park, Markethill, Co. Armagh",
+      "parking": "On-site parking and managed camping; check current booking and entry arrangements.",
+      "facts": [
+        "Managed campsite",
+        "Forest trails",
+        "Family cycling"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "gosford-forest-park",
+      "path": "/place/113/gosford-forest-park"
+    },
+    {
+      "id": 114,
+      "name": "Slieve Donard",
+      "county": "Down",
+      "category": "trail",
+      "latitude": 54.1802215,
+      "longitude": -5.920961,
+      "cost": "Free",
+      "distance": "9 km return · 4-5 hours",
+      "kicker": "Northern Ireland’s highest summit above Newcastle",
+      "description": "Climb beside the Glen River through forest before following the Mourne Wall to the 850 m summit. Sea-to-summit views are exceptional, but the upper mountain is steep and exposed.",
+      "address": "Donard Park, Newcastle, Co. Down",
+      "parking": "Public parking at Donard Park; arrive early on clear weekends.",
+      "facts": [
+        "850 m summit",
+        "Mourne Wall",
+        "Strenuous"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "slieve-donard",
+      "path": "/place/114/slieve-donard"
+    },
+    {
+      "id": 115,
+      "name": "Tollymore Forest Park",
+      "county": "Down",
+      "category": "camp",
+      "latitude": 54.2188815,
+      "longitude": -5.9489858,
+      "cost": "Entry charge may apply",
+      "distance": "1-8 km trails",
+      "kicker": "River, stone bridges and managed camping beneath the Mournes",
+      "description": "Trails follow the Shimna River through mature forest, crossing ornate bridges and passing rocky cascades. The established campsite offers a lawful base close to Newcastle and the mountains.",
+      "address": "Tollymore Forest Park, Bryansford, Co. Down",
+      "parking": "Large on-site car park and bookable managed campsite; check current charges.",
+      "facts": [
+        "Managed campsite",
+        "River trails",
+        "Mourne views"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "tollymore-forest-park",
+      "path": "/place/115/tollymore-forest-park"
+    },
+    {
+      "id": 116,
+      "name": "Tyrella Beach",
+      "county": "Down",
+      "category": "beach",
+      "latitude": 54.2517479,
+      "longitude": -5.7481239,
+      "cost": "Beach access charge may apply",
+      "distance": "2 km strand",
+      "kicker": "A quiet dune-backed beach facing the Mourne Mountains",
+      "description": "Wide sand, low dunes and a mountain skyline make Tyrella feel far removed from nearby towns. The beach is managed during the bathing season, with access arrangements varying by date.",
+      "address": "Tyrella Beach, Downpatrick, Co. Down",
+      "parking": "Managed beach car park; seasonal vehicle access or parking fees may apply.",
+      "facts": [
+        "Blue Flag beach",
+        "Mourne views",
+        "Dune habitat"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "tyrella-beach",
+      "path": "/place/116/tyrella-beach"
+    },
+    {
+      "id": 117,
+      "name": "Scrabo Tower",
+      "county": "Down",
+      "category": "viewpoint",
+      "latitude": 54.5802837,
+      "longitude": -5.7154558,
+      "cost": "Free grounds",
+      "distance": "2 km hill loop",
+      "kicker": "A landmark tower above Strangford Lough",
+      "description": "Climb through Scrabo Country Park to the basalt hilltop and its nineteenth-century tower. The view ranges across Newtownards, the lough’s islands and the Ards Peninsula.",
+      "address": "Scrabo Country Park, Newtownards, Co. Down",
+      "parking": "Free car park below the tower; interior opening is limited.",
+      "facts": [
+        "Strangford panorama",
+        "Country park",
+        "Landmark tower"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "scrabo-tower",
+      "path": "/place/117/scrabo-tower"
+    },
+    {
+      "id": 118,
+      "name": "Glenariff Forest Park",
+      "county": "Antrim",
+      "category": "trail",
+      "latitude": 55.0194506,
+      "longitude": -6.124067,
+      "cost": "Free trails · parking charge may apply",
+      "distance": "3-9 km trails",
+      "kicker": "Waterfalls and deep woodland in the Queen of the Glens",
+      "description": "The Waterfall Walk descends through a steep-sided glen on timber paths beside the Glenariff River. Longer forest routes climb back to open views towards the sea.",
+      "address": "Glenariff Forest Park, Glenariff Road, Co. Antrim",
+      "parking": "Main forest car park; check current barrier charge and opening hours.",
+      "facts": [
+        "Waterfall walk",
+        "Steep glen",
+        "Waymarked trails"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "glenariff-forest-park",
+      "path": "/place/118/glenariff-forest-park"
+    },
+    {
+      "id": 119,
+      "name": "Carrick-a-Rede",
+      "county": "Antrim",
+      "category": "viewpoint",
+      "latitude": 55.2395381,
+      "longitude": -6.3324234,
+      "cost": "Paid bridge crossing",
+      "distance": "2 km return coastal walk",
+      "kicker": "A rope bridge suspended above clear Atlantic water",
+      "description": "A cliff-top path crosses flower-rich grassland to the famous bridge and views towards Rathlin Island. The coastal walk is rewarding even when bridge tickets are unavailable.",
+      "address": "Carrick-a-Rede, Ballintoy, Co. Antrim",
+      "parking": "National Trust parking; advance booking may be required for bridge access.",
+      "facts": [
+        "Rope bridge",
+        "Cliff-top path",
+        "Rathlin views"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "carrick-a-rede",
+      "path": "/place/119/carrick-a-rede"
+    },
+    {
+      "id": 120,
+      "name": "Carrickfergus Castle",
+      "county": "Antrim",
+      "category": "historic",
+      "latitude": 54.7134139,
+      "longitude": -5.8065062,
+      "cost": "Paid castle entry",
+      "distance": "1-2 hour visit",
+      "kicker": "A complete Norman fortress guarding Belfast Lough",
+      "description": "Massive walls and a sea-facing keep tell eight centuries of military history. Walk the harbour outside for the strongest view of the castle reflected against the lough.",
+      "address": "Marine Highway, Carrickfergus, Co. Antrim, BT38 7BG",
+      "parking": "Public harbour parking beside the castle; check local time limits.",
+      "facts": [
+        "Norman castle",
+        "Harbour setting",
+        "Eight centuries"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "carrickfergus-castle",
+      "path": "/place/120/carrickfergus-castle"
+    },
+    {
+      "id": 121,
+      "name": "Benone Strand",
+      "county": "Derry",
+      "category": "beach",
+      "latitude": 55.1807856,
+      "longitude": -6.9292781,
+      "cost": "Free pedestrian access · vehicle charge may apply",
+      "distance": "11 km strand",
+      "kicker": "A vast beach beneath Binevenagh and Mussenden Temple",
+      "description": "One of Ireland’s longest strands runs west towards Magilligan Point, with the cliffs of Binevenagh behind and Donegal across the water. Vehicle access is managed and conditions vary with tides.",
+      "address": "Benone Strand, Limavady, Co. Derry",
+      "parking": "Use the managed beach and leisure-park entrances; seasonal charges may apply.",
+      "facts": [
+        "11 km strand",
+        "Binevenagh views",
+        "Managed vehicle access"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "benone-strand",
+      "path": "/place/121/benone-strand"
+    },
+    {
+      "id": 122,
+      "name": "Roe Valley Country Park",
+      "county": "Derry",
+      "category": "trail",
+      "latitude": 55.0213775,
+      "longitude": -6.9318134,
+      "cost": "Free",
+      "distance": "2-7 km riverside trails",
+      "kicker": "Wooded riverside paths around historic water-powered mills",
+      "description": "Follow the River Roe through a steep wooded valley, past rapids, footbridges and industrial remains. Several linked loops allow an easy stroll or a longer circuit.",
+      "address": "Roe Valley Country Park, Dogleap Road, Limavady, Co. Derry",
+      "parking": "Free car parks at the visitor centre and Dogleap Road entrances.",
+      "facts": [
+        "Riverside walks",
+        "Historic mills",
+        "Woodland gorge"
+      ],
+      "updated_at": "2026-09-21T09:15:31.229568+00:00",
+      "slug": "roe-valley-country-park",
+      "path": "/place/122/roe-valley-country-park"
+    }
+  ],
+  "counties": [
+    {
+      "name": "Antrim",
+      "slug": "antrim",
+      "path": "/guides/antrim",
+      "placeIds": [
+        2,
+        8,
+        53,
+        54,
+        56,
+        57,
+        59,
+        60,
+        61,
+        118,
+        119,
+        120
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            8,
+            53,
+            56,
+            57,
+            60,
+            61,
+            118,
+            119
+          ],
+          "path": "/guides/antrim/outdoor-adventures"
+        },
+        {
+          "slug": "history-and-heritage",
+          "title": "Historic places and landmarks",
+          "categories": [
+            "historic"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            2,
+            54,
+            120
+          ],
+          "path": "/guides/antrim/history-and-heritage"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            2,
+            8,
+            53,
+            54,
+            56,
+            57,
+            59,
+            60,
+            61,
+            118,
+            119,
+            120
+          ],
+          "path": "/guides/antrim/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Armagh",
+      "slug": "armagh",
+      "path": "/guides/armagh",
+      "placeIds": [
+        14,
+        112,
+        113
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            14,
+            113
+          ],
+          "path": "/guides/armagh/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Carlow",
+      "slug": "carlow",
+      "path": "/guides/carlow",
+      "placeIds": [
+        28,
+        29
+      ],
+      "topics": []
+    },
+    {
+      "name": "Cavan",
+      "slug": "cavan",
+      "path": "/guides/cavan",
+      "placeIds": [
+        23,
+        90
+      ],
+      "topics": []
+    },
+    {
+      "name": "Clare",
+      "slug": "clare",
+      "path": "/guides/clare",
+      "placeIds": [
+        3,
+        9,
+        71,
+        98,
+        99
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            3,
+            71,
+            98
+          ],
+          "path": "/guides/clare/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            3,
+            9,
+            71,
+            98,
+            99
+          ],
+          "path": "/guides/clare/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Cork",
+      "slug": "cork",
+      "path": "/guides/cork",
+      "placeIds": [
+        13,
+        47,
+        76,
+        77
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            47,
+            76
+          ],
+          "path": "/guides/cork/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            13,
+            47,
+            76,
+            77
+          ],
+          "path": "/guides/cork/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Derry",
+      "slug": "derry",
+      "path": "/guides/derry",
+      "placeIds": [
+        10,
+        58,
+        121,
+        122
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            10,
+            122
+          ],
+          "path": "/guides/derry/outdoor-adventures"
+        },
+        {
+          "slug": "coast-and-beaches",
+          "title": "Beaches and coastal escapes",
+          "categories": [
+            "beach"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            58,
+            121
+          ],
+          "path": "/guides/derry/coast-and-beaches"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            10,
+            58,
+            121,
+            122
+          ],
+          "path": "/guides/derry/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Donegal",
+      "slug": "donegal",
+      "path": "/guides/donegal",
+      "placeIds": [
+        5,
+        6,
+        50,
+        51,
+        52,
+        105,
+        106,
+        107
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            5,
+            6,
+            50,
+            51,
+            52,
+            106
+          ],
+          "path": "/guides/donegal/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            5,
+            6,
+            50,
+            51,
+            52,
+            105,
+            106,
+            107
+          ],
+          "path": "/guides/donegal/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Down",
+      "slug": "down",
+      "path": "/guides/down",
+      "placeIds": [
+        22,
+        55,
+        114,
+        115,
+        116,
+        117
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            114,
+            115,
+            117
+          ],
+          "path": "/guides/down/outdoor-adventures"
+        },
+        {
+          "slug": "coast-and-beaches",
+          "title": "Beaches and coastal escapes",
+          "categories": [
+            "beach"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            22,
+            116
+          ],
+          "path": "/guides/down/coast-and-beaches"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            22,
+            55,
+            114,
+            115,
+            116,
+            117
+          ],
+          "path": "/guides/down/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Dublin",
+      "slug": "dublin",
+      "path": "/guides/dublin",
+      "placeIds": [
+        15,
+        45,
+        62,
+        63,
+        87
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            45,
+            62,
+            63
+          ],
+          "path": "/guides/dublin/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            15,
+            45,
+            62,
+            63,
+            87
+          ],
+          "path": "/guides/dublin/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Fermanagh",
+      "slug": "fermanagh",
+      "path": "/guides/fermanagh",
+      "placeIds": [
+        19,
+        108,
+        109
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            19,
+            108
+          ],
+          "path": "/guides/fermanagh/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Galway",
+      "slug": "galway",
+      "path": "/guides/galway",
+      "placeIds": [
+        12,
+        46,
+        67,
+        68,
+        69,
+        95,
+        96,
+        97
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            46,
+            67,
+            68,
+            95
+          ],
+          "path": "/guides/galway/outdoor-adventures"
+        },
+        {
+          "slug": "history-and-heritage",
+          "title": "Historic places and landmarks",
+          "categories": [
+            "historic"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            69,
+            96,
+            97
+          ],
+          "path": "/guides/galway/history-and-heritage"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            12,
+            46,
+            67,
+            68,
+            69,
+            95,
+            96,
+            97
+          ],
+          "path": "/guides/galway/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Kerry",
+      "slug": "kerry",
+      "path": "/guides/kerry",
+      "placeIds": [
+        4,
+        44,
+        73,
+        74,
+        75
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            44,
+            73,
+            74,
+            75
+          ],
+          "path": "/guides/kerry/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            4,
+            44,
+            73,
+            74,
+            75
+          ],
+          "path": "/guides/kerry/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Kildare",
+      "slug": "kildare",
+      "path": "/guides/kildare",
+      "placeIds": [
+        30,
+        31
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            30,
+            31
+          ],
+          "path": "/guides/kildare/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Kilkenny",
+      "slug": "kilkenny",
+      "path": "/guides/kilkenny",
+      "placeIds": [
+        27,
+        93
+      ],
+      "topics": []
+    },
+    {
+      "name": "Laois",
+      "slug": "laois",
+      "path": "/guides/laois",
+      "placeIds": [
+        18,
+        92
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            18,
+            92
+          ],
+          "path": "/guides/laois/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Leitrim",
+      "slug": "leitrim",
+      "path": "/guides/leitrim",
+      "placeIds": [
+        32,
+        33
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            32,
+            33
+          ],
+          "path": "/guides/leitrim/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Limerick",
+      "slug": "limerick",
+      "path": "/guides/limerick",
+      "placeIds": [
+        21,
+        70,
+        78
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            21,
+            78
+          ],
+          "path": "/guides/limerick/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Longford",
+      "slug": "longford",
+      "path": "/guides/longford",
+      "placeIds": [
+        34,
+        35
+      ],
+      "topics": []
+    },
+    {
+      "name": "Louth",
+      "slug": "louth",
+      "path": "/guides/louth",
+      "placeIds": [
+        24
+      ],
+      "topics": []
+    },
+    {
+      "name": "Mayo",
+      "slug": "mayo",
+      "path": "/guides/mayo",
+      "placeIds": [
+        11,
+        48,
+        49,
+        102,
+        103,
+        104
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            48,
+            49,
+            103
+          ],
+          "path": "/guides/mayo/outdoor-adventures"
+        },
+        {
+          "slug": "coast-and-beaches",
+          "title": "Beaches and coastal escapes",
+          "categories": [
+            "beach"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            11,
+            104
+          ],
+          "path": "/guides/mayo/coast-and-beaches"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            11,
+            48,
+            49,
+            102,
+            103,
+            104
+          ],
+          "path": "/guides/mayo/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Meath",
+      "slug": "meath",
+      "path": "/guides/meath",
+      "placeIds": [
+        17,
+        88,
+        89
+      ],
+      "topics": [
+        {
+          "slug": "history-and-heritage",
+          "title": "Historic places and landmarks",
+          "categories": [
+            "historic"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            17,
+            88,
+            89
+          ],
+          "path": "/guides/meath/history-and-heritage"
+        }
+      ]
+    },
+    {
+      "name": "Monaghan",
+      "slug": "monaghan",
+      "path": "/guides/monaghan",
+      "placeIds": [
+        36,
+        37
+      ],
+      "topics": []
+    },
+    {
+      "name": "Offaly",
+      "slug": "offaly",
+      "path": "/guides/offaly",
+      "placeIds": [
+        20,
+        91,
+        94
+      ],
+      "topics": [
+        {
+          "slug": "history-and-heritage",
+          "title": "Historic places and landmarks",
+          "categories": [
+            "historic"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            91,
+            94
+          ],
+          "path": "/guides/offaly/history-and-heritage"
+        }
+      ]
+    },
+    {
+      "name": "Roscommon",
+      "slug": "roscommon",
+      "path": "/guides/roscommon",
+      "placeIds": [
+        38,
+        39
+      ],
+      "topics": []
+    },
+    {
+      "name": "Sligo",
+      "slug": "sligo",
+      "path": "/guides/sligo",
+      "placeIds": [
+        16,
+        100,
+        101
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            16,
+            101
+          ],
+          "path": "/guides/sligo/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Tipperary",
+      "slug": "tipperary",
+      "path": "/guides/tipperary",
+      "placeIds": [
+        7,
+        79
+      ],
+      "topics": []
+    },
+    {
+      "name": "Tyrone",
+      "slug": "tyrone",
+      "path": "/guides/tyrone",
+      "placeIds": [
+        25,
+        110,
+        111
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            25,
+            111
+          ],
+          "path": "/guides/tyrone/outdoor-adventures"
+        }
+      ]
+    },
+    {
+      "name": "Waterford",
+      "slug": "waterford",
+      "path": "/guides/waterford",
+      "placeIds": [
+        40,
+        41,
+        72,
+        80,
+        81
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            40,
+            41,
+            72,
+            80
+          ],
+          "path": "/guides/waterford/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            40,
+            41,
+            72,
+            80,
+            81
+          ],
+          "path": "/guides/waterford/weekend-plan"
+        }
+      ]
+    },
+    {
+      "name": "Westmeath",
+      "slug": "westmeath",
+      "path": "/guides/westmeath",
+      "placeIds": [
+        42,
+        43
+      ],
+      "topics": [
+        {
+          "slug": "history-and-heritage",
+          "title": "Historic places and landmarks",
+          "categories": [
+            "historic"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            42,
+            43
+          ],
+          "path": "/guides/westmeath/history-and-heritage"
+        }
+      ]
+    },
+    {
+      "name": "Wexford",
+      "slug": "wexford",
+      "path": "/guides/wexford",
+      "placeIds": [
+        26,
+        82,
+        83
+      ],
+      "topics": []
+    },
+    {
+      "name": "Wicklow",
+      "slug": "wicklow",
+      "path": "/guides/wicklow",
+      "placeIds": [
+        1,
+        64,
+        65,
+        66,
+        84,
+        85,
+        86
+      ],
+      "topics": [
+        {
+          "slug": "outdoor-adventures",
+          "title": "Walks, viewpoints and wild places",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp"
+          ],
+          "minimum": 2,
+          "placeIds": [
+            1,
+            64,
+            65,
+            85,
+            86
+          ],
+          "path": "/guides/wicklow/outdoor-adventures"
+        },
+        {
+          "slug": "weekend-plan",
+          "title": "A weekend outdoor itinerary",
+          "categories": [
+            "trail",
+            "viewpoint",
+            "camp",
+            "beach",
+            "historic"
+          ],
+          "minimum": 4,
+          "placeIds": [
+            1,
+            64,
+            65,
+            66,
+            84,
+            85,
+            86
+          ],
+          "path": "/guides/wicklow/weekend-plan"
+        }
+      ]
+    }
+  ]
+}
