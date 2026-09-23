@@ -69,10 +69,12 @@ request `#1`; it did not merge or publish the generated content. The workflow
 branch naming is retry-safe because it includes the Actions run ID.
 
 The missing Hostinger VPS and ecommerce MCP registrations were added to the
-shared Codex configuration and verified with `codex mcp list`; the app must be
-restarted before the VPS connector can inventory the existing machine and the
-SerpBear deployment can continue. R2 remains untouched and no paid service or
-billing was enabled.
+shared Codex configuration. A subsequent restart showed that the two entries
+had not persisted; on 23 September they were added again with both the required
+`PATH` and Hostinger attribution environment, then verified with `codex mcp
+list`. The app must be fully restarted once more before the VPS connector can
+inventory the existing machine and the SerpBear deployment can continue. R2
+remains untouched and no paid service or billing was enabled.
 
 Map framing/data correction on 21 September 2026: replaced the percentage-based
 default framing with a generous all-island overview that must show visible sea
