@@ -33,12 +33,12 @@ Glendalough metadata and TouristAttraction JSON-LD, the 196-URL sitemap, and the
 expected private-route exclusions in `robots.txt`. The deployed county hub is
 open in Chrome for review.
 
-External connection status: the existing GitHub remote is configured but the
-local `gh` CLI is unavailable. The Hostinger connector was missing its VPS and
-ecommerce server registrations; both were added on 23 September. Codex must be
-restarted once before VPS inventory can be read and the exact SerpBear Docker
-project write can be confirmed. No VPS project, paid scraper, Clarity project,
-Search Console property, billing or R2 service was created or activated.
+External connection status: the existing GitHub remote is configured and the
+official `gh` CLI is installed and verified. The Hostinger connector was missing
+its VPS and ecommerce server registrations; both were added on 23 September.
+Codex must be fully restarted once before VPS inventory can be read and the exact
+SerpBear Docker project write can be confirmed. No VPS project, paid scraper,
+billing or R2 service was created or activated.
 
 Analytics/SEO connection resumed later on 23 September 2026. Google Search
 Console URL-prefix ownership for the live Workers origin was verified with the
@@ -49,13 +49,25 @@ the app's existing consent gate remains mandatory and advertising storage stays
 denied. Cloudflare deployed commit `addb4f7`; the live site showed no analytics
 script before consent and loaded the expected Clarity project script only after
 the test browser selected Allow analytics. GitHub Actions repository variables
-`PUBLIC_SITE_URL` and `GSC_SITE_URL` were added. No GitHub Actions secrets existed
-at verification time.
+`PUBLIC_SITE_URL` and `GSC_SITE_URL` were added.
 
 A dedicated Google Cloud project named `Wander Eire SEO` was created without a
-billing account for Search Console reporting. Service-account creation, key
-creation, Search Console user access and transmission of the JSON credential to
-GitHub Secrets remain intentionally pending an action-time user confirmation.
+billing account for Search Console reporting. A dedicated service account with
+no Google Cloud IAM roles was created, given Restricted access to the Wander
+Éire Search Console property, and its JSON key was stored directly as the
+encrypted GitHub Actions secret `GSC_SERVICE_ACCOUNT_JSON`. The Search Console
+API was enabled and the local reporting script authenticated successfully; it
+returned zero rows, which is expected for the newly verified property.
+
+GitHub Actions run `35865717067` completed inventory refresh, Search Console
+ingestion and brief generation. Rank ingestion was correctly skipped because
+SerpBear is not deployed. The run pushed its review branch but could not create
+the pull request because the repository currently forbids Actions from creating
+or approving pull requests. Enabling that repository permission requires an
+explicit user confirmation; it permits review-PR creation but does not merge or
+publish the generated content. The workflow branch naming was subsequently made
+retry-safe by including the Actions run ID.
+
 The missing Hostinger VPS and ecommerce MCP registrations were added to the
 shared Codex configuration and verified with `codex mcp list`; the app must be
 restarted before the VPS connector can inventory the existing machine and the

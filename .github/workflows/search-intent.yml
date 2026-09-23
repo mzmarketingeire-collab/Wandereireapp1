@@ -46,7 +46,7 @@ jobs:
         run: |
           git add -A public/seo/places.json public/sitemap.xml public/robots.txt content/briefs/generated reports
           git diff --cached --quiet && exit 0
-          branch="automation/search-intent-$(date -u +%Y-%m-%d)"
+          branch="automation/search-intent-$(date -u +%Y-%m-%d)-${GITHUB_RUN_ID}"
           git config user.name "wander-eire-automation"
           git config user.email "actions@users.noreply.github.com"
           git switch -c "$branch"
