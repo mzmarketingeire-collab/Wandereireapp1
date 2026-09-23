@@ -46,8 +46,11 @@ checked-in HTML verification file, and Google accepted the existing 196-URL
 `sitemap.xml`. Microsoft Clarity project `Wander Éire` was created on the free
 service and `VITE_CLARITY_ID` was saved as a Cloudflare Workers build variable;
 the app's existing consent gate remains mandatory and advertising storage stays
-denied. GitHub Actions repository variables `PUBLIC_SITE_URL` and `GSC_SITE_URL`
-were added. No GitHub Actions secrets existed at verification time.
+denied. Cloudflare deployed commit `addb4f7`; the live site showed no analytics
+script before consent and loaded the expected Clarity project script only after
+the test browser selected Allow analytics. GitHub Actions repository variables
+`PUBLIC_SITE_URL` and `GSC_SITE_URL` were added. No GitHub Actions secrets existed
+at verification time.
 
 A dedicated Google Cloud project named `Wander Eire SEO` was created without a
 billing account for Search Console reporting. Service-account creation, key
