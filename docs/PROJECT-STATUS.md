@@ -40,6 +40,25 @@ restarted once before VPS inventory can be read and the exact SerpBear Docker
 project write can be confirmed. No VPS project, paid scraper, Clarity project,
 Search Console property, billing or R2 service was created or activated.
 
+Analytics/SEO connection resumed later on 23 September 2026. Google Search
+Console URL-prefix ownership for the live Workers origin was verified with the
+checked-in HTML verification file, and Google accepted the existing 196-URL
+`sitemap.xml`. Microsoft Clarity project `Wander Éire` was created on the free
+service and `VITE_CLARITY_ID` was saved as a Cloudflare Workers build variable;
+the app's existing consent gate remains mandatory and advertising storage stays
+denied. GitHub Actions repository variables `PUBLIC_SITE_URL` and `GSC_SITE_URL`
+were added. No GitHub Actions secrets existed at verification time.
+
+A dedicated Google Cloud project named `Wander Eire SEO` was created without a
+billing account for Search Console reporting. Service-account creation, key
+creation, Search Console user access and transmission of the JSON credential to
+GitHub Secrets remain intentionally pending an action-time user confirmation.
+The missing Hostinger VPS and ecommerce MCP registrations were added to the
+shared Codex configuration and verified with `codex mcp list`; the app must be
+restarted before the VPS connector can inventory the existing machine and the
+SerpBear deployment can continue. R2 remains untouched and no paid service or
+billing was enabled.
+
 Map framing/data correction on 21 September 2026: replaced the percentage-based
 default framing with a generous all-island overview that must show visible sea
 beyond all four coasts while leaving place-focused landscape zoom unchanged.
