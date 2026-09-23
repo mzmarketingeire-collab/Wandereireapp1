@@ -61,12 +61,12 @@ returned zero rows, which is expected for the newly verified property.
 
 GitHub Actions run `35865717067` completed inventory refresh, Search Console
 ingestion and brief generation. Rank ingestion was correctly skipped because
-SerpBear is not deployed. The run pushed its review branch but could not create
-the pull request because the repository currently forbids Actions from creating
-or approving pull requests. Enabling that repository permission requires an
-explicit user confirmation; it permits review-PR creation but does not merge or
-publish the generated content. The workflow branch naming was subsequently made
-retry-safe by including the Actions run ID.
+SerpBear is not deployed. The initial run pushed its review branch but could not
+create the pull request because the repository forbade Actions from creating or
+approving pull requests. After explicit user confirmation, that permission was
+enabled. Retry run `35866441021` then passed end to end and created review pull
+request `#1`; it did not merge or publish the generated content. The workflow
+branch naming is retry-safe because it includes the Actions run ID.
 
 The missing Hostinger VPS and ecommerce MCP registrations were added to the
 shared Codex configuration and verified with `codex mcp list`; the app must be
