@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/dublin/outdoor-adventures
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-09-23T13:21:24.314Z
 
 ## Search evidence
 
