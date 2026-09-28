@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/fermanagh/outdoor-adventures
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-09-28T14:11:45.863Z
 
 ## Search evidence
 
