@@ -1,6 +1,6 @@
 # Generated content opportunities
 
-Generated: 2026-09-23T11:07:10.155Z
+Generated: 2026-10-05T14:58:45.770Z
 
 These are review briefs, not publish-ready articles. Search evidence is used when available; otherwise the brief is clearly marked as inventory-led.
 
