@@ -1,0 +1,34 @@
+{
+  "generatedAt": "2026-10-12T15:45:10.292Z",
+  "domain": "wander-eire.markhoare28.workers.dev",
+  "keywords": [
+    {
+      "ID": 1,
+      "keyword": "glendalough walks",
+      "device": "desktop",
+      "country": "IE",
+      "city": "",
+      "latlong": "",
+      "domain": "wander-eire.markhoare28.workers.dev",
+      "lastUpdated": "2026-10-12T00:00:03.118Z",
+      "added": "2026-09-23T16:22:12.204Z",
+      "position": 0,
+      "history": {
+        "2026-9-23": 0,
+        "2026-9-28": 0,
+        "2026-10-5": 0,
+        "2026-10-12": 0
+      },
+      "volume": 0,
+      "url": "",
+      "tags": [
+        "test"
+      ],
+      "lastResult": [],
+      "sticky": false,
+      "updating": false,
+      "lastUpdateError": false,
+      "settings": null
+    }
+  ]
+}
