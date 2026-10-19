@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/mayo/outdoor-adventures
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-10-19T13:37:58.358Z
 
 ## Search evidence
 
