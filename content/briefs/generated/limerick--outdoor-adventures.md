@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/limerick/outdoor-adventures
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-10-26T13:19:46.973Z
 
 ## Search evidence
 
