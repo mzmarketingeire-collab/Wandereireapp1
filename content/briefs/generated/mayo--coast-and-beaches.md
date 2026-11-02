@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/mayo/coast-and-beaches
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-11-02T16:18:10.652Z
 
 ## Search evidence
 
