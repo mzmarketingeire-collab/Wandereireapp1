@@ -2,7 +2,7 @@
 
 Status: editorial review required
 Target route: /guides/down/weekend-plan
-Evidence refreshed: 2026-09-23T11:07:10.062Z
+Evidence refreshed: 2026-11-09T16:39:00.950Z
 
 ## Search evidence
 
